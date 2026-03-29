@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>TECH Pay - Minhas Chaves</title>
+  <style>
+    :root { --bg: #000; --card: #121826; --border: #2A3441; --accent: #818CF8; --text-sec: #9CA3AF; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; padding: 20px; overflow-x: hidden; }
+
+    .header { display: flex; align-items: center; gap: 15px; margin-bottom: 35px; }
+    .back-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
+    .back-btn:active { transform: scale(0.9); }
+    .back-btn svg { stroke: var(--accent); width: 20px; fill: none; stroke-width: 3; }
+
+    .key-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .key-info b { display: block; font-size: 14px; color: var(--text-sec); margin-bottom: 5px; }
+    .key-info span { font-size: 16px; font-weight: 600; }
+    
+    .btn-add { width: 100%; padding: 18px; border-radius: 16px; border: 1px dashed var(--accent); background: rgba(129, 140, 248, 0.05); color: var(--accent); font-weight: 600; cursor: pointer; margin-top: 20px; font-size: 16px; transition: 0.2s; }
+    .btn-add:active { background: rgba(129, 140, 248, 0.2); }
+
+    /* MODAL GAVETA */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: flex-end; backdrop-filter: blur(4px); }
+    .modal-content { width: 100%; background: var(--card); border-top: 2px solid var(--accent); border-radius: 30px 30px 0 0; padding: 30px; animation: slideUp 0.3s ease-out; }
+    
+    .input-premium { width: 100%; padding: 16px; background: #000; border: 1px solid var(--border); border-radius: 14px; color: white; margin-bottom: 20px; font-size: 16px; outline: none; }
+    .input-premium:focus { border-color: var(--accent); }
+
+    .btn-confirm { width: 100%; padding: 18px; background: var(--accent); color: #000; border: none; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; margin-bottom: 10px; }
+    .btn-cancel { width: 100%; padding: 15px; background: transparent; color: var(--text-sec); border: none; font-weight: 500; cursor: pointer; }
+
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="back-btn" onclick="location.href='pix.html'">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <b style="font-size: 18px;">Minhas chaves</b>
+  </div>
+
+  <div id="lista-chaves">
+    <div class="key-card">
+      <div class="key-info"><b>CPF</b><span>***.456.789-**</span></div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+    <div class="key-card">
+      <div class="key-info"><b>E-mail</b><span>contato@uptech.com</span></div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+  </div>
+
+  <button class="btn-add" onclick="abrirModal()">+ Cadastrar nova chave</button>
+
+  <div class="modal-overlay" id="modalCadastro">
+    <div class="modal-content">
+      <h3 style="margin: 0 0 10px 0;">Nova Chave Pix</h3>
+      <p style="color: var(--text-sec); font-size: 14px; margin-bottom: 25px;">Selecione o tipo e digite o dado da chave.</p>
+      
+      <select class="input-premium" id="tipoChave">
+        <option>Celular</option>
+        <option>E-mail</option>
+        <option>Chave Aleatória</option>
+      </select>
+      
+      <input type="text" class="input-premium" id="valorChave" placeholder="Digite aqui...">
+      
+      <button class="btn-confirm" onclick="salvarChave()">Cadastrar Chave</button>
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <script>
+    function abrirModal() { document.getElementById('modalCadastro').style.display = 'flex'; }
+    function fecharModal() { document.getElementById('modalCadastro').style.display = 'none'; }
+    
+    function salvarChave() {
+      const valor = document.getElementById('valorChave').value;
+      if(!valor) return alert("Digite o valor da chave");
+      
+      alert("Chave cadastrada com sucesso!");
+      fecharModal();
+      document.getElementById('valorChave').value = "";
+    }
+  </script>
+
+</body>
+</html>

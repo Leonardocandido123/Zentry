@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>TECH Pay - Pagar</title>
+  <style>
+    :root { --primary: #22C55E; --bg: #000000; --card: #121826; --border: #2A3441; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; }
+
+    .header { padding: 20px; display: flex; align-items: center; gap: 15px; }
+    .back-btn { background: none; border: none; color: white; cursor: pointer; padding: 5px; }
+    .header h2 { font-size: 20px; font-weight: 600; margin: 0; }
+
+    .content { flex: 1; padding: 20px; overflow-y: auto; }
+
+    /* ÁREA DO SCANNER MELHORADA */
+    .scanner-container {
+      width: 100%;
+      height: 280px;
+      background: #050505;
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    /* Cantos do Scanner (Style nativo) */
+    .corner { position: absolute; width: 30px; height: 30px; border: 3px solid var(--primary); }
+    .top-left { top: 40px; left: 40px; border-right: 0; border-bottom: 0; border-radius: 8px 0 0 0; }
+    .top-right { top: 40px; right: 40px; border-left: 0; border-bottom: 0; border-radius: 0 8px 0 0; }
+    .bottom-left { bottom: 40px; left: 40px; border-right: 0; border-top: 0; border-radius: 0 0 0 8px; }
+    .bottom-right { bottom: 40px; right: 40px; border-left: 0; border-top: 0; border-radius: 0 0 8px 0; }
+
+    .scanner-line {
+      position: absolute;
+      width: 70%;
+      height: 2px;
+      background: var(--primary);
+      box-shadow: 0 0 20px var(--primary);
+      top: 50px;
+      animation: scan 2.5s infinite ease-in-out;
+      z-index: 2;
+    }
+
+    @keyframes scan {
+      0%, 100% { top: 60px; opacity: 0.8; }
+      50% { top: 220px; opacity: 1; }
+    }
+
+    .qr-placeholder { opacity: 0.1; width: 120px; height: 120px; }
+
+    /* BOTÕES DE OPÇÃO */
+    .pay-option {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .pay-option:active { transform: scale(0.96); background: #1a2233; }
+
+    .icon-box {
+      width: 48px; height: 48px;
+      background: #1F2937;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .info b { display: block; font-size: 15px; color: #FFF; margin-bottom: 2px; }
+    .info span { font-size: 12px; color: #9CA3AF; line-height: 1.2; }
+
+    svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+  <button class="back-btn btn-touch" onclick="location.href='pix.html'">
+    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <h2>Pagar</h2>
+</div>
+
+
+  <div class="content">
+    <div class="scanner-container">
+      <div class="corner top-left"></div>
+      <div class="corner top-right"></div>
+      <div class="corner bottom-left"></div>
+      <div class="corner bottom-right"></div>
+      
+      <div class="scanner-line"></div>
+      
+      <svg class="qr-placeholder" viewBox="0 0 24 24"><path d="M3 11V3h8v8H3zm0 10v-8h8v8H3zM13 3h8v8h-8V3zm0 10h8v8h-8v-8zm2 2h4v4h-4v-4z"/></svg>
+      
+      <p style="position: absolute; bottom: 15px; font-size: 11px; color: #4B5563; font-weight: 500;">Aponte para um QR Code ou Boleto</p>
+    </div>
+
+    <div class="pay-option" onclick="simularLeitura('QR Code Pix')">
+      <div class="icon-box" style="color: #6366F1;">
+        <svg viewBox="0 0 24 24"><path d="M12 3l3.8 3.8L12 10.6 8.2 6.8 12 3zM21 12l-3.8 3.8L13.4 12l3.8-3.8L21 12zM12 21l-3.8-3.8L12 13.4l3.8 3.8L12 21zM3 12l3.8-3.8L10.6 12l-3.8 3.8L3 12z"/></svg>
+      </div>
+      <div class="info">
+        <b>Ler QR Code</b>
+        <span>Pagar contas ou compras via Pix</span>
+      </div>
+    </div>
+
+    <div class="pay-option" onclick="simularLeitura('Boleto Bancário')">
+      <div class="icon-box">
+        <svg viewBox="0 0 24 24"><path d="M4 7V4a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v3m0 10v3a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-3M7 7h10v10H7z"/></svg>
+      </div>
+      <div class="info">
+        <b>Código de barras</b>
+        <span>Escaneie a linha digitável do boleto</span>
+      </div>
+    </div>
+
+    <div class="pay-option" onclick="digitarCodigo()">
+      <div class="icon-box" style="color: #9CA3AF;">
+        <svg viewBox="0 0 24 24"><path d="M17 3H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4z"/><path d="M9 7v10m6-10v10"/></svg>
+      </div>
+      <div class="info">
+        <b>Inserir manualmente</b>
+        <span>Se não conseguir ler o código</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function simularLeitura(tipo) {
+      alert(`Buscando ${tipo}...`);
+      
+      setTimeout(() => {
+        const valorStr = prompt(`Leitura realizada!\n\n${tipo} identificado.\nQual o valor para pagamento?`, "0,00");
+        if (valorStr) {
+            const valor = parseFloat(valorStr.replace(',', '.'));
+            if(isNaN(valor)) return alert("Valor inválido!");
+            
+            processarPagamento(valor, tipo);
+        }
+      }, 800);
+    }
+
+    function processarPagamento(valor, tipo) {
+        let saldo = parseFloat(localStorage.getItem("saldo")) || 1250;
+
+        if (saldo >= valor) {
+            saldo -= valor;
+            localStorage.setItem("saldo", saldo);
+
+            // Salva no extrato
+            let hist = JSON.parse(localStorage.getItem("historico")) || [];
+            hist.push({ 
+                tipo: 'enviado', 
+                valor: valor, 
+                descricao: `Pagto: ${tipo}` 
+            });
+            localStorage.setItem("historico", JSON.stringify(hist));
+
+            alert("Pagamento aprovado! ✨");
+            window.location.href = 'home.html';
+        } else {
+            alert("Saldo insuficiente na sua conta UP Tech.");
+        }
+    }
+
+    function digitarCodigo() {
+        const cod = prompt("Digite os números do boleto:");
+        if(cod) simularLeitura("Boleto Digitado");
+    }
+  </script>
+</body>
+</html>

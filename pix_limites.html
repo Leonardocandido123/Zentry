@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>TECH Pay - Meus Limites Pix</title>
+  <style>
+    :root { 
+      --bg: #000; 
+      --card: #121826; 
+      --border: #2A3441; 
+      --accent: #818CF8; 
+      --text-sec: #9CA3AF;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    /* AJUSTE AQUI: Permitir rolagem natural */
+    body { 
+      margin: 0; 
+      font-family: 'Inter', sans-serif; 
+      background: var(--bg); 
+      color: white; 
+      padding: 20px;
+      min-height: 100vh;
+      overflow-y: auto; /* Garante a rolagem vertical */
+    }
+
+    .header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .back-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; }
+    .back-btn svg { stroke: var(--accent); width: 20px; fill: none; stroke-width: 3; }
+
+    .limit-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 25px; margin-bottom: 25px; }
+    .limit-label { color: var(--text-sec); font-size: 14px; margin-bottom: 8px; display: block; }
+    .limit-value { font-size: 28px; font-weight: 700; color: white; margin-bottom: 20px; display: block; }
+
+    .progress-bg { width: 100%; height: 8px; background: #222; border-radius: 10px; overflow: hidden; }
+    .progress-fill { width: 35%; height: 100%; background: var(--accent); border-radius: 10px; }
+
+    .section-title { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-sec); margin: 30px 0 15px; letter-spacing: 1px; }
+    
+    .adj-item { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .adj-info b { display: block; font-size: 15px; margin-bottom: 4px; }
+    .adj-info span { font-size: 12px; color: var(--text-sec); }
+    
+    .btn-edit { color: var(--accent); font-size: 14px; font-weight: 600; background: rgba(129, 140, 248, 0.1); border: none; padding: 8px 15px; border-radius: 12px; cursor: pointer; }
+
+    /* AJUSTE AQUI: Removi o position: fixed para ele não cobrir o texto */
+    .save-btn { 
+      width: 100%; /* Ocupa a largura do padding do body */
+      background: var(--accent); 
+      color: #000; 
+      border: none; 
+      padding: 18px; 
+      border-radius: 16px; 
+      font-weight: 700; 
+      font-size: 16px;
+      margin-top: 30px; /* Espaço após o último item */
+      margin-bottom: 40px; /* Espaço no final para não colar na borda */
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(129, 140, 248, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="back-btn" onclick="location.href='pix.html'">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <b style="font-size: 18px;">Meus Limites Pix</b>
+  </div>
+
+  <div class="limit-card">
+    <span class="limit-label">Limite diário disponível</span>
+    <span class="limit-value">R$ 5.000,00</span>
+    <div class="progress-bg">
+      <div class="progress-fill"></div>
+    </div>
+    <p style="font-size: 12px; color: var(--text-sec); margin-top: 15px;">
+      Você já utilizou <b>R$ 1.750,00</b> do seu limite hoje.
+    </p>
+  </div>
+
+  <div class="section-title">Configurar Limites</div>
+
+  <div class="adj-item">
+    <div class="adj-info">
+      <b>Limite por Transação</b>
+      <span>Máximo de R$ 2.000,00</span>
+    </div>
+    <button class="btn-edit">Ajustar</button>
+  </div>
+
+  <div class="adj-item">
+    <div class="adj-info">
+      <b>Limite Noturno</b>
+      <span>Das 20h às 06h: R$ 1.000,00</span>
+    </div>
+    <button class="btn-edit">Ajustar</button>
+  </div>
+
+  <div style="margin-top: 25px; padding: 15px; background: rgba(129, 140, 248, 0.05); border-radius: 14px; border: 1px dashed var(--accent);">
+    <p style="font-size: 12px; color: var(--accent); margin: 0; line-height: 1.5;">
+      ⚠️ <b>Segurança UP Tech:</b> Pedidos para aumentar o limite levam de 24h a 48h para serem aprovados por segurança.
+    </p>
+  </div>
+
+  <button class="save-btn" onclick="location.href='pix.html'">
+    Salvar Configurações
+  </button>
+
+</body>
+</html>

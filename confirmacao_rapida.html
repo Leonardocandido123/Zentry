@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Confirmação Rápida - TEC Pay</title>
+    <style>
+        body { margin:0; font-family:'Inter', sans-serif; background:#000000; color:#E5E7EB; padding:20px; display:flex; flex-direction:column; align-items:center; height: 100vh; justify-content: space-between; }
+        
+        .success-content { display:flex; flex-direction:column; align-items:center; justify-content: center; flex-grow: 1; }
+        
+        .success-icon { width:60px; height:60px; background:#22C55E; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+        .success-icon svg { width:30px; stroke:#0B0F19; fill:none; stroke-width:3; }
+        
+        .title { text-align:center; font-size:22px; font-weight:700; margin-bottom:10px; color:#FFF; }
+        .subtitle { text-align:center; font-size:14px; color:#9CA3AF; margin-bottom:50px; }
+        
+        /* O Botão Principal (Pro) - Estilo Fintech */
+        .btn-view-receipt { 
+            width:100%; max-width:400px; padding:16px; border-radius:14px; border:none; 
+            background:#1F2937; color:#E5E7EB; font-weight:600; font-size:15px; 
+            cursor:pointer; transition: 0.2s;
+        }
+        .btn-view-receipt:active { background: #2A3441; transform: scale(0.98); }
+
+        .btn-done { 
+            width:100%; max-width:400px; padding:16px; border-radius:14px; border:none; 
+            background:#22C55E; color:#0B0F19; font-weight:700; font-size:16px; 
+            margin-bottom:15px; cursor:pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="success-content">
+        <div class="success-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <h1 class="title">Pix enviado</h1>
+        <p class="subtitle">Sua transferência de R$ 60,00<br> foi realizada com sucesso</p>
+        
+        <button class="btn-view-receipt" onclick="location.href='comprovante.html'">
+            Abrir Comprovante Detalhado
+        </button>
+    </div>
+
+    <div style="width:100%; max-width:400px; display: flex; flex-direction: column; align-items: center;">
+        <button class="btn-done" onclick="location.href='home.html'">Concluir</button>
+    </div>
+
+<script>
+  // Puxar o valor real para a subtitle (se você salvou no passo anterior)
+  const valor = localStorage.getItem("ultimoValor") || "R$ 0,00";
+  document.querySelector(".subtitle").innerHTML = `Sua transferência de ${valor}<br> foi realizada com sucesso`;
+</script>
+
+</body>
+</html>

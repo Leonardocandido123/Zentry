@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>TECH Pay - Histórico Pix</title>
+  <style>
+    :root { --bg: #000; --card: #121826; --border: #2A3441; --accent: #818CF8; --text-sec: #9CA3AF; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; padding: 20px; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .back-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; }
+    .back-btn svg { stroke: var(--accent); width: 20px; fill: none; stroke-width: 3; }
+
+    .btn-share { background: rgba(129, 140, 248, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-share:active { background: var(--accent); color: #000; }
+
+    .search-bar { width: 100%; background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 12px; color: white; margin-bottom: 25px; outline: none; font-size: 14px; }
+    .search-bar:focus { border-color: var(--accent); }
+
+    .history-item { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); margin-bottom: 12px; cursor: pointer; transition: 0.2s; }
+    .history-item:active { transform: scale(0.98); background: #1a2233; }
+    
+    .item-info b { display: block; font-size: 15px; margin-bottom: 4px; }
+    .item-info span { font-size: 12px; color: var(--text-sec); }
+    .item-value { font-weight: 700; font-size: 15px; }
+    .out { color: #FF4D4D; }
+    .in { color: #22C55E; }
+
+    .empty-state { text-align: center; padding: 40px; color: var(--text-sec); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <div class="back-btn" onclick="location.href='pix.html'">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      </div>
+      <b style="font-size: 18px;">Histórico Pix</b>
+    </div>
+    <button class="btn-share" onclick="compartilharExtrato()">Exportar PDF</button>
+  </div>
+
+  <input type="text" class="search-bar" placeholder="Buscar por nome ou valor...">
+
+  <div id="lista-historico">
+    <div class="empty-state">Nenhuma transação encontrada.</div>
+  </div>
+
+  <script>
+    function compartilharExtrato() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Extrato UP Tech',
+          text: 'Confira meu extrato dos últimos 30 dias.',
+          url: window.location.href
+        }).catch(console.error);
+      } else {
+        alert("Extrato gerado com sucesso! Arquivo PDF pronto para download.");
+      }
+    }
+
+    const hist = JSON.parse(localStorage.getItem("historico")) || [];
+    const container = document.getElementById("lista-historico");
+
+    if(hist.length > 0) {
+      container.innerHTML = hist.slice().reverse().map(item => `
+        <div class="history-item" onclick="location.href='comprovante.html'">
+          <div class="item-info">
+            <b>${item.titulo || 'Transferência Pix'}</b>
+            <span>${new Date(item.data).toLocaleDateString('pt-BR')} • ${new Date(item.data).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}</span>
+          </div>
+          <div class="item-value ${item.tipo === 'saida' ? 'out' : 'in'}">
+            ${item.tipo === 'saida' ? '-' : '+'} R$ ${parseFloat(item.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+          </div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TECH Pay - Termos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #22C55E; --bg: #000000; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 25px;
+            color: white;
+        }
+
+        .progress-container { width: 100%; height: 4px; background: #1F2937; border-radius: 10px; margin-top: 20px; }
+        .progress-bar { width: 100%; height: 100%; background: var(--primary); border-radius: 10px; }
+
+        .header-area { margin-top: 40px; margin-bottom: 20px; }
+        .header-area h2 { font-size: 24px; font-weight: 500; }
+
+        .terms-box {
+            flex-grow: 1;
+            background: #121212;
+            border-radius: 16px;
+            padding: 20px;
+            overflow-y: auto;
+            border: 1px solid #2A3441;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #9CA3AF;
+            line-height: 1.6;
+        }
+
+        .check-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+
+        #checkTermo {
+            width: 22px; height: 22px;
+            accent-color: var(--primary);
+        }
+
+        .finish-btn {
+            width: 100%;
+            padding: 18px;
+            background: #1F2937;
+            color: #4B5563;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .finish-btn.active {
+            background: var(--primary);
+            color: black;
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container">
+        <div class="progress-bar"></div>
+    </div>
+
+    <div class="header-area">
+        <h2>Termos e Condições</h2>
+    </div>
+
+    <div class="terms-box">
+        <p>Ao abrir sua conta na UP Tech Premium, você concorda com nossos termos de uso e política de privacidade. <br><br>
+        1. O uso da conta é pessoal e intransferível.<br>
+        2. Mantemos seus dados protegidos sob a LGPD.<br>
+        3. Taxas de serviços podem ser consultadas no extrato.<br><br>
+        Prometemos transparência total e segurança nível bancário em cada transação. Seja bem-vindo ao futuro do seu dinheiro.</p>
+    </div>
+
+    <label class="check-container">
+        <input type="checkbox" id="checkTermo">
+        <span>Li e aceito os termos do contrato</span>
+    </label>
+
+    <button class="finish-btn" id="finishBtn" onclick="finalizar()">Finalizar Cadastro</button>
+
+    <script>
+        const check = document.getElementById('checkTermo');
+        const btn = document.getElementById('finishBtn');
+
+        check.addEventListener('change', () => {
+            if(check.checked) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        function finalizar() {
+            if(check.checked) {
+                // Aqui você pode disparar um alerta de sucesso
+                alert("Cadastro realizado com sucesso!");
+                window.location.href = "login.html";
+            }
+        }
+    </script>
+</body>
+</html>

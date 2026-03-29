@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TECH Pay - Redefinir Senha</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #22C55E;
+            --bg: #000000;
+            --text-muted: #6B7280;
+            --border: #2A3441;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 25px;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* BARRA DE PROGRESSO */
+        .progress-container { width: 100%; height: 4px; background: #1F2937; border-radius: 10px; margin-top: 10px; margin-bottom: 20px; }
+        .progress-bar { width: 50%; height: 100%; background: var(--primary); border-radius: 10px; transition: 0.5s; }
+
+        .header { display: flex; align-items: center; margin-bottom: 30px; }
+        .back-btn { background: none; border: none; cursor: pointer; color: white; margin-right: 15px; display: flex; align-items: center; }
+        .back-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .step-info { font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        .question-area { flex-grow: 1; }
+        .question-area h2 { font-size: 26px; font-weight: 500; line-height: 1.3; margin-bottom: 40px; }
+
+        .input-group { position: relative; border-bottom: 1px solid var(--border); margin-bottom: 35px; transition: 0.3s; }
+        .input-group.valid { border-bottom-color: var(--primary); }
+        
+        .input-line {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 15px 0;
+            color: white;
+            font-size: 22px;
+            outline: none;
+        }
+
+        .input-label {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            font-size: 18px;
+            color: #6B7280;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-line:focus + .input-label,
+        .input-line:not(:placeholder-shown) + .input-label {
+            top: -15px;
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .eye { position: absolute; right: 0; top: 15px; cursor: pointer; z-index: 10; }
+        .eye svg { width: 22px; height: 22px; stroke: #6B7280; fill: none; stroke-width: 2; }
+
+        /* FOOTER COM BOTÃO REDONDO */
+        .footer {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0 40px 0;
+            margin-top: auto;
+        }
+
+        .next-btn {
+            width: 65px;
+            height: 65px;
+            background: #1F2937;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .next-btn svg { width: 30px; height: 30px; stroke: #4B5563; stroke-width: 2.5; fill: none; }
+
+        .next-btn.active {
+            background: var(--primary);
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.4);
+            cursor: pointer;
+            transform: scale(1.05);
+        }
+        .next-btn.active svg { stroke: #000000; }
+
+        /* ESTADOS DE TRANSIÇÃO */
+        #senhaSection { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="header">
+        <button class="back-btn" onclick="voltar()">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="step-info" id="stepText">RECUPERAÇÃO</span>
+    </div>
+
+    <div class="question-area" id="cpfSection">
+        <h2 id="mainTitle">Para continuar, digite seu CPF</h2>
+        <div class="input-group" id="groupCpf">
+            <input type="tel" id="cpf" class="input-line" placeholder=" " maxlength="11">
+            <label class="input-label">CPF</label>
+        </div>
+    </div>
+
+    <div class="question-area" id="senhaSection">
+        <h2>Crie sua nova senha de 6 dígitos</h2>
+        
+        <div class="input-group" id="groupP1">
+            <input type="password" id="novaSenha" class="input-line" placeholder=" " maxlength="6">
+            <label class="input-label">Nova senha</label>
+            <span class="eye" onclick="togglePass('novaSenha')">
+                <svg id="eye1" viewBox="0 0 24 24"><path d="M1 12s4-6 11-6 11 6 11 6-4 6-11 6S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+        </div>
+
+        <div class="input-group" id="groupP2">
+            <input type="password" id="confirmaSenha" class="input-line" placeholder=" " maxlength="6">
+            <label class="input-label">Confirmar nova senha</label>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button class="next-btn" id="nextBtn">
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </button>
+    </div>
+
+    <script>
+        const cpfInput = document.getElementById('cpf');
+        const novaSenha = document.getElementById('novaSenha');
+        const confirmaSenha = document.getElementById('confirmaSenha');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressBar = document.getElementById('progressBar');
+        
+        let etapa = 1;
+
+        // Máscara e Validação de CPF simples (11 dígitos)
+        cpfInput.addEventListener('input', () => {
+            cpfInput.value = cpfInput.value.replace(/\D/g, '');
+            const isValid = cpfInput.value.length === 11;
+            document.getElementById('groupCpf').classList.toggle('valid', isValid);
+            nextBtn.classList.toggle('active', isValid);
+        });
+
+        // Validação das Senhas
+        function validarSenhas() {
+            const p1 = novaSenha.value;
+            const p2 = confirmaSenha.value;
+            const isP1Valid = /^\d{6}$/.test(p1);
+            const isMatch = p1 === p2 && p2.length === 6;
+
+            document.getElementById('groupP1').classList.toggle('valid', isP1Valid);
+            document.getElementById('groupP2').classList.toggle('valid', isMatch);
+            nextBtn.classList.toggle('active', isP1Valid && isMatch);
+        }
+
+        novaSenha.addEventListener('input', validarSenhas);
+        confirmaSenha.addEventListener('input', validarSenhas);
+
+        function togglePass(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === "password" ? "text" : "password";
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (!nextBtn.classList.contains('active')) return;
+
+            if (etapa === 1) {
+                // Ir para etapa de senha
+                etapa = 2;
+                document.getElementById('cpfSection').style.display = 'none';
+                document.getElementById('senhaSection').style.display = 'block';
+                progressBar.style.width = '100%';
+                document.getElementById('stepText').innerText = "NOVA SENHA";
+                nextBtn.classList.remove('active');
+            } else {
+                // Finalizar
+                localStorage.setItem('usuarioCPF', cpfInput.value);
+                localStorage.setItem('usuarioSenha', novaSenha.value);
+                localStorage.setItem('cadastro','true');
+                
+                // Feedback de sucesso visual
+                nextBtn.style.background = "#FFF";
+                nextBtn.innerHTML = "✅";
+                
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            }
+        });
+
+        function voltar() {
+            if (etapa === 2) {
+                etapa = 1;
+                document.getElementById('cpfSection').style.display = 'block';
+                document.getElementById('senhaSection').style.display = 'none';
+                progressBar.style.width = '50%';
+                document.getElementById('stepText').innerText = "RECUPERAÇÃO";
+                nextBtn.classList.add('active');
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

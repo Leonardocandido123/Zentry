@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body{ margin:0; font-family:'Inter', sans-serif; background:#000000; color:#E5E7EB; padding: 20px; }
+  
+  /* HEADER - Seta agora é Verde */
+  .header { display: flex; align-items: center; gap: 15px; margin-bottom: 40px; }
+  .back-btn { width: 40px; height: 40px; border-radius: 50%; background: #22C55E; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(34,197,94,0.2); }
+  .back-btn svg { stroke: #0B0F19; width: 20px; fill: none; stroke-width: 3; }
+  
+  .saldo-display { background: rgba(34, 197, 94, 0.1); padding: 8px 16px; border-radius: 20px; color: #22C55E; font-size: 13px; font-weight: 600; display: inline-block; margin-bottom: 30px; }
+  
+  .main-input { width: 100%; background: transparent; border: none; border-bottom: 2px solid #2A3441; color: #FFF; font-size: 24px; padding: 10px 0; outline: none; transition: .3s; }
+  .main-input:focus { border-bottom-color: #22C55E; }
+  
+  #feedbackDestino { display: none; margin-top: 15px; margin-bottom: 30px; }
+  .dest-name { display: block; font-weight: 600; color: #FFF; font-size: 16px; }
+  .dest-bank { font-size: 12px; color: #6B7280; text-transform: uppercase; letter-spacing: 1px; }
+  
+  .valor-area { margin-top: 20px; display: none; }
+  .valor-input { background: transparent; border: none; color: #22C55E; font-size: 48px; font-weight: 700; width: 100%; outline: none; }
+  
+  .confirm-btn { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background: #1F2937; display: flex; align-items: center; justify-content: center; border: none; cursor: not-allowed; transition: .3s; opacity: 0.5; }
+  .confirm-btn.active { background: #22C55E; cursor: pointer; transform: scale(1.1); opacity: 1; }
+  .confirm-btn svg { stroke: #0B0F19; width: 28px; fill: none; stroke-width: 2.5; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="back-btn" onclick="location.href='pix.html'"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></div>
+  <b style="font-size: 18px;">Transferir Pix</b>
+</div>
+
+<div class="saldo-display">Saldo: <span id="saldoAtual">R$ 0,00</span></div>
+
+<div class="transfer-flow">
+  <span style="color:#9CA3AF; font-size:14px;">Para quem você quer transferir?</span>
+  <input type="text" id="chavePix" class="main-input" placeholder="Chave Pix, CPF ou celular" maxlength="18">
+
+  <div id="feedbackDestino">
+    <span class="dest-name">Leonardo Candido</span>
+    <span class="dest-bank">Nu Pagamentos - 001</span>
+  </div>
+
+  <div class="valor-area" id="valorArea">
+    <div style="color:#9CA3AF; font-size:12px;">Quanto você quer enviar?</div>
+    <input type="text" id="valorInput" class="valor-input" placeholder="R$ 0,00">
+  </div>
+</div>
+
+<button class="confirm-btn" id="btnProsseguir" onclick="realizarPix()">
+  <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+</button>
+
+<script>
+  const chaveInput = document.getElementById("chavePix");
+  const valorInput = document.getElementById("valorInput");
+  const btn = document.getElementById("btnProsseguir");
+  const feedback = document.getElementById("feedbackDestino");
+  const valorArea = document.getElementById("valorArea");
+
+  // 1. Carregar Saldo Real
+  const saldoOriginal = parseFloat(localStorage.getItem("saldo")) || 1250.00;
+  document.getElementById("saldoAtual").innerText = saldoOriginal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  // 2. Máscara e Lógica de Chave
+  chaveInput.addEventListener("input", (e) => {
+    let v = e.target.value.replace(/\D/g, '');
+    let formatado = v;
+
+    if (v.length > 2 && v[2] === "9") { // Celular
+        formatado = v.replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
+    } else if (v.length <= 11) { // CPF
+        formatado = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    }
+
+    e.target.value = formatado;
+
+    // Mostrar campos se chave tiver tamanho de CPF ou Celular
+    if (v.length >= 11) {
+      feedback.style.display = "block";
+      valorArea.style.display = "block";
+    } else {
+      feedback.style.display = "none";
+      valorArea.style.display = "none";
+    }
+    validar();
+  });
+
+  // 3. Máscara de Dinheiro
+  valorInput.addEventListener("input", (e) => {
+    let v = e.target.value.replace(/\D/g,'');
+    v = (v/100).toFixed(2) + '';
+    v = v.replace(".", ",");
+    v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    e.target.value = "R$ " + v;
+    validar();
+  });
+
+  function validar() {
+    const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
+    const valorNum = parseFloat(valorLimpo) || 0;
+    const chaveOk = chaveInput.value.length >= 11;
+
+    if(chaveOk && valorNum > 0) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  }
+
+  function realizarPix() {
+    if(!btn.classList.contains("active")) return;
+    
+    const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
+    const valorFinal = parseFloat(valorLimpo);
+    
+    if(valorFinal > saldoOriginal) { 
+        alert("Saldo insuficiente!"); 
+        return; 
+    }
+
+    // Salvar dados da transação
+    localStorage.setItem("ultimoValor", valorInput.value);
+    localStorage.setItem("saldo", (saldoOriginal - valorFinal));
+    
+    let hist = JSON.parse(localStorage.getItem("historico")) || [];
+    hist.push({tipo: "saida", valor: valorFinal, data: new Date().toISOString()});
+    localStorage.setItem("historico", JSON.stringify(hist));
+
+    // Redirecionar para a tela de processando
+    window.location.href = "processando.html";
+  }
+</script>
+</body>
+</html>

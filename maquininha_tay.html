@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+  <title>Tay POS - Elite</title>
+  <style>
+    :root { --pos-body: #1a1a1a; --screen-bg: #FFFFFF; --accent: #22c55e; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+    
+    body { 
+      height: 100vh; width: 100vw; overflow: hidden; display: flex; 
+      align-items: center; justify-content: center; background: #000; font-family: 'Inter', sans-serif;
+    }
+
+    /* CORPO DA MÁQUINA - AGORA RESPONSIVO */
+    .pos-device { 
+      background: linear-gradient(145deg, #2a2a2a, #0a0a0a); 
+      border-radius: 45px; padding: 12px; width: 95%; max-width: 360px;
+      height: 98vh; max-height: 720px; /* Evita cortes */
+      display: flex; flex-direction: column;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8); border: 1px solid #333;
+    }
+
+    .paper-slot { height: 10px; background: #000; margin: 5px auto 15px; width: 80%; border-radius: 10px; }
+
+    /* TELA DIGITAL */
+    .pos-screen { 
+      background: var(--screen-bg); border-radius: 20px; overflow: hidden;
+      flex: 1; display: flex; flex-direction: column;
+      border: 4px solid #111; position: relative;
+    }
+    /* Efeito de Vidro */
+    .pos-screen::after {
+      content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+      pointer-events: none; z-index: 10;
+    }
+
+    .status-bar { background: #f1f3f5; padding: 8px 15px; display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #adb5bd; }
+    .app-content { flex: 1; padding: 15px; display: flex; flex-direction: column; color: #1a1a1a; text-align: center; }
+
+    /* COMPONENTES DE TELA */
+    .main-display { font-family: 'JetBrains Mono', monospace; font-size: 38px; margin: 20px 0; color: #000; }
+    .method-card { background: #f8f9fa; border: 1px solid #ddd; border-radius: 12px; padding: 15px; margin-bottom: 8px; font-weight: 700; cursor: pointer; }
+    .nfc-icon { width: 60px; margin: 20px auto; animation: pulse 1.5s infinite; }
+    
+    /* TECLADO FÍSICO (FIXO NO RODAPÉ) */
+    .physical-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 15px 5px; }
+    .p-key { 
+      height: 48px; background: linear-gradient(180deg, #3d3d3d, #1a1a1a); 
+      border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #fff; font-size: 17px; font-weight: 700; cursor: pointer; box-shadow: 0 3px 0 #000;
+    }
+    .p-key:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }
+    .p-key span { font-size: 7px; color: #777; }
+
+    .cmd-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 0 5px 10px; }
+    .cmd-key { height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; box-shadow: 0 3px 0 #000; cursor: pointer; color: #fff; }
+    .btn-cancel { background: #dc3545; }
+    .btn-corr { background: #ffc107; color: #000; }
+    .btn-ok { background: #28a745; }
+
+    /* TECLADO DE SENHA NA TELA */
+    .pin-dots { display: flex; justify-content: center; gap: 15px; margin: 20px 0; }
+    .dot { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #ddd; }
+    .dot.active { background: #000; border-color: #000; }
+
+    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+  </style>
+</head>
+<body>
+
+  <div class="pos-device">
+    <div class="paper-slot"></div>
+    
+    <div class="pos-screen">
+      <div class="status-bar"><span>TAY SMART</span> <span id="clock">14:46</span> <span>🔋 98%</span></div>
+      <div class="app-content" id="screenContent"></div>
+    </div>
+
+    <div class="physical-keypad">
+      <div class="p-key" onclick="press(1)">1<span>QZ</span></div>
+      <div class="p-key" onclick="press(2)">2<span>ABC</span></div>
+      <div class="p-key" onclick="press(3)">3<span>DEF</span></div>
+      <div class="p-key" onclick="press(4)">4<span>GHI</span></div>
+      <div class="p-key" onclick="press(5)">5<span>JKL</span></div>
+      <div class="p-key" onclick="press(6)">6<span>MNO</span></div>
+      <div class="p-key" onclick="press(7)">7<span>PRS</span></div>
+      <div class="p-key" onclick="press(8)">8<span>TUV</span></div>
+      <div class="p-key" onclick="press(9)">9<span>WXY</span></div>
+    </div>
+
+    <div class="cmd-row">
+        <div class="cmd-key btn-cancel" onclick="resetPOS()">CANCEL</div>
+        <div class="cmd-key btn-corr" onclick="backspace()">CORR</div>
+        <div class="cmd-key btn-ok" onclick="nextStep()">ENTER</div>
+    </div>
+    <div style="display:flex; justify-content:center; padding-bottom:10px;">
+        <div class="p-key" style="width:31%; height:45px" onclick="press(0)">0</div>
+    </div>
+  </div>
+
+  <script>
+    let rawValue = "0";
+    let step = "AMOUNT";
+    let pin = "";
+    let transaction = { val: "", method: "" };
+
+    function render() {
+      const screen = document.getElementById('screenContent');
+      
+      if(step === "AMOUNT") {
+        let fmt = (parseInt(rawValue)/100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        screen.innerHTML = `<p style="color:#999; font-size:12px;">VALOR DA VENDA</p><div class="main-display">${fmt}</div><p style="color:var(--accent); font-weight:800; font-size:11px; margin-top:auto;">CONFIRMAR NO BOTÃO VERDE</p>`;
+      } 
+      
+      else if(step === "METHODS") {
+        screen.innerHTML = `<p style="margin-bottom:15px; font-weight:700;">MÉTODO</p>
+          <div class="method-card" onclick="setMethod('PIX')">PIX (QR CODE)</div>
+          <div class="method-card" onclick="setMethod('DEBITO')">DÉBITO</div>
+          <div class="method-card" onclick="setMethod('CREDITO')">CRÉDITO</div>`;
+      }
+
+      else if(step === "APPROACH") {
+        screen.innerHTML = `
+          <p style="font-weight:700;">PAGAMENTO</p>
+          <img src="https://cdn-icons-png.flaticon.com/512/93/93461.png" class="nfc-icon">
+          <p style="font-size:14px; font-weight:600;">APROXIME OU INSIRA</p>
+          <p style="font-size:12px; color:#666; margin-top:10px;">O CARTÃO OU DISPOSITIVO</p>
+        `;
+        // Simula detecção de cartão após 3 segundos
+        setTimeout(() => { step = "PASSWORD"; render(); }, 3000);
+      }
+
+      else if(step === "PASSWORD") {
+        screen.innerHTML = `
+          <p style="font-weight:700;">DIGITE A SENHA</p>
+          <div class="pin-dots">
+            <div class="dot ${pin.length >= 1 ? 'active' : ''}"></div>
+            <div class="dot ${pin.length >= 2 ? 'active' : ''}"></div>
+            <div class="dot ${pin.length >= 3 ? 'active' : ''}"></div>
+            <div class="dot ${pin.length >= 4 ? 'active' : ''}"></div>
+          </div>
+          <p style="font-size:12px; color:#999;">USE O TECLADO FÍSICO</p>
+        `;
+      }
+
+      else if(step === "PIX_QR") {
+        screen.innerHTML = `
+          <p style="font-weight:700; margin-bottom:10px;">PAGAMENTO PIX</p>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TAYPAY" style="width:160px; margin:auto; border:5px solid #fff; box-shadow:0 0 10px rgba(0,0,0,0.1)">
+          <p style="font-size:11px; color:#666; margin-top:10px;">Aguardando confirmação...</p>
+        `;
+        setTimeout(finish, 4000);
+      }
+
+      else if(step === "PROCESSING") {
+        screen.innerHTML = `<p style="font-weight:700; margin-top:20px;">PROCESSANDO...</p><div class="loading-spinner"></div>`;
+        setTimeout(finish, 2000);
+      }
+    }
+
+    function press(n) {
+      if(step === "AMOUNT") {
+        rawValue += n;
+        render();
+      } else if(step === "PASSWORD") {
+        if(pin.length < 4) { pin += n; render(); }
+        if(pin.length === 4) { step = "PROCESSING"; render(); }
+      }
+    }
+
+    function backspace() {
+      if(step === "AMOUNT") { rawValue = rawValue.slice(0, -1) || "0"; render(); }
+      else if(step === "PASSWORD") { pin = pin.slice(0, -1); render(); }
+    }
+
+    function nextStep() {
+      if(step === "AMOUNT" && parseInt(rawValue) > 0) { step = "METHODS"; render(); }
+    }
+
+    function setMethod(m) {
+      transaction.method = m;
+      if(m === 'PIX') step = "PIX_QR";
+      else step = "APPROACH";
+      render();
+    }
+
+    function resetPOS() { location.reload(); }
+
+    function finish() {
+        alert("TRANSAÇÃO APROVADA!");
+        location.href = 'comprovante_tay.html';
+    }
+
+    render();
+  </script>
+</body>
+</html>

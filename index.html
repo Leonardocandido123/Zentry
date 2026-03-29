@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Techpay - Carregando</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* RESET E FUNDO BLACK ABSOLUTO */
+    *{box-sizing:border-box;margin:0;padding:0;}
+    
+    body{
+      font-family:'Inter', sans-serif;
+      background:#000000; 
+      color:#FFFFFF;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      overflow:hidden;
+    }
+
+    .splash-container{
+      text-align:center;
+    }
+
+    /* LOGO TECHPAY ATUALIZADA */
+    .logo-main{
+      font-size:50px; 
+      font-weight:700;
+      color:#ffffff;
+      opacity:0;
+      letter-spacing: -2px;
+      /* Animação de entrada suave com leve subida */
+      animation: logoEntrada 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* O AZUL IDENTIDADE AQUI */
+    .accent-color {
+      color: #24A344; 
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    @keyframes logoEntrada{
+      0%{opacity:0; transform:translateY(20px) scale(0.9); filter: blur(10px);}
+      100%{opacity:1; transform:translateY(0) scale(1); filter: blur(0);}
+    }
+
+    /* BARRA DE CARREGAMENTO NOVO AZUL */
+    .loader-bar{
+      margin: 40px auto 0;
+      width:140px;
+      height:2px; 
+      background:rgba(255,255,255,0.1);
+      border-radius:10px;
+      overflow:hidden;
+    }
+
+    .loader-fill{
+      height:100%;
+      width:0%;
+      background:#24A344; /* Seu azul identidade */
+      box-shadow: 0 0 15px rgba(36, 163, 68, 0.5);
+      animation:loadAnim 2.8s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    }
+
+    @keyframes loadAnim{
+      0% { width: 0%; }
+      30% { width: 40%; }
+      60% { width: 70%; }
+      100%{ width: 100%; }
+    }
+</style>
+</head>
+<body>
+
+<div class="splash-container">
+  <div class="logo-main">
+    TECH<span class="accent-color">PAY</span>
+  </div>
+  
+  <div class="loader-bar">
+    <div class="loader-fill"></div>
+  </div>
+</div>
+
+<script>
+// Redireciona para a sua tela de Login (com biometria)
+setTimeout(()=>{
+  // Se o seu login for o arquivo index.html, mude aqui:
+  window.location.href = "login.html";
+}, 3500);
+</script>
+
+</body>
+</html>

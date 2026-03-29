@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>TECH Pay - Pix Copia e Cola</title>
+  <style>
+    :root { 
+      --bg: #000000; 
+      --card: #121826; 
+      --border: #2A3441; 
+      --accent: #22C55E; /* Verde Neon TechPay */
+      --text-sec: #9CA3AF;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; padding: 20px; }
+
+    /* HEADER */
+    .header { display: flex; align-items: center; gap: 15px; margin-bottom: 35px; }
+    .back-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; }
+    .back-btn svg { stroke: var(--accent); width: 22px; fill: none; stroke-width: 2.5; }
+
+    /* ÁREA DE INPUT */
+    .field-group { margin-bottom: 30px; }
+    .label { color: var(--text-sec); font-size: 14px; margin-bottom: 12px; display: block; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    
+    .input-area { 
+      width: 100%; background: var(--card); border: 1px solid var(--border); 
+      border-radius: 20px; padding: 20px; color: white; font-size: 16px; 
+      outline: none; transition: 0.3s; min-height: 140px; resize: none;
+      font-family: 'Inter', sans-serif;
+    }
+    .input-area:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(34, 197, 94, 0.1); }
+
+    /* BOTÃO FIXO */
+    .pay-btn { 
+      position: fixed; bottom: 30px; left: 20px; right: 20px; 
+      background: var(--accent); color: #000; border: none; 
+      padding: 20px; border-radius: 22px; font-weight: 700; font-size: 16px;
+      cursor: pointer; transition: 0.2s; box-shadow: 0 10px 25px rgba(34, 197, 94, 0.2);
+    }
+    .pay-btn:active { transform: scale(0.96); }
+    .pay-btn:disabled { background: #1f2937; color: #4b5563; cursor: not-allowed; box-shadow: none; }
+
+    .tip-box {
+      background: rgba(34, 197, 94, 0.05); padding: 18px; border-radius: 16px; 
+      border: 1px dashed var(--accent); display: flex; gap: 12px; align-items: center;
+    }
+    .tip-box span { font-size: 13px; color: var(--text-sec); line-height: 1.4; }
+    .tip-box b { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="back-btn" onclick="location.href='pix.html'">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <b style="font-size: 22px; letter-spacing: -0.5px;">Copia e Cola</b>
+  </div>
+
+  <div class="field-group">
+    <span class="label">Código do pagamento</span>
+    <textarea class="input-area" id="pixCode" placeholder="Cole o código completo aqui..."></textarea>
+  </div>
+
+  <div class="tip-box">
+    <div style="font-size: 20px;">📋</div>
+    <span>Certifique-se de que o código começa com <b>"000201..."</b> para garantir o processamento.</span>
+  </div>
+
+  <button class="pay-btn" id="btnPagar" disabled onclick="processarPagamento()">
+    Continuar para o pagamento
+  </button>
+
+  <script>
+    const input = document.getElementById('pixCode');
+    const btn = document.getElementById('btnPagar');
+
+    input.addEventListener('input', () => {
+      btn.disabled = input.value.trim().length < 10;
+    });
+
+    function processarPagamento() {
+      // Lógica de saldo já ajustada por você
+      window.location.href = "processando.html";
+    }
+  </script>
+</body>
+</html>

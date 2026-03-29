@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Techpay - Login</title>
+  <style>
+    :root { 
+      --bg: #000000; --accent: #24A344; --card: #121826; 
+      --text-main: #FFFFFF; --text-sub: #9CA3AF; --border: #2A3441;
+    }
+
+    body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+
+    /* LOGO */
+    .logo-container { text-align: center; margin-bottom: 50px; transition: 0.8s ease; z-index: 5; }
+    .logo-icon { background: var(--accent); color: #000; width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 24px; margin: 0 auto 15px; }
+    .logo-text { font-size: 28px; font-weight: 700; }
+
+    /* LINKS DE ACESSO (TELA INICIAL) */
+    .account-actions { 
+      position: absolute; bottom: 50px; width: 100%; text-align: center; 
+      z-index: 150; transition: 0.5s;
+    }
+    .action-link { color: var(--text-sub); font-size: 14px; text-decoration: none; margin: 0 15px; padding: 10px; display: inline-block; }
+    .create-acc { display: block; margin-top: 20px; color: var(--text-main); font-size: 15px; font-weight: 600; text-decoration: none; padding: 15px; background: rgba(36, 163, 68, 0.1); border-radius: 12px; margin-inline: 40px; }
+
+    /* MODAL BIOMETRIA */
+    .biometry-modal {
+      position: fixed; bottom: -100%; left: 0; right: 0;
+      background: var(--card); border-radius: 30px 30px 0 0;
+      padding: 40px 20px 100px; text-align: center;
+      transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100; border-top: 1px solid var(--border);
+    }
+    .biometry-modal.active { bottom: 0; }
+
+    .fingerprint-icon { width: 85px; height: 85px; color: var(--accent); margin-bottom: 20px; transition: 0.2s; cursor: pointer; touch-action: none; }
+    .scanning { animation: scanPulse 0.3s infinite; filter: drop-shadow(0 0 15px var(--accent)); color: #FFF !important; }
+    .error-ui { color: #EF4444 !important; animation: shake 0.4s; }
+
+    .btn-senha { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 16px; border-radius: 14px; width: 85%; font-weight: 600; margin-top: 20px; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; backdrop-filter: blur(5px); z-index: 50; }
+    .overlay.active { display: block; }
+
+    /* ANIMAÇÕES */
+    @keyframes scanPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.92); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+  </style>
+</head>
+<body>
+
+  <div class="logo-container" id="logoContent">
+    <div class="logo-icon">TP</div>
+    <div class="logo-text">tech<span style="color: var(--accent); font-weight: 400;">pay</span></div>
+  </div>
+
+  <div class="account-actions" id="welcomeUI" style="display: none;">
+    <a href="cadastro_nome.html" class="create-acc">Criar conta grátis</a>
+    <a href="login_manual.html" class="action-link" style="color: var(--accent);">Já sou cliente (Entrar)</a>
+    <br><br>
+    <a href="reset.html" class="action-link">Esqueci a senha</a>
+  </div>
+
+  <div class="overlay" id="bgOverlay"></div>
+
+  <div class="biometry-modal" id="bioModal">
+    <svg class="fingerprint-icon" id="fingerIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12"></path>
+      <path d="M5 12C5 8.13401 8.13401 5 12 5C15.866 5 19 8.13401 19 12"></path>
+      <path d="M8 12C8 9.79086 9.79086 8 12 8C14.2091 8 16 9.79086 16 12"></path>
+      <path d="M12 12V12.01"></path>
+      <path d="M11 16C11 16.5523 11.4477 17 12 17C12.5523 17 13 16.5523 13 16V15"></path>
+      <path d="M12 22V20"></path>
+    </svg>
+    <div class="modal-title" id="mTitle" style="font-weight: 700;">Olá, Leonardo</div>
+    <div class="modal-desc" id="mDesc">Toque no sensor para acessar sua conta</div>
+    <button class="btn-senha" id="btnSenha">Usar senha do celular</button>
+    
+    <a href="reset.html" id="linkRecuperar" style="display:none; color: var(--accent); margin-top: 25px; text-decoration: none; font-size: 14px; font-weight: 600;">Esqueceu a senha? Clique aqui</a>
+  </div>
+
+<style>
+    body { 
+      margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); 
+      height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+      overflow: hidden; 
+      transition: opacity 0.5s ease; /* ADICIONE ESTA LINHA PARA A TRANSIÇÃO FUNCIONAR */
+      opacity: 1; 
+    }
+    /* ... resto do seu CSS ... */
+</style>
+
+<script>
+  let holdTimer;
+  let erros = 0;
+  // Pegamos o status de login
+  const isUserLogged = localStorage.getItem('techpay_user'); 
+
+  window.onload = () => {
+    // Se NÃO estiver logado, mostra botões de criar conta
+    if (!isUserLogged || isUserLogged === "false") {
+      document.getElementById('welcomeUI').style.display = 'block';
+    } else {
+      // Se já for usuário, abre a biometria direto
+      abrirBiometria();
+    }
+  };
+
+  function abrirBiometria() {
+    document.getElementById('welcomeUI').style.display = 'none'; // Esconde links iniciais
+    document.getElementById('bioModal').classList.add('active');
+    document.getElementById('bgOverlay').classList.add('active');
+    document.getElementById('logoContent').style.transform = 'translateY(-60px) scale(0.8)';
+  }
+
+  // Ação do botão "Já sou cliente"
+  const btnCliente = document.querySelector('.action-link[style*="color: var(--accent)"]');
+  if(btnCliente) {
+      btnCliente.onclick = (e) => {
+          e.preventDefault();
+          abrirBiometria();
+      };
+  }
+
+  const icon = document.getElementById('fingerIcon');
+  const title = document.getElementById('mTitle');
+  const desc = document.getElementById('mDesc');
+
+  function startScan(e) {
+    e.preventDefault();
+    if (icon.classList.contains('success')) return;
+    
+    icon.classList.remove('error-ui');
+    icon.classList.add('scanning');
+    
+    // Inicia o timer de 1.5s para dar o acesso
+    holdTimer = setTimeout(accessGranted, 1500);
+    if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+  }
+
+  function stopScan() {
+    if (icon.classList.contains('success')) return;
+    clearTimeout(holdTimer);
+    icon.classList.remove('scanning');
+    
+    // Lógica de Erro (se soltar antes do tempo)
+    erros++;
+    if (erros >= 3) {
+        icon.classList.add('error-ui');
+        title.innerText = "Muitas tentativas";
+        desc.innerText = "Acesso bloqueado temporariamente.";
+        document.getElementById('linkRecuperar').style.display = 'block';
+        if (navigator.vibrate) navigator.vibrate(300);
+    }
+  }
+
+  function accessGranted() {
+    icon.classList.remove('scanning');
+    icon.classList.add('success');
+    icon.style.color = "var(--accent)";
+    
+    // Salva o login para a próxima vez
+    localStorage.setItem('techpay_user', 'true');
+    
+    title.innerText = "Acesso Permitido";
+    desc.innerText = "Entrando no app...";
+
+    // Transição para a HOME
+    setTimeout(() => {
+      document.body.style.opacity = '0'; // Faz o fade out
+      setTimeout(() => {
+        window.location.href = 'home.html'; // Redireciona
+      }, 500);
+    }, 300);
+  }
+
+  // Eventos de toque
+  icon.addEventListener('pointerdown', startScan);
+  icon.addEventListener('pointerup', stopScan);
+  icon.addEventListener('pointerleave', stopScan);
+
+  // Botão Senha
+  document.getElementById('btnSenha').onclick = () => {
+    title.innerText = "Autenticando...";
+    setTimeout(accessGranted, 1000);
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TECH Pay - Criar Conta (Nome)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #22C55E;
+            --bg: #000000;
+            --text-muted: #6B7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 25px;
+            color: white;
+            justify-content: flex-start; /* Ajustado para o teclado não quebrar o layout */
+        }
+
+        /* BARRA DE PROGRESSO (Adicionada para combinar com as outras telas) */
+        .progress-container { width: 100%; height: 4px; background: #1F2937; border-radius: 10px; margin-top: 10px; margin-bottom: 20px; }
+        .progress-bar { width: 15%; height: 100%; background: var(--primary); border-radius: 10px; transition: 0.5s; }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn { background: none; border: none; cursor: pointer; color: white; margin-right: 15px; display: flex; align-items: center; }
+        .back-btn svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+        .step-info { font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        .question-area { flex-grow: 1; }
+        .question-area h2 { font-size: 26px; font-weight: 500; line-height: 1.3; margin-bottom: 40px; }
+
+        .input-group { position: relative; border-bottom: 1px solid #2A3441; }
+        .input-line {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 15px 0;
+            color: white;
+            font-size: 24px;
+            outline: none;
+        }
+
+        .input-label {
+            position: absolute;
+            top: 15px;
+            left: 0;
+            font-size: 20px;
+            color: #6B7280;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-line:focus + .input-label,
+        .input-line:not(:placeholder-shown) + .input-label {
+            top: -15px;
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        /* RODAPÉ INTELIGENTE */
+        .footer {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0 30px 0;
+            margin-top: auto; /* Empurra para o fim da tela ou topo do teclado */
+        }
+
+        .next-btn {
+            width: 60px;
+            height: 60px;
+            background: #1F2937;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .next-btn svg { width: 28px; height: 28px; stroke: #4B5563; stroke-width: 2.5; fill: none; }
+
+        .next-btn.active {
+            background: var(--primary);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+            cursor: pointer;
+        }
+        .next-btn.active svg { stroke: #000000; }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container">
+        <div class="progress-bar"></div>
+    </div>
+
+    <div class="header">
+        <button class="back-btn" onclick="location.href='login.html'">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="step-info">PASSO 1 DE 6</span>
+    </div>
+
+    <div class="question-area">
+        <h2>Para começar, qual o seu nome completo?</h2>
+        
+        <div class="input-group">
+            <input type="text" id="name" class="input-line" placeholder=" " autocomplete="name" required>
+            <label for="name" class="input-label">Nome completo</label>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button class="next-btn" id="nextBtn" onclick="proximoPasso()">
+            <svg viewBox="0 0 24 24">
+                <path d="M5 12h14M13 5l7 7-7 7"/>
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        const nameInput = document.getElementById('name');
+        const nextBtn = document.getElementById('nextBtn');
+
+        nameInput.addEventListener('input', () => {
+            // Ativa o botão se tiver nome e sobrenome (pelo menos um espaço e caracteres)
+            const nomes = nameInput.value.trim().split(" ");
+            if (nomes.length >= 2 && nomes[1].length >= 2) {
+                nextBtn.classList.add('active');
+            } else {
+                nextBtn.classList.remove('active');
+            }
+        });
+
+        // ESCUTA O ENTER/SETA DO TECLADO
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                proximoPasso();
+            }
+        });
+
+        function proximoPasso() {
+            if(!nextBtn.classList.contains('active')) return;
+            
+            localStorage.setItem("usuarioNome", nameInput.value.trim());
+            
+            // AGORA REDIRECIONA PARA O NOME CERTO DO ARQUIVO:
+            window.location.href = "cadastro_cpf.html";
+        }
+    </script>
+</body>
+</html>

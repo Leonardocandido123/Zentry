@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviando...</title>
+    <style>
+        body { background:#0B0F19; color:white; display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; font-family: sans-serif; }
+        .loader { width:45px; height:45px; border:3px solid #1F2937; border-top:3px solid #22C55E; border-radius:50%; animation:spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="loader"></div>
+    <p>Enviando Pix...</p>
+
+    <script>
+        // O SEGREDO ESTÁ AQUI: Redirecionar para o nome exato do arquivo de confirmação
+        setTimeout(() => {
+            window.location.href = "confirmacao_rapida.html";
+        }, 2000);
+    </script>
+
+</body>
+</html>
