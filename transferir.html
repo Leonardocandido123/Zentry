@@ -114,7 +114,7 @@
     }
   }
 
-  function realizarPix() {
+function realizarPix() {
     if(!btn.classList.contains("active")) return;
     
     const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
@@ -125,16 +125,24 @@
         return; 
     }
 
-    // Salvar dados da transação
-    localStorage.setItem("ultimoValor", valorInput.value);
+    // 1. Atualiza o saldo
     localStorage.setItem("saldo", (saldoOriginal - valorFinal));
-    
-    let hist = JSON.parse(localStorage.getItem("historico")) || [];
-    hist.push({tipo: "saida", valor: valorFinal, data: new Date().toISOString()});
-    localStorage.setItem("historico", JSON.stringify(hist));
+    localStorage.setItem("ultimoValor", valorInput.value);
 
-    // Redirecionar para a tela de processando
+    // 2. Salva no Extrato (Padronizado)
+    let extrato = JSON.parse(localStorage.getItem("transacoes")) || [];
+    extrato.unshift({
+        nome: "Leonardo Candido", // Nome que aparecerá no extrato
+        tipo: "saida",
+        categoria: "pix",
+        valor: valorInput.value,
+        data: new Date().toLocaleDateString('pt-BR')
+    });
+    localStorage.setItem("transacoes", JSON.stringify(extrato));
+
     window.location.href = "processando.html";
+  }
+        
   }
 </script>
 </body>
