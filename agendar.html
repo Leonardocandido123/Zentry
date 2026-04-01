@@ -80,10 +80,10 @@
     </p>
   </div>
 
-  <button class="confirm-btn" onclick="alert('Pix agendado com sucesso!'); location.href='pix.html'">
-    Agendar Transferência
-  </button>
-
+<button class="confirm-btn" onclick="agendarPix()">
+  Agendar Transferência
+</button>
+  
   <script>
     // Máscara simples para dinheiro
     document.getElementById('valor').addEventListener('input', function(e) {
@@ -93,6 +93,29 @@
       v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       e.target.value = "R$ " + v;
     });
+    function agendarPix() {
+    const valor = document.getElementById('valor').value;
+    const destino = document.querySelector('input[placeholder="Ex: leonardo@email.com"]').value;
+    const dataAgendada = document.querySelector('input[type="date"]').value;
+
+    if(!valor || valor === "R$ 0,00" || !destino || !dataAgendada) {
+        return alert("Preencha todos os campos!");
+    }
+
+    // Configura o comprovante dinâmico
+    localStorage.setItem("tipoTransacao", "pix"); // Usa o layout de Pix
+    localStorage.setItem("ultimoValor", valor);
+    localStorage.setItem("destinoNome", "Agendado para: " + destino);
+    localStorage.setItem("detalhesExtras", "Data: " + dataAgendada.split('-').reverse().join('/'));
+    localStorage.setItem("instDestino", "Pagamento Programado");
+
+    // No agendamento, geralmente não desconta o saldo na hora, 
+    // mas se quiser descontar, adicione a lógica de saldo aqui.
+
+    alert('Pix agendado com sucesso!');
+    window.location.href = 'comprovante.html';
+    }
+    
   </script>
 </body>
 </html>
