@@ -3,133 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprovante - TechPay</title>
+    <title>Comprovante - TechPay Official</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --bg-app: #000; --accent: #22c55e; }
-        body { margin:0; font-family:'Inter', sans-serif; background:var(--bg-app); color:#FFF; padding:20px; display:flex; flex-direction:column; align-items:center; }
-        
-        /* ESTILO DO COMPROVANTE (PAPEL BRANCO) */
-        .receipt-paper { 
-            width:100%; max-width:350px; background:#FFFFFF; color:#000; 
-            padding:40px 25px; border-radius:4px; position:relative;
+        :root { 
+            --accent: #22c55e; 
+            --text-main: #000000;
+            --text-muted: #666666;
+            --border: #e5e7eb;
+        }
+
+        /* CONFIGURAÇÃO PARA FIXAR OS BOTÕES E ROLAR O CONTEÚDO */
+        body { 
+            margin: 0; 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            background: linear-gradient(180deg, #0f172a 0%, #000000 100%); 
+            color: #FFF; 
+            height: 100vh;
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; /* Trava a rolagem do body */
+        }
+
+        /* ÁREA QUE ROLA (COMPROVANTE) */
+        .scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px; /* Espaço para não cobrir o final do papel */
+        }
+
+        .document-paper { 
+            width: 100%; 
+            max-width: 380px; 
+            background: #FFFFFF; 
+            padding: 40px 30px; 
+            border-radius: 4px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        
-        /* Efeito de serrilhado */
-        .receipt-paper::after {
-            content: ""; position: absolute; left: 0; right: 0; bottom: -5px; height: 10px;
-            background-size: 20px 20px; background-repeat: repeat-x;
-            background-image: radial-gradient(circle, var(--bg-app) 70%, transparent 75%);
+            color: var(--text-main);
+            box-sizing: border-box;
         }
 
-        .logo-header { text-align:center; border-bottom:1px dashed #CCC; padding-bottom:20px; margin-bottom:20px; }
-        .logo-header b { font-size:24px; letter-spacing:-1px; color:#000; text-transform: uppercase; }
-        .logo-header span { color: var(--accent); }
-        
-        .status-badge { background:#E8F5E9; color:#2E7D32; padding:5px 15px; border-radius:20px; font-size:12px; font-weight:700; margin-bottom:20px; display:inline-block; }
+        .doc-header { text-align: center; margin-bottom: 40px; }
+        .brand { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; text-transform: uppercase; }
+        .brand span { color: var(--accent); }
+        .doc-type { font-size: 16px; font-weight: 500; margin-top: 5px; display: block; }
+        .doc-timestamp { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
-        .info-row { display:flex; justify-content:space-between; margin-bottom:15px; font-size:14px; }
-        .info-row span { color:#666; }
-        .info-row b { color:#000; text-align:right; max-width:60%; }
+        .line { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
+        .section-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 15px; display: block; }
+        .data-row { margin-bottom: 12px; }
+        .data-label { font-size: 11px; color: var(--text-muted); display: block; }
+        .data-value { font-size: 14px; font-weight: 600; color: var(--text-main); line-height: 1.4; }
 
-        .total-box { border-top:2px solid #000; padding-top:20px; margin-top:20px; text-align:center; }
-        .total-box h2 { margin:0; font-size:32px; font-weight:800; color:#000; }
+        .amount-box { margin: 30px 0; }
+        .amount-label { font-size: 12px; color: var(--text-muted); }
+        .amount-value { font-size: 28px; font-weight: 800; margin-top: 5px; }
 
-        .footer-id { margin-top:30px; font-size:10px; color:#999; text-align:center; font-family:monospace; word-break:break-all; }
+        .auth-footer { margin-top: 40px; font-family: 'Courier New', monospace; font-size: 10px; color: var(--text-muted); text-align: left; line-height: 1.5; }
 
-        /* BOTÕES */
-        .actions { width:100%; max-width:350px; margin-top:30px; display:flex; flex-direction:column; gap:12px; }
-        .btn { padding:18px; border-radius:16px; border:none; font-weight:700; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition: 0.2s; }
-        .btn-share { background:#FFF; color:#000; }
-        .btn-done { background:transparent; color:var(--accent); border:1px solid var(--accent); }
-        .btn:active { transform: scale(0.98); }
+        /* RODAPÉ FIXO DOS BOTÕES */
+        .fixed-actions {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px); /* Efeito de vidro atrás dos botões */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            width: 100%;
+            box-sizing: border-box;
+            align-items: center;
+        }
+
+       /* BOTÃO ESTÁTICO E DIRETO */
+.btn-style {
+    width: 100%;
+    max-width: 380px;
+    background: #FFFFFF;
+    color: #000000;
+    border: none;
+    padding: 18px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    /* REMOVIDO: transition: 0.2s; */
+}
+
+/* APENAS MUDANÇA DE COR NO CLIQUE, SEM MOVIMENTO */
+.btn-style:active { 
+    background: #e5e7eb; /* Muda levemente a cor para o usuário saber que clicou */
+    /* REMOVIDO: transform: scale(0.98); */
+    /* REMOVIDO: opacity: 0.9; */
+}
+
     </style>
 </head>
 <body>
 
-    <div class="receipt-paper" id="comprovantePapel">
-        <div class="logo-header">
-            <b>Tech<span>Pay</span></b><br>
-            <small style="color: #666; font-weight: 500;">Comprovante de Transferência</small>
+    <div class="scroll-container">
+        <div class="document-paper" id="printable">
+            <div class="doc-header">
+                <div class="brand">Tech<span>Pay</span></div>
+                <span id="doc-title" class="doc-type">Comprovante de Transação</span>
+                <span class="doc-timestamp" id="res-time">--/--/---- --:--:--</span>
+            </div>
+
+            <hr class="line">
+
+            <div class="amount-box">
+                <span class="amount-label" id="label-valor">Valor pago</span>
+                <div class="amount-value" id="res-val">R$ 0,00</div>
+            </div>
+
+            <div id="dados-dinamicos">
+                </div>
+
+            <hr class="line">
+
+            <span class="section-title">Dados do Pagador</span>
+            <div class="data-row">
+                <span class="data-label">Nome</span>
+                <span class="data-value" id="res-user-name">Carregando...</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Instituição</span>
+                <span class="data-value">TechPay Pagamentos S.A.</span>
+            </div>
+
+            <div class="auth-footer">
+                ID: <span id="res-id">---</span><br>
+                Autenticação: <span id="res-auth">---</span>
+            </div>
         </div>
-
-        <center><div class="status-badge">✓ PIX REALIZADO COM SUCESSO</div></center>
-
-        <div class="info-row"><span>Tipo de transação</span><b>Pix</b></div>
-        <div class="info-row"><span>Para</span><b id="res-nome">Leonardo Candido</b></div>
-        <div class="info-row"><span>Instituição</span><b>Nu Pagamentos - 001</b></div>
-        <div class="info-row"><span>Chave Pix</span><b>***.123.456-**</b></div>
-        
-        <div style="margin:20px 0; border-bottom:1px dashed #EEE;"></div>
-        
-        <div class="info-row"><span>Pagador</span><b id="nomeUser">Seu Nome</b></div>
-        <div class="info-row"><span>Instituição Origem</span><b>TechPay S.A.</b></div>
-        <div class="info-row"><span>Data e Hora</span><b id="res-data">--/--/----</b></div>
-        
-        <div class="total-box">
-            <span style="font-size:11px; color:#666; text-transform:uppercase;">Valor da transação</span>
-            <h2 id="res-val">R$ 0,00</h2>
-        </div>
-
-        <div class="footer-id">Autenticação: <span id="res-id"></span></div>
     </div>
 
-    <div class="actions">
-        <button class="btn btn-share" onclick="compartilharFoto()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8m-11-8l5-5 5 5m-5-5v11"/></svg>
-            Enviar para WhatsApp
+    <div class="fixed-actions">
+        <button class="btn-style" onclick="sendToWhatsApp()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8m-11-8l5-5 5 5m-5-5v11"/></svg>
+            Enviar Comprovante
         </button>
-        <button class="btn btn-done" onclick="location.href='home.html'">Voltar ao Início</button>
+        
+        <button class="btn-style" onclick="window.location.href='home.html'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            Concluir
+        </button>
     </div>
 
     <script>
-        // Carrega o valor real e o nome do usuário
-        const pixValor = localStorage.getItem("ultimoValor") || "R$ 0,00";
-        const nomeUsuario = localStorage.getItem("usuarioNome") || "Cliente TechPay";
-        
-        document.getElementById('res-val').innerText = pixValor;
-        document.getElementById('nomeUser').innerText = nomeUsuario;
-        document.getElementById('res-data').innerText = new Date().toLocaleString('pt-BR');
-        document.getElementById('res-id').innerText = "TP" + Math.random().toString(36).substr(2, 18).toUpperCase();
+        window.onload = function() {
+            const tipo = localStorage.getItem("tipoOperacao") || "Pix";
+            const valor = localStorage.getItem("ultimoValor") || "R$ 0,00";
+            const nomeUser = localStorage.getItem("usuarioNome") || "Cliente TechPay";
+            
+            document.getElementById('res-val').innerText = valor;
+            document.getElementById('res-user-name').innerText = nomeUser;
+            document.getElementById('res-time').innerText = new Date().toLocaleString('pt-BR');
+            document.getElementById('res-id').innerText = "TP" + Math.random().toString(36).substr(2, 25).toUpperCase();
+            document.getElementById('res-auth').innerText = Math.random().toString(16).substr(2, 20).toUpperCase();
 
-       async function compartilharFoto() {
-    const el = document.getElementById("comprovantePapel");
-    
-    try {
-        // 1. Transforma o HTML em uma imagem de alta qualidade
-        const canvas = await html2canvas(el, { 
-            scale: 3, 
-            backgroundColor: "#ffffff",
-            useCORS: true 
-        });
-        
-        const dataUrl = canvas.toDataURL("image/png");
-        const blob = await (await fetch(dataUrl)).blob();
-        
-        // 2. Cria o arquivo real para o sistema operacional reconhecer
-        const file = new File([blob], 'Comprovante_TechPay.png', { type: 'image/png' });
+            const areaDinamica = document.getElementById('dados-dinamicos');
 
-        // 3. Verifica se o celular suporta o compartilhamento de ARQUIVOS
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: 'Comprovante TechPay',
-                text: 'Segue o comprovante da minha transferência via TechPay.'
-            });
-        } else {
-            // Se o navegador barrar o arquivo, ele tenta compartilhar pelo menos o texto
-            await navigator.share({
-                title: 'Comprovante TechPay',
-                text: `*Pix Realizado!*\nValor: ${pixValor}\nPara: Leonardo Candido`
-            });
+            if (tipo === "Recarga") {
+                document.getElementById('doc-title').innerText = "Comprovante de Recarga";
+                document.getElementById('label-valor').innerText = "Valor da recarga";
+                
+                areaDinamica.innerHTML = `
+                    <span class="section-title">Dados do Telefone</span>
+                    <div class="data-row">
+                        <span class="data-label">Operadora</span>
+                        <span class="data-value">${localStorage.getItem("operadora") || 'VIVO'}</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Número</span>
+                        <span class="data-value">${localStorage.getItem("telefone") || '(00) 00000-0000'}</span>
+                    </div>
+                `;
+            } else {
+                document.getElementById('doc-title').innerText = "Comprovante de Pix";
+                areaDinamica.innerHTML = `
+                    <span class="section-title">Dados do Recebedor</span>
+                    <div class="data-row">
+                        <span class="data-label">Nome</span>
+                        <span class="data-value">Leonardo Candido</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Instituição</span>
+                        <span class="data-value">Nu Pagamentos S.A.</span>
+                    </div>
+                `;
+            }
+        };
+
+        async function sendToWhatsApp() {
+            const el = document.getElementById("printable");
+            const canvas = await html2canvas(el, { scale: 3, backgroundColor: "#ffffff" });
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+            const file = new File([blob], 'Comprovante_TechPay.png', { type: 'image/png' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: 'Comprovante TechPay',
+                    text: 'Aqui está o comprovante da minha transação via TechPay.'
+                });
+            } else {
+                alert("Compartilhamento não suportado. Tente salvar a imagem.");
+            }
         }
-    } catch (err) {
-        console.error("Erro ao compartilhar:", err);
-        alert("Não foi possível abrir a gaveta de apps. Tente salvar a imagem manualmente.");
-    }
-}
-
     </script>
 </body>
 </html>
