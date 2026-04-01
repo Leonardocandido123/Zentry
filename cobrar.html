@@ -242,12 +242,14 @@
 </div>
 
 <script>
+// 1. FUNÇÃO PARA SELECIONAR O CLIENTE DA LISTA
 function selecionarParaCobranca(nome, valor) {
     document.getElementById('main-amount').value = "R$ " + valor;
     document.getElementById('selected-name').innerText = "Cobrando " + nome;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// 2. MÁSCARA DE DINHEIRO
 function mascaraMoeda(i) {
     let v = i.value.replace(/\D/g,'');
     v = (v/100).toFixed(2) + '';
@@ -257,82 +259,64 @@ function mascaraMoeda(i) {
     i.value = "R$ " + v;
 }
 
+// 3. FUNÇÃO PARA GERAR O DOCUMENTO (CORRIGIDA)
 function gerarCobranca() {
     const valor = document.getElementById('main-amount').value;
-    const nome = document.getElementById('selected-name').innerText.replace("Cobrando ", "") || "Cliente";
-    if(valor === "R$ 0,00") return alert("Digite um valor");
+    const nomeRaw = document.getElementById('selected-name').innerText;
+    const nome = nomeRaw.replace("Cobrando ", "") || "Cliente";
     
-    const msg = `Olá Sr(a). *${nome}*,\n\nConstatamos uma pendência no valor de *${valor}* na data 12/12/25.\n\nO pagamento pode ser feito via Pix pela chave abaixo:`;
-    document.getElementById('render-texto').innerHTML = msg.replace(/\n/g, "<br>");
-    document.getElementById('modalCobranca').style.display = 'flex';
-}
-
-function fecharModal() { document.getElementById('modalCobranca').style.display = 'none'; }
-
-function selecionarParaCobranca(nome, valor) {
-    document.getElementById('main-amount').value = "R$ " + valor;
-    document.getElementById('selected-name').innerText = "Cobrando " + nome;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function mascaraMoeda(i) {
-    let v = i.value.replace(/\D/g,'');
-    v = (v/100).toFixed(2) + '';
-    v = v.replace(".", ",");
-    v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
-    v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
-    i.value = "R$ " + v;
-}
-
-function gerarCobranca() {
-    const valor = document.getElementById('main-amount').value;
-    const nome = document.getElementById('selected-name').innerText.replace("Cobrando ", "") || "Cliente";
+    if(valor === "R$ 0,00" || valor === "") {
+        return alert("Selecione um cliente ou digite um valor");
+    }
     
-    if(valor === "R$ 0,00") return alert("Digite um valor");
-    
-    // Preenche os campos do "documento"
+    // Atualiza os dados no Modal (Documento)
     document.getElementById('render-valor').innerText = valor;
     document.getElementById('render-cliente').innerText = nome;
+    document.getElementById('render-frase-nome').innerText = nome; // AQUI O NOME APARECE NA FRASE
     
-    document.getElementById('modalCobranca').style.display = 'flex';
-  
-document.getElementById('render-frase-nome').innerText = nome;
-  
-}
-  
-function fecharModal() { document.getElementById('modalCobranca').style.display = 'none'; }
+    // Prepara o texto invisível que será usado no compartilhamento
+    const msg = `Olá Sr(a). ${nome},\n\nConstatamos uma pendência no valor de ${valor} na data 12/12/25.\n\nO pagamento pode ser feito via Pix pela chave abaixo:`;
+    
+    // Criamos um elemento temporário ou usamos uma variável global para o texto
+    window.textoParaCompartilhar = msg;
 
-// FUNÇÃO ATUALIZADA PARA FORÇAR A ESCOLHA DE APPS
+    // Abre o Modal
+    document.getElementById('modalCobranca').style.display = 'flex';
+}
+
+// 4. FECHAR MODAL
+function fecharModal() { 
+    document.getElementById('modalCobranca').style.display = 'none'; 
+}
+
+// 5. FUNÇÃO DE COMPARTILHAR (ESCOLHA DE APPS)
 async function compartilharCobranca() {
-    const textoBase = document.getElementById('render-texto').innerText;
     const chavePix = document.getElementById('render-chave').innerText;
-    const mensagemCompleta = `${textoBase}\n\nChave Pix: ${chavePix}`;
+    const mensagemCompleta = `${window.textoParaCompartilhar}\n\nChave Pix: ${chavePix}`;
 
     if (navigator.share) {
         try {
             await navigator.share({
-                text: mensagemCompleta // Mandamos apenas o 'text' para o Android abrir a lista de todos os apps
+                text: mensagemCompleta
             });
             fecharModal();
         } catch (err) {
-            // Se o usuário apenas fechar a janelinha de escolha, não faz nada
             console.log("Compartilhamento fechado");
         }
     } else {
-        // Se realmente não tiver suporte (PC), aí ele avisa
-        alert("Seu celular não permite escolher apps por aqui. Tente copiar o texto manualmente.");
+        alert("Seu celular não suporta o compartilhamento nativo. Copie o texto manualmente.");
     }
 }
 
-// Lógica de busca
+// 6. LÓGICA DE BUSCA
 document.querySelector('.search-box input').addEventListener('input', function(e) {
     let busca = e.target.value.toLowerCase();
     document.querySelectorAll('.client-card').forEach(card => {
-        card.style.display = card.querySelector('b').innerText.toLowerCase().includes(busca) ? 'flex' : 'none';
+        let nomeCard = card.querySelector('b').innerText.toLowerCase();
+        card.style.display = nomeCard.includes(busca) ? 'flex' : 'none';
     });
 });
-
-
-</script>
+      </script>
+  
 </body>
 </html>
