@@ -148,13 +148,13 @@ function realizarPix() {
     let valorLimpo = valorInput.replace("R$ ", "").replace(".", "").replace(",", ".");
     localStorage.setItem("saldo", (saldoAtual - parseFloat(valorLimpo)));
 
-    // 3. VAI PARA O COMPROVANTE ÚNICO
-    const btn = document.getElementById("btnProsseguir");
-    btn.innerHTML = "Enviando...";
-    setTimeout(() => { 
-        window.location.href = 'comprovante.html'; 
-    }, 1200);
-}
+    function irParaRevisao() {
+    const valor = document.getElementById('input-valor').value;
+    localStorage.setItem("ultimoValor", "R$ " + valor);
+    localStorage.setItem("tipoOperacao", "Pix");
+    window.location.href = 'revisao.html'; // Manda para a revisão
+    }
+  
   
   
 </script>
