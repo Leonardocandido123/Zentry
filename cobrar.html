@@ -32,63 +32,83 @@
         display: none; justify-content: center; align-items: center; z-index: 10000;
     }
     /* Card de Cobrança Profissional - Estilo Documento Clean */
+
+/* Estilo Documento de Cobrança Profissional (Inspirado em Comprovantes Reais) */
 .card-profissional {
-    width: 90%; 
-    max-width: 350px; 
-    background: #FFFFFF; /* Fundo Branco para seriedade */
-    border-radius: 20px; 
-    padding: 25px; 
-    text-align: center; 
-    position: relative;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-
-.card-profissional h3 { 
-    color: #111827; /* Título em Preto */
-    margin-top: 0; 
-    font-size: 18px; 
-    font-weight: 700;
-    border-bottom: 1px solid #E5E7EB;
-    padding-bottom: 15px;
-}
-
-.texto-cobranca {
-    background: #F9FAFB; /* Cinza bem clarinho */
-    border-radius: 12px; 
-    padding: 20px;
-    font-size: 14px; 
-    line-height: 1.6; 
+    width: 92%; 
+    max-width: 380px; 
+    background: #FFFFFF; 
+    border-radius: 4px; /* Cantos mais retos para parecer papel */
+    padding: 0; 
     text-align: left; 
-    color: #374151; /* Texto Cinza Escuro (Leitura Profissional) */
-    margin: 20px 0;
-    border: 1px solid #E5E7EB;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    overflow: hidden;
+    border-top: 6px solid var(--primary); /* Detalhe da marca no topo */
 }
 
-.chave-pix-box {
-    background: #F3F4F6; 
-    border: 1px dashed #9CA3AF;
-    padding: 12px; 
-    border-radius: 8px; 
-    font-family: monospace;
-    font-size: 13px; 
-    color: #111827; /* Chave em destaque preto */
-    word-break: break-all; 
-    margin-top: 8px;
+.doc-header {
+    padding: 20px;
+    border-bottom: 1px solid #EEEEEE;
 }
 
-.btn-generate {
-    width: 100%; 
-    background: #111827; /* Botão Preto para contraste profissional */
-    color: #FFFFFF; 
-    border: none; 
-    padding: 18px; 
-    border-radius: 12px; 
-    font-weight: 700; 
-    font-size: 16px; 
-    margin-top: 20px; 
+.doc-header img { height: 24px; margin-bottom: 10px; }
+
+.doc-title {
+    color: #111827;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.doc-body { padding: 20px; }
+
+.doc-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6B7280;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.doc-value {
+    font-size: 15px;
+    color: #111827;
+    font-weight: 500;
+    margin-bottom: 18px;
+    display: block;
+}
+
+.doc-amount {
+    font-size: 22px;
+    color: var(--primary);
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.doc-divider {
+    height: 1px;
+    background: #EEEEEE;
+    margin: 15px 0;
+}
+
+.btn-doc-share {
+    width: 100%;
+    background: #F3F4F6;
+    color: #111827;
+    border: none;
+    padding: 20px;
+    font-weight: 700;
+    font-size: 15px;
     cursor: pointer;
+    transition: 0.2s;
+    border-top: 1px solid #E5E7EB;
 }
 
+.btn-doc-share:active { background: #E5E7EB; }
+    
 /* Ajuste do botão de fechar (X) para aparecer no fundo branco */
 .card-profissional div[onclick="fecharModal()"] {
     color: #9CA3AF !important;
@@ -130,15 +150,48 @@
 
 <div id="modalCobranca" class="overlay-cobranca">
     <div class="card-profissional">
-        <div onclick="fecharModal()" style="position:absolute; right:20px; top:20px; cursor:pointer; color:var(--text-secondary); font-size: 20px;">✕</div>
-        <h3 style="color: var(--primary); margin-bottom: 10px;">Cobrança Tech Pay</h3>
-        <div class="texto-cobranca" id="render-texto"></div>
-        <span style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">Chave Pix para Pagamento:</span>
-        <div class="chave-pix-box" id="render-chave">leonardo.silva@email.com</div>
-        <button class="btn-generate" style="margin-top:20px; margin-bottom:0;" onclick="compartilharCobranca()">Compartilhar Cobrança</button>
+        <div onclick="fecharModal()" style="position:absolute; right:15px; top:15px; cursor:pointer; color:#9CA3AF; font-size: 18px; z-index: 10;">✕</div>
+        
+        <div class="doc-header">
+            <b style="color: var(--primary); font-size: 14px; display: block; margin-bottom: 4px;">tech pay</b>
+            <h1 class="doc-title">Ordem de Cobrança</h1>
+        </div>
+
+        <div class="doc-body">
+            <span class="doc-label">Valor da Cobrança</span>
+            <div class="doc-amount" id="render-valor">R$ 0,00</div>
+
+            <div class="doc-divider"></div>
+
+            <span class="doc-label">Pagador</span>
+            <span class="doc-value" id="render-cliente">Nome do Cliente</span>
+
+            <div style="display: flex; justify-content: space-between;">
+                <div>
+                    <span class="doc-label">Vencimento</span>
+                    <span class="doc-value">12/12/2025</span>
+                </div>
+                <div style="text-align: right;">
+                    <span class="doc-label">Status</span>
+                    <span class="doc-value" style="color: #F59E0B;">Pendente</span>
+                </div>
+            </div>
+
+            <div class="doc-divider"></div>
+
+            <span class="doc-label">Dados para Pagamento (PIX)</span>
+            <span class="doc-value" id="render-chave">leonardo.silva@email.com</span>
+            
+            <span class="doc-label">Instituição</span>
+            <span class="doc-value">Tech Pay Pagamentos S.A.</span>
+        </div>
+
+        <button class="btn-doc-share" onclick="compartilharCobranca()">
+            Enviar Documento para Cliente
+        </button>
     </div>
 </div>
-
+  
 <div class="container">
   <div class="header">
     <a href="home.html" class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></a>
@@ -228,15 +281,16 @@ function mascaraMoeda(i) {
 function gerarCobranca() {
     const valor = document.getElementById('main-amount').value;
     const nome = document.getElementById('selected-name').innerText.replace("Cobrando ", "") || "Cliente";
+    
     if(valor === "R$ 0,00") return alert("Digite um valor");
     
-    // Texto formatado
-    const msg = `Olá Sr(a). ${nome},\n\nConstatamos uma pendência no valor de ${valor} na data 12/12/25.\n\nO pagamento pode ser feito via Pix pela chave abaixo:`;
+    // Preenche os campos do "documento"
+    document.getElementById('render-valor').innerText = valor;
+    document.getElementById('render-cliente').innerText = nome;
     
-    document.getElementById('render-texto').innerHTML = msg.replace(/\n/g, "<br>");
     document.getElementById('modalCobranca').style.display = 'flex';
 }
-
+  
 function fecharModal() { document.getElementById('modalCobranca').style.display = 'none'; }
 
 // FUNÇÃO ATUALIZADA PARA FORÇAR A ESCOLHA DE APPS
