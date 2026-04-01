@@ -1,129 +1,228 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>TECH Pay - Cobrar</title>
+  <title>Tech Pay - Cobrar e Clientes</title>
   <style>
-    :root { --primary: #22C55E; --bg: #000000; --card: #121826; --border: #2A3441; --text-sec: #9CA3AF; }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; padding: 20px; }
+    :root { 
+        --primary: #22c55e; 
+        --danger: #ef4444;
+        --bg-card: #111827;
+        --border: rgba(255, 255, 255, 0.15); 
+        --text-secondary: #9CA3AF; 
+    }
 
-    .header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
-    .back-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; }
+    /* Notificação de Sucesso */
+    .toast-success {
+        position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+        width: 90%; max-width: 380px; background: #16a34a; color: white;
+        padding: 16px; border-radius: 16px; display: flex; align-items: center; gap: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999;
+        transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .toast-success.show { top: 20px; }
+    .toast-icon { background: rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    /* Modal de Cobrança Profissional */
+    .overlay-cobranca {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+        display: none; justify-content: center; align-items: center; z-index: 10000;
+    }
+    .card-profissional {
+        width: 90%; max-width: 350px; background: #111827; border: 1px solid var(--primary);
+        border-radius: 28px; padding: 25px; text-align: center; position: relative;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .texto-cobranca {
+        background: rgba(255,255,255,0.03); border-radius: 15px; padding: 15px;
+        font-size: 14px; line-height: 1.6; text-align: left; color: #e5e7eb; margin: 20px 0;
+        border-left: 4px solid var(--primary);
+    }
+    .chave-pix-box {
+        background: #000; border: 1px dashed var(--border);
+        padding: 12px; border-radius: 12px; font-family: monospace;
+        font-size: 13px; color: var(--primary); word-break: break-all; margin-top: 8px;
+    }
     
-    .main-card { background: var(--card); border: 1px solid var(--border); border-radius: 28px; padding: 25px; text-align: center; }
-    .label { color: var(--text-sec); font-size: 13px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 15px; }
-    
-    .value-input { background: transparent; border: none; color: white; font-size: 42px; font-weight: 700; width: 100%; text-align: center; outline: none; margin-bottom: 10px; }
-    .value-input::placeholder { color: #1F2937; }
-
-    .desc-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 18px; padding: 15px; margin-top: 20px; width: 100%; color: white; font-family: 'Inter'; outline: none; }
-
-    /* QR CODE AREA */
-    #qr-result { display: none; margin-top: 30px; animation: fadeIn 0.5s ease; }
-    .qr-frame { background: white; padding: 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px; }
-    .qr-mock { width: 180px; height: 180px; background: #000; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; }
-
-    .btn-primary { background: var(--primary); color: #000; border: none; width: 100%; padding: 20px; border-radius: 22px; font-weight: 700; font-size: 16px; margin-top: 25px; cursor: pointer; transition: 0.2s; }
-    .btn-primary:active { transform: scale(0.96); }
-    
-    .btn-share { background: #1F2937; color: white; border: 1px solid var(--border); width: 100%; padding: 15px; border-radius: 18px; margin-top: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    body { margin:0; font-family:'Inter',sans-serif; background: radial-gradient(circle at 20% 0%, #0f172a, #000 60%); color: #fff; padding-bottom: 100px; }
+    .container { padding: 20px; max-width: 450px; margin: auto; }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .back-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-card); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; text-decoration: none; color: var(--primary); }
+    .amount-container { text-align: center; margin: 30px 0; }
+    .amount-input { background: transparent; border: none; color: #fff; font-size: 42px; font-weight: 800; text-align: center; width: 100%; outline: none; }
+    .customer-selected { font-size: 14px; color: var(--primary); margin-top: 5px; font-weight: 600; height: 20px; }
+    .btn-generate { width: 100%; background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 18px; font-weight: 800; font-size: 16px; cursor: pointer; margin-bottom: 30px; }
+    .divider { display: flex; align-items: center; margin: 30px 0 20px; }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+    .divider span { padding: 0 15px; color: var(--text-secondary); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .search-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 15px; padding: 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .search-box input { background: transparent; border: none; color: white; outline: none; width: 100%; }
+    .client-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer; }
+    .avatar { width: 48px; height: 48px; border-radius: 14px; background: #1F2937; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .info { flex: 1; }
+    .debt-text { color: var(--danger) !important; font-weight: 700; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .status-paid { background: var(--primary); }
+    .status-debt { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+    .fab { position: fixed; bottom: 30px; right: 20px; width: 56px; height: 56px; background: var(--primary); border-radius: 18px; display: flex; align-items: center; justify-content: center; border: none; }
+    svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; }
   </style>
 </head>
 <body>
 
+<div id="toast" class="toast-success">
+    <div class="toast-icon">✓</div>
+    <div>
+        <b style="display:block; font-size: 14px;">Recebimento Confirmado!</b>
+        <span id="toast-msg" style="font-size: 12px; opacity: 0.9;"></span>
+    </div>
+</div>
+
+<div id="modalCobranca" class="overlay-cobranca">
+    <div class="card-profissional">
+        <div onclick="fecharModal()" style="position:absolute; right:20px; top:20px; cursor:pointer; color:var(--text-secondary); font-size: 20px;">✕</div>
+        <h3 style="color: var(--primary); margin-bottom: 10px;">Cobrança Tech Pay</h3>
+        <div class="texto-cobranca" id="render-texto"></div>
+        <span style="font-size: 11px; color: var(--text-secondary); font-weight: 600;">Chave Pix para Pagamento:</span>
+        <div class="chave-pix-box" id="render-chave">leonardo.silva@email.com</div>
+        <button class="btn-generate" style="margin-top:20px; margin-bottom:0;" onclick="compartilharCobranca()">Compartilhar Cobrança</button>
+    </div>
+</div>
+
+<div class="container">
   <div class="header">
-    <div class="back-btn" onclick="history.back()">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-    </div>
-    <h2 style="margin:0; font-size: 20px;">Cobrar Cliente</h2>
+    <a href="home.html" class="back-btn"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></a>
+    <b style="font-size: 18px;">Cobrar Cliente</b>
+    <div style="width:40px"></div>
   </div>
 
-  <div class="main-card">
-    <span class="label">Quanto você quer receber?</span>
-    <input type="text" id="valor-cobrar" class="value-input" placeholder="R$ 0,00">
+  <div class="amount-container">
+    <label style="font-size: 13px; color: var(--text-secondary);">Valor a cobrar</label>
+    <input type="text" class="amount-input" id="main-amount" value="R$ 0,00" oninput="mascaraMoeda(this)">
+    <div class="customer-selected" id="selected-name"></div>
+  </div>
+
+  <button class="btn-generate" onclick="gerarCobranca()">Gerar Cobrança</button>
+
+  <div class="divider"><span>Meus Clientes</span></div>
+
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" style="color: var(--text-secondary); width: 18px;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" placeholder="Procurar por nome...">
+  </div>
+
+  <div id="lista-clientes">
+    <div class="client-card" onclick="selecionarParaCobranca('Ricardo Frete', '150,00')">
+        <div class="avatar" style="color: #F59E0B; border: 1px solid var(--danger);">RF</div>
+        <div class="info"><b>Ricardo Frete</b><span class="debt-text">Débito Vencido: R$ 150,00</span></div>
+        <div class="status-dot status-debt"></div>
+    </div>
+    <div class="client-card" onclick="selecionarParaCobranca('João Mecânica', '350,00')">
+        <div class="avatar" style="color: #3b82f6; border: 1px solid var(--danger);">JM</div>
+        <div class="info"><b>João Mecânica</b><span class="debt-text">Atrasado há 2 dias: R$ 350,00</span></div>
+        <div class="status-dot status-debt"></div>
+    </div>
+    <div class="client-card" onclick="selecionarParaCobranca('Marcos Oliveira', '0,00')">
+        <div class="avatar" style="color: #6366F1;">MO</div>
+        <div class="info"><b>Marcos Oliveira</b><span style="color: var(--primary);">Tudo pago!</span></div>
+        <div class="status-dot status-paid"></div>
+    </div>
+  </div>
+
+  <button class="fab" onclick="location.href='novo-cliente.html'"><svg viewBox="0 0 24 24" style="stroke: #000;"><path d="M12 5v14M5 12h14"/></svg></button>
+</div>
+
+<script>
+function selecionarParaCobranca(nome, valor) {
+    document.getElementById('main-amount').value = "R$ " + valor;
+    document.getElementById('selected-name').innerText = "Cobrando " + nome;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function mascaraMoeda(i) {
+    let v = i.value.replace(/\D/g,'');
+    v = (v/100).toFixed(2) + '';
+    v = v.replace(".", ",");
+    v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+    v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
+    i.value = "R$ " + v;
+}
+
+function gerarCobranca() {
+    const valor = document.getElementById('main-amount').value;
+    const nome = document.getElementById('selected-name').innerText.replace("Cobrando ", "") || "Cliente";
+    if(valor === "R$ 0,00") return alert("Digite um valor");
     
-    <input type="text" id="descricao" class="desc-box" placeholder="Para que é essa cobrança? (Opcional)">
+    const msg = `Olá Sr(a). *${nome}*,\n\nConstatamos uma pendência no valor de *${valor}* na data 12/12/25.\n\nO pagamento pode ser feito via Pix pela chave abaixo:`;
+    document.getElementById('render-texto').innerHTML = msg.replace(/\n/g, "<br>");
+    document.getElementById('modalCobranca').style.display = 'flex';
+}
 
-    <div id="qr-result">
-        <div class="qr-frame">
-            <div class="qr-mock">
-                <svg width="150" height="150" viewBox="0 0 24 24" fill="black"><path d="M3 11V3h8v8H3zm0 10v-8h8v8H3zM13 3h8v8h-8V3zm0 10h8v8h-8v-8zm2 2h4v4h-4v-4z"/></svg>
-            </div>
-        </div>
-        <p style="font-size: 13px; color: var(--text-sec);">QR Code gerado com sucesso!</p>
-        
-        <button class="btn-share" onclick="compartilharCobrança()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
-            Compartilhar Link Pix
-        </button>
-    </div>
+function fecharModal() { document.getElementById('modalCobranca').style.display = 'none'; }
 
-    <button id="btn-gerar" class="btn-primary" onclick="gerarCobranca()">Gerar QR Code</button>
-  </div>
+function selecionarParaCobranca(nome, valor) {
+    document.getElementById('main-amount').value = "R$ " + valor;
+    document.getElementById('selected-name').innerText = "Cobrando " + nome;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-  <script>
-    // Máscara de Moeda
-    document.getElementById('valor-cobrar').addEventListener('input', function(e) {
-      let v = e.target.value.replace(/\D/g,'');
-      v = (v/100).toFixed(2) + '';
-      v = v.replace(".", ",");
-      v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      e.target.value = "R$ " + v;
-    });
+function mascaraMoeda(i) {
+    let v = i.value.replace(/\D/g,'');
+    v = (v/100).toFixed(2) + '';
+    v = v.replace(".", ",");
+    v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+    v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
+    i.value = "R$ " + v;
+}
 
-    function gerarCobranca() {
-        const valor = document.getElementById('valor-cobrar').value;
-        if(valor === "" || valor === "R$ 0,00") return alert("Digite um valor!");
+function gerarCobranca() {
+    const valor = document.getElementById('main-amount').value;
+    const nome = document.getElementById('selected-name').innerText.replace("Cobrando ", "") || "Cliente";
+    if(valor === "R$ 0,00") return alert("Digite um valor");
+    
+    // Texto formatado
+    const msg = `Olá Sr(a). ${nome},\n\nConstatamos uma pendência no valor de ${valor} na data 12/12/25.\n\nO pagamento pode ser feito via Pix pela chave abaixo:`;
+    
+    document.getElementById('render-texto').innerHTML = msg.replace(/\n/g, "<br>");
+    document.getElementById('modalCobranca').style.display = 'flex';
+}
 
-        document.getElementById('btn-gerar').style.display = 'none';
-        document.getElementById('qr-result').style.display = 'block';
-    }
-    // Máscara de Moeda (Mantive a sua que está ótima)
-    document.getElementById('valor-cobrar').addEventListener('input', function(e) {
-      let v = e.target.value.replace(/\D/g,'');
-      v = (v/100).toFixed(2) + '';
-      v = v.replace(".", ",");
-      v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      e.target.value = "R$ " + v;
-    });
+function fecharModal() { document.getElementById('modalCobranca').style.display = 'none'; }
 
-    function gerarCobranca() {
-        const valor = document.getElementById('valor-cobrar').value;
-        if(valor === "" || valor === "R$ 0,00") return alert("Digite um valor!");
+// FUNÇÃO ATUALIZADA PARA FORÇAR A ESCOLHA DE APPS
+async function compartilharCobranca() {
+    const textoBase = document.getElementById('render-texto').innerText;
+    const chavePix = document.getElementById('render-chave').innerText;
+    const mensagemCompleta = `${textoBase}\n\nChave Pix: ${chavePix}`;
 
-        document.getElementById('btn-gerar').style.display = 'none';
-        document.getElementById('qr-result').style.display = 'block';
-    }
-
-    // NOVA FUNÇÃO DE COMPARTILHAR (Muito mais estável)
-    async function compartilharCobrança() {
-        const valor = document.getElementById('valor-cobrar').value;
-        const desc = document.getElementById('descricao').value || "Serviço";
-        const textoLink = `Olá! Segue meu Pix de ${valor} referente a: ${desc}. TechPay agradece!`;
-
-        // Tenta usar o compartilhamento nativo do celular
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'Cobrança TechPay',
-                    text: textoLink,
-                    url: '#', // Aqui você poderia colocar o link do QR Code se tivesse um servidor
-                });
-            } catch (err) {
-                // Se o usuário cancelar, não faz nada e a tela não some
-            }
-        } else {
-            // Caso o navegador não suporte (PC antigo), ele usa o Zap direto
-            window.open(`https://wa.me/?text=${encodeURIComponent(textoLink)}`, '_blank');
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                text: mensagemCompleta // Mandamos apenas o 'text' para o Android abrir a lista de todos os apps
+            });
+            fecharModal();
+        } catch (err) {
+            // Se o usuário apenas fechar a janelinha de escolha, não faz nada
+            console.log("Compartilhamento fechado");
         }
+    } else {
+        // Se realmente não tiver suporte (PC), aí ele avisa
+        alert("Seu celular não permite escolher apps por aqui. Tente copiar o texto manualmente.");
     }
+}
 
-  </script>
+// Lógica de busca
+document.querySelector('.search-box input').addEventListener('input', function(e) {
+    let busca = e.target.value.toLowerCase();
+    document.querySelectorAll('.client-card').forEach(card => {
+        card.style.display = card.querySelector('b').innerText.toLowerCase().includes(busca) ? 'flex' : 'none';
+    });
+});
+
+
+</script>
 </body>
 </html>
