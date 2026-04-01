@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Comprovante - TechPay Official</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -13,7 +13,6 @@
             --border: #e5e7eb;
         }
 
-        /* CONFIGURAÇÃO PARA FIXAR OS BOTÕES E ROLAR O CONTEÚDO */
         body { 
             margin: 0; 
             font-family: 'Inter', -apple-system, sans-serif; 
@@ -22,89 +21,76 @@
             height: 100vh;
             display: flex; 
             flex-direction: column; 
-            overflow: hidden; /* Trava a rolagem do body */
+            overflow: hidden; 
         }
 
-        /* ÁREA QUE ROLA (COMPROVANTE) */
         .scroll-container {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-bottom: 40px; /* Espaço para não cobrir o final do papel */
+            padding-bottom: 20px;
         }
 
         .document-paper { 
             width: 100%; 
-            max-width: 380px; 
+            max-width: 360px; 
             background: #FFFFFF; 
-            padding: 40px 30px; 
+            padding: 30px 25px; 
             border-radius: 4px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             color: var(--text-main);
             box-sizing: border-box;
         }
 
-        .doc-header { text-align: center; margin-bottom: 40px; }
-        .brand { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; text-transform: uppercase; }
+        .doc-header { text-align: center; margin-bottom: 30px; }
+        .brand { font-size: 18px; font-weight: 800; text-transform: uppercase; }
         .brand span { color: var(--accent); }
-        .doc-type { font-size: 16px; font-weight: 500; margin-top: 5px; display: block; }
-        .doc-timestamp { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        .doc-type { font-size: 15px; font-weight: 600; margin-top: 5px; display: block; }
+        .doc-timestamp { font-size: 11px; color: var(--text-muted); }
 
-        .line { border: 0; border-top: 1px solid var(--border); margin: 20px 0; }
-        .section-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 15px; display: block; }
-        .data-row { margin-bottom: 12px; }
-        .data-label { font-size: 11px; color: var(--text-muted); display: block; }
-        .data-value { font-size: 14px; font-weight: 600; color: var(--text-main); line-height: 1.4; }
+        .line { border: 0; border-top: 1px solid var(--border); margin: 15px 0; }
+        .section-title { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 10px; display: block; }
+        .data-row { margin-bottom: 10px; }
+        .data-label { font-size: 10px; color: var(--text-muted); display: block; }
+        .data-value { font-size: 13px; font-weight: 600; color: var(--text-main); }
 
-        .amount-box { margin: 30px 0; }
-        .amount-label { font-size: 12px; color: var(--text-muted); }
-        .amount-value { font-size: 28px; font-weight: 800; margin-top: 5px; }
+        .amount-box { margin: 20px 0; }
+        .amount-value { font-size: 26px; font-weight: 800; }
 
-        .auth-footer { margin-top: 40px; font-family: 'Courier New', monospace; font-size: 10px; color: var(--text-muted); text-align: left; line-height: 1.5; }
+        .auth-footer { margin-top: 30px; font-family: monospace; font-size: 9px; color: var(--text-muted); }
 
-        /* RODAPÉ FIXO DOS BOTÕES */
+        /* RODAPÉ AJUSTADO PARA CABER TUDO */
         .fixed-actions {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px); /* Efeito de vidro atrás dos botões */
-            padding: 20px;
+            background: #000;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            gap: 10px;
             width: 100%;
             box-sizing: border-box;
-            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
 
-       /* BOTÃO ESTÁTICO E DIRETO */
-.btn-style {
-    width: 100%;
-    max-width: 380px;
-    background: #FFFFFF;
-    color: #000000;
-    border: none;
-    padding: 18px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    /* REMOVIDO: transition: 0.2s; */
-}
+        .btn-style {
+            width: 100%;
+            background: #FFFFFF;
+            color: #000000;
+            border: none;
+            padding: 14px; /* Diminuído para dar espaço */
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
 
-/* APENAS MUDANÇA DE COR NO CLIQUE, SEM MOVIMENTO */
-.btn-style:active { 
-    background: #e5e7eb; /* Muda levemente a cor para o usuário saber que clicou */
-    /* REMOVIDO: transform: scale(0.98); */
-    /* REMOVIDO: opacity: 0.9; */
-}
-
+        .btn-style:active { background: #e5e7eb; }
     </style>
 </head>
 <body>
@@ -113,93 +99,67 @@
         <div class="document-paper" id="printable">
             <div class="doc-header">
                 <div class="brand">Tech<span>Pay</span></div>
-                <span id="doc-title" class="doc-type">Comprovante de Transação</span>
-                <span class="doc-timestamp" id="res-time">--/--/---- --:--:--</span>
+                <span id="doc-title" class="doc-type">Comprovante</span>
+                <span class="doc-timestamp" id="res-time">--/--/----</span>
             </div>
-
             <hr class="line">
-
             <div class="amount-box">
-                <span class="amount-label" id="label-valor">Valor pago</span>
+                <span class="amount-label" id="label-valor" style="font-size: 11px; color: #666;">Valor</span>
                 <div class="amount-value" id="res-val">R$ 0,00</div>
             </div>
-
-            <div id="dados-dinamicos">
-                </div>
-
+            <div id="dados-dinamicos"></div>
             <hr class="line">
-
-            <span class="section-title">Dados do Pagador</span>
+            <span class="section-title">Pagador</span>
             <div class="data-row">
-                <span class="data-label">Nome</span>
-                <span class="data-value" id="res-user-name">Carregando...</span>
+                <span class="data-value" id="res-user-name">...</span>
+                <span class="data-label">TechPay Pagamentos S.A.</span>
             </div>
-            <div class="data-row">
-                <span class="data-label">Instituição</span>
-                <span class="data-value">TechPay Pagamentos S.A.</span>
-            </div>
-
             <div class="auth-footer">
-                ID: <span id="res-id">---</span><br>
-                Autenticação: <span id="res-auth">---</span>
+                ID: <span id="res-id">...</span><br>
+                Autenticação: <span id="res-auth">...</span>
             </div>
         </div>
     </div>
 
     <div class="fixed-actions">
         <button class="btn-style" onclick="sendToWhatsApp()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8m-11-8l5-5 5 5m-5-5v11"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8m-11-8l5-5 5 5m-5-5v11"/></svg>
             Enviar Comprovante
         </button>
-        
-        <button class="btn-style" onclick="window.location.href='home.html'">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        <button class="btn-style" onclick="concluirOperacao()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             Concluir
         </button>
     </div>
 
     <script>
+        function concluirOperacao() {
+            // Limpa dados sensíveis antes de sair
+            localStorage.removeItem("ultimoValor");
+            localStorage.removeItem("tipoOperacao");
+            window.location.href = 'home.html';
+        }
+
         window.onload = function() {
+            // Força a rolagem para o topo ao carregar
+            window.scrollTo(0,0);
+            
             const tipo = localStorage.getItem("tipoOperacao") || "Pix";
             const valor = localStorage.getItem("ultimoValor") || "R$ 0,00";
-            const nomeUser = localStorage.getItem("usuarioNome") || "Cliente TechPay";
             
             document.getElementById('res-val').innerText = valor;
-            document.getElementById('res-user-name').innerText = nomeUser;
+            document.getElementById('res-user-name').innerText = localStorage.getItem("usuarioNome") || "Cliente TechPay";
             document.getElementById('res-time').innerText = new Date().toLocaleString('pt-BR');
-            document.getElementById('res-id').innerText = "TP" + Math.random().toString(36).substr(2, 25).toUpperCase();
-            document.getElementById('res-auth').innerText = Math.random().toString(16).substr(2, 20).toUpperCase();
+            document.getElementById('res-id').innerText = "TP" + Math.random().toString(36).substr(2, 15).toUpperCase();
+            document.getElementById('res-auth').innerText = Math.random().toString(16).substr(2, 18).toUpperCase();
 
             const areaDinamica = document.getElementById('dados-dinamicos');
-
             if (tipo === "Recarga") {
                 document.getElementById('doc-title').innerText = "Comprovante de Recarga";
-                document.getElementById('label-valor').innerText = "Valor da recarga";
-                
-                areaDinamica.innerHTML = `
-                    <span class="section-title">Dados do Telefone</span>
-                    <div class="data-row">
-                        <span class="data-label">Operadora</span>
-                        <span class="data-value">${localStorage.getItem("operadora") || 'VIVO'}</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Número</span>
-                        <span class="data-value">${localStorage.getItem("telefone") || '(00) 00000-0000'}</span>
-                    </div>
-                `;
+                areaDinamica.innerHTML = `<span class="section-title">Destino</span><div class="data-row"><span class="data-label">Operadora</span><span class="data-value">${localStorage.getItem("operadora") || 'VIVO'}</span></div><div class="data-row"><span class="data-label">Número</span><span class="data-value">${localStorage.getItem("telefone") || '(00) 00000-0000'}</span></div>`;
             } else {
                 document.getElementById('doc-title').innerText = "Comprovante de Pix";
-                areaDinamica.innerHTML = `
-                    <span class="section-title">Dados do Recebedor</span>
-                    <div class="data-row">
-                        <span class="data-label">Nome</span>
-                        <span class="data-value">Leonardo Candido</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">Instituição</span>
-                        <span class="data-value">Nu Pagamentos S.A.</span>
-                    </div>
-                `;
+                areaDinamica.innerHTML = `<span class="section-title">Recebedor</span><div class="data-row"><span class="data-label">Nome</span><span class="data-value">Leonardo Candido</span></div><div class="data-row"><span class="data-label">Instituição</span><span class="data-value">Nu Pagamentos S.A.</span></div>`;
             }
         };
 
@@ -207,16 +167,9 @@
             const el = document.getElementById("printable");
             const canvas = await html2canvas(el, { scale: 3, backgroundColor: "#ffffff" });
             const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-            const file = new File([blob], 'Comprovante_TechPay.png', { type: 'image/png' });
-
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({
-                    files: [file],
-                    title: 'Comprovante TechPay',
-                    text: 'Aqui está o comprovante da minha transação via TechPay.'
-                });
-            } else {
-                alert("Compartilhamento não suportado. Tente salvar a imagem.");
+            const file = new File([blob], 'Comprovante.png', { type: 'image/png' });
+            if (navigator.share) {
+                await navigator.share({ files: [file], title: 'Comprovante' });
             }
         }
     </script>
