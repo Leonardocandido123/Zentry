@@ -1,1 +1,134 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Tech Pay - Gerar Link</title>
+  <style>
+    :root { 
+        --primary: #22c55e; 
+        --bg-card: #111827;
+        --border: rgba(255, 255, 255, 0.15); 
+        --text-secondary: #9CA3AF; 
+    }
+    
+    body { margin:0; font-family:'Inter',sans-serif; background: #000; color: #fff; padding: 20px; }
+    .header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .back-btn { background: var(--bg-card); border: 1px solid var(--border); color: #fff; border-radius: 12px; padding: 10px; cursor: pointer; }
+    
+    .card-gerador { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 25px; }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+    .input-group input { 
+        width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
+        border-radius: 12px; padding: 15px; color: #fff; font-size: 16px; box-sizing: border-box;
+    }
+    .input-group input:focus { border-color: var(--primary); outline: none; }
+
+    .btn-gerar { 
+        width: 100%; background: var(--primary); color: #000; border: none; 
+        border-radius: 15px; padding: 18px; font-weight: 700; font-size: 16px; cursor: pointer;
+        transition: 0.3s; margin-top: 10px;
+    }
+    
+    /* ÁREA DO LINK GERADO */
+    #resultado { display: none; margin-top: 30px; animation: fadeIn 0.5s ease; }
+    .link-box { 
+        background: #064e3b; border: 1px dashed var(--primary); border-radius: 15px; 
+        padding: 15px; text-align: center; margin-bottom: 20px;
+    }
+    .link-text { font-size: 12px; color: #fff; word-break: break-all; opacity: 0.8; }
+    
+    .actions-share { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-share { 
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 12px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; border: none;
+    }
+    .btn-copy { background: var(--bg-card); color: #fff; border: 1px solid var(--border); }
+    .btn-whatsapp { background: #25D366; color: #fff; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<div class="header">
+    <button class="back-btn" onclick="location.href='home.html'">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2 style="margin:0; font-size: 18px;">Link de Pagamento</h2>
+</div>
+
+<div class="card-gerador">
+    <div class="input-group">
+        <label>Quanto você quer cobrar?</label>
+        <input type="text" id="valor" placeholder="R$ 0,00" oninput="mascaraMoeda(this)">
+    </div>
+
+    <div class="input-group">
+        <label>Descrição do serviço/produto</label>
+        <input type="text" id="descricao" placeholder="Ex: Manutenção de Ar-condicionado">
+    </div>
+
+    <button class="btn-gerar" onclick="gerarLink()">Gerar Link de Venda</button>
+</div>
+
+<div id="resultado">
+    <div class="link-box">
+        <span style="display:block; font-size: 10px; text-transform: uppercase; margin-bottom: 5px; font-weight: 800;">Link pronto para envio:</span>
+        <div class="link-text" id="link-gerado">techpay.me/pagar/leo-782b92</div>
+    </div>
+
+    <div class="actions-share">
+        <button class="btn-share btn-copy" onclick="copiar()">
+            Copiar
+        </button>
+        <button class="btn-share btn-whatsapp" onclick="compartilharZap()">
+            WhatsApp
+        </button>
+    </div>
+</div>
+
+<script>
+function mascaraMoeda(i) {
+    let v = i.value.replace(/\D/g,'');
+    v = (v/100).toFixed(2) + '';
+    v = v.replace(".", ",");
+    v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+    v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
+    i.value = "R$ " + v;
+}
+
+function gerarLink() {
+    const valor = document.getElementById('valor').value;
+    if(valor === "" || valor === "R$ 0,00") {
+        alert("Digite um valor válido");
+        return;
+    }
+    
+    // Simulação de geração de link único
+    const hash = Math.random().toString(36).substring(7);
+    document.getElementById('link-gerado').innerText = `techpay.me/venda/${hash}`;
+    
+    document.getElementById('resultado').style.display = 'block';
+}
+
+function copiar() {
+    const link = document.getElementById('link-gerado').innerText;
+    navigator.clipboard.writeText(link);
+    alert("Link copiado!");
+}
+
+function compartilharZap() {
+    const link = document.getElementById('link-gerado').innerText;
+    const desc = document.getElementById('descricao').value;
+    const valor = document.getElementById('valor').value;
+    const texto = `Olá! Segue o link para pagamento de ${desc} no valor de ${valor}: ${link}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`);
+}
+</script>
+
+</body>
+</html>
