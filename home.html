@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
   <title>Tech Pay - Home Premium</title>
   <style>
     :root { 
@@ -61,42 +63,41 @@
     .smart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
     .progress-container { height: 6px; background: #1f2937; border-radius: 10px; margin: 10px 0; overflow: hidden; }
     .progress-bar { height: 100%; background: var(--primary); border-radius: 10px; }
-.nav-bar { 
+
+    .nav-bar { 
     position: fixed; 
     bottom: 0; left: 0; right: 0; 
-    background: rgba(10, 10, 10, 0.95); 
-    backdrop-filter: blur(10px); 
-    border-top: 1px solid rgba(255, 255, 255, 0.1); 
+    background: rgba(10, 10, 10, 0.98); 
+    backdrop-filter: blur(15px); 
+    border-top: 1px solid rgba(255, 255, 255, 0.08); 
     display: flex; 
     justify-content: space-around; 
-    padding: 12px 0 25px; 
+    padding: 10px 0 25px; 
     z-index: 1000; 
 }
 
 .nav-btn { 
     background: none; 
     border: none; 
-    color: #9CA3AF; /* Cor cinza para itens inativos */
+    color: #9CA3AF; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    gap: 4px; 
-    font-size: 10px; 
+    gap: 5px; 
+    font-size: 11px; 
     cursor: pointer;
-    transition: 0.3s;
+    flex: 1;
 }
 
-/* O item ativo ganha a cor da nossa identidade (Verde) */
-.nav-btn.active { 
-    color: var(--primary) !important; 
-}
-
-.nav-btn svg { 
+/* Tamanho e traço do ícone */
+.nav-btn i { 
     width: 22px; 
     height: 22px; 
-    fill: none; 
-    stroke: currentColor; 
-    stroke-width: 2; 
+    stroke-width: 2px; /* Aqui controla a finura do traço */
+}
+
+.nav-btn.active { 
+    color: #22c55e !important; 
 }
     
   </style>
@@ -182,25 +183,26 @@
 
 <nav class="nav-bar">
   <button class="nav-btn" onclick="location.href='home.html'">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <i data-lucide="home"></i>
     <span>Início</span>
   </button>
 
   <button class="nav-btn active" onclick="location.href='metas.html'">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <i data-lucide="bar-chart-3"></i>
     <span>Metas</span>
   </button>
 
   <button class="nav-btn" onclick="location.href='ajustes.html'">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 1 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <i data-lucide="settings"></i>
     <span>Ajustes</span>
   </button>
 
   <button class="nav-btn" onclick="logout()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    <i data-lucide="log-out"></i>
     <span>Sair</span>
   </button>
 </nav>
+  
   
 <script>
 let saldoOculto = false;
@@ -335,6 +337,9 @@ window.onload = () => {
     atualizarResumo(); 
     carregarBanners(); 
 };
+  // Coloque isso no final do seu script para "ativar" os ícones
+lucide.createIcons();
+  
 </script>
 </body>   </html>
                                                                                     
