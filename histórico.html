@@ -1,1 +1,110 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --primary: #22c55e; --bg: #000; --card: #111; --border: rgba(255,255,255,0.08); --text-muted: #888; --orange: #ff5f1f; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; padding: 25px; }
+
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+        .back-btn { width: 45px; height: 45px; background: var(--card); border-radius: 15px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+
+        .balance-summary { background: linear-gradient(135deg, #111 0%, #050505 100%); padding: 25px; border-radius: 28px; border: 1px solid var(--border); margin-bottom: 25px; text-align: center; }
+        
+        .filter-scroll { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 25px; padding-bottom: 5px; scrollbar-width: none; }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+        .filter-chip { padding: 10px 20px; background: var(--card); border-radius: 12px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; white-space: nowrap; color: var(--text-muted); }
+        .filter-chip.active { background: var(--primary); color: #000; border-color: var(--primary); }
+
+        .transaction-group { margin-bottom: 25px; }
+        .group-title { font-size: 12px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
+
+        .trans-card { background: var(--card); padding: 18px; border-radius: 22px; border: 1px solid var(--border); display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+        .icon-box { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+        
+        .val-pos { color: var(--primary); font-weight: 800; }
+        .val-neg { color: #ff4444; font-weight: 800; }
+        .tag { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="back-btn" onclick="window.history.back()"><i data-lucide="chevron-left"></i></div>
+        <h2 style="font-size: 18px; font-weight: 800; margin: 0;">Extrato</h2>
+        <div class="back-btn"><i data-lucide="search"></i></div>
+    </div>
+
+    <div class="balance-summary">
+        <span style="color: var(--text-muted); font-size: 13px; font-weight: 600;">Saldo em conta</span>
+        <h1 style="font-size: 32px; font-weight: 800; margin: 10px 0;">R$ 573,50</h1>
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 10px;">
+            <span style="color: var(--primary); font-size: 12px; font-weight: 700;"><i data-lucide="trending-up" style="width:12px; vertical-align: middle;"></i> +12% este mês</span>
+        </div>
+    </div>
+
+    <div class="filter-scroll">
+        <div class="filter-chip active">Tudo</div>
+        <div class="filter-chip">Pix</div>
+        <div class="filter-chip">TECHTap</div>
+        <div class="filter-chip">Pagamentos</div>
+        <div class="filter-chip">Entradas</div>
+    </div>
+
+    <div class="transaction-group">
+        <div class="group-title">Hoje, 02 de Abril</div>
+        
+        <div class="trans-card">
+            <div class="icon-box" style="background: rgba(255, 95, 31, 0.1); color: var(--orange);">
+                <i data-lucide="contactless"></i>
+            </div>
+            <div style="flex: 1;">
+                <div style="font-weight: 700; font-size: 15px;">Venda TECHTap</div>
+                <div class="tag" style="background: rgba(255, 95, 31, 0.1); color: var(--orange);">CRÉDITO</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="val-pos">+ R$ 150,00</div>
+                <div style="font-size: 11px; color: var(--text-muted);">14:20</div>
+            </div>
+        </div>
+
+        <div class="trans-card">
+            <div class="icon-box" style="background: rgba(34, 197, 94, 0.1); color: var(--primary);">
+                <i data-lucide="zap"></i>
+            </div>
+            <div style="flex: 1;">
+                <div style="font-weight: 700; font-size: 15px;">Recebimento Pix</div>
+                <div class="tag" style="background: rgba(34, 197, 94, 0.1); color: var(--primary);">INSTANTÂNEO</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="val-pos">+ R$ 85,90</div>
+                <div style="font-size: 11px; color: var(--text-muted);">10:05</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="transaction-group">
+        <div class="group-title">Ontem, 01 de Abril</div>
+        
+        <div class="trans-card">
+            <div class="icon-box" style="background: rgba(255, 255, 255, 0.05); color: #fff;">
+                <i data-lucide="shopping-bag"></i>
+            </div>
+            <div style="flex: 1;">
+                <div style="font-weight: 700; font-size: 15px;">Pagamento Boleto</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Conta de Luz</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="val-neg">- R$ 186,00</div>
+                <div style="font-size: 11px; color: var(--text-muted);">16:45</div>
+            </div>
+        </div>
+    </div>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>
