@@ -131,40 +131,41 @@
         <span>Recarga</span>
     </a>
   </section>
-  <div style="background: linear-gradient(135deg, #ff5f1f 0%, #ff8c00 100%); 
-            margin: 15px 25px; 
-            padding: 12px 20px; /* Padding reduzido para ficar estreito como o Pix */
-            border-radius: 24px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-            height: 85px; /* Altura fixa para garantir a igualdade */
-            box-shadow: 0 8px 15px rgba(255, 95, 31, 0.15);">
-    
-    <div style="display: flex; flex-direction: column; justify-content: center;">
-        <h3 style="margin: 0; color: #000; font-size: 16px; font-weight: 800; line-height: 1.2;">
-            TECHTap ⚡
-        </h3>
-        <p style="margin: 2px 0 0; color: rgba(0,0,0,0.7); font-size: 12px; font-weight: 600;">
-            Venda por aproximação
-        </p>
-    </div>
-
-    <button onclick="abrirPDV()" 
-            style="background: #fff; /* Botão branco para destacar no laranja */
-                   color: #000; 
-                   border: none; 
-                   padding: 8px 20px; 
-                   border-radius: 15px; 
-                   font-weight: 800; 
-                   font-size: 13px;
-                   cursor: pointer;
-                   box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-        Cobrar
-    </button>
-  </div>
   
+<div style="
+  background: linear-gradient(135deg, #ff5f1f 0%, #ff8c00 100%);
+  margin: 15px 25px;
+  padding: 16px 20px; /* igual ao Pix */
+  border-radius: 20px; /* igual ao Pix */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 8px 15px rgba(255, 95, 31, 0.15);
+">
 
+  <div>
+    <b style="color:#000; font-size:14px;">
+      TECHTap ⚡
+    </b><br>
+    <span style="font-size:11px; color:rgba(0,0,0,0.7);">
+      Venda por aproximação
+    </span>
+  </div>
+
+  <button onclick="abrirPDV()" style="
+    background:#fff;
+    color:#000;
+    border:none;
+    padding:8px 16px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:12px;
+    cursor:pointer;
+  ">
+    Cobrar
+  </button>
+
+</div>
   <div class="banner-wrapper">
     <div class="banner-container" id="banner-slider"></div>
     <div class="banner-dots" id="banner-dots"></div>
