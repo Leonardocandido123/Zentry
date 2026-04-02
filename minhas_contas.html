@@ -1,191 +1,175 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { 
-            --primary: #22C55E; 
-            --danger: #EF4444; 
-            --bg: #000; 
-            --card: #111827; 
-            --text-secondary: #9CA3AF;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Tech Pay - Minhas Contas</title>
+  <style>
+    :root { 
+        --primary: #22c55e; 
+        --bg-card: #111827;
+        --border: rgba(255, 255, 255, 0.15); 
+        --text-secondary: #9CA3AF; 
+        --danger: #ef4444;
+        --warning: #f59e0b;
+    }
+    
+    body { margin:0; font-family:'Inter',sans-serif; background: #000; color: #fff; padding: 20px; padding-bottom: 100px; }
+    
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+    .back-btn { background: var(--bg-card); border: 1px solid var(--border); color: #fff; border-radius: 12px; padding: 10px; cursor: pointer; display: flex; }
 
-        body { 
-            margin: 0; 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg); 
-            color: white; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
-        }
-        
-        .header { 
-            padding: 25px 20px; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            border-bottom: 1px solid #1F2937; 
-        }
+    /* CARD DE CADASTRO */
+    .add-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 30px; }
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; }
+    .input-group input { 
+        width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); 
+        border-radius: 12px; padding: 12px; color: #fff; font-size: 14px; box-sizing: border-box;
+    }
+    .btn-add { 
+        width: 100%; background: #fff; color: #000; border: none; 
+        border-radius: 12px; padding: 14px; font-weight: 700; cursor: pointer;
+    }
 
-        .scroll-content { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 20px; 
-            padding-bottom: 40px;
-        }
+    /* LISTA DE CONTAS */
+    .lista-contas { display: flex; flex-direction: column; gap: 12px; }
+    .conta-item { 
+        background: var(--bg-card); border: 1px solid var(--border); 
+        padding: 16px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
+        transition: 0.3s;
+    }
+    .info b { display: block; font-size: 15px; margin-bottom: 4px; }
+    .info span { font-size: 12px; color: var(--text-secondary); }
+    
+    .status-vencido { border-left: 4px solid var(--danger); }
+    .status-hoje { border-left: 4px solid var(--warning); }
+    .status-ok { border-left: 4px solid var(--primary); }
 
-        .info-box {
-            background: rgba(34, 197, 94, 0.1); 
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            padding: 15px; 
-            border-radius: 12px; 
-            color: var(--primary); 
-            font-size: 13px; 
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
+    .btn-pay { background: rgba(255,255,255,0.1); border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .btn-pay.pago { background: var(--primary); color: #000; border: none; }
 
-        .label { 
-            color: var(--text-secondary); 
-            font-size: 13px; 
-            display: block; 
-            margin-bottom: 8px; 
-            margin-top: 20px; 
-            font-weight: 500;
-        }
-        
-        input { 
-            width: 100%; 
-            background: #111827; 
-            border: 1px solid #374151; 
-            border-radius: 12px; 
-            color: white; 
-            font-size: 16px; 
-            padding: 15px; 
-            outline: none; 
-            box-sizing: border-box;
-            transition: 0.3s;
-        }
-
-        input:focus { border-color: var(--primary); background: #1f2937; }
-
-        /* Estilo para o campo de data (ajuste para mobile) */
-        input[type="date"] {
-            color-scheme: dark;
-        }
-
-        .row-reminder { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: #111827; 
-            padding: 18px; 
-            border-radius: 12px; 
-            margin-top: 30px;
-            border: 1px solid #374151;
-        }
-
-        .row-reminder span { font-weight: 600; font-size: 15px; }
-
-        /* Rodapé Fixo */
-        .fixed-footer { 
-            padding: 20px 20px 30px 20px; 
-            background: #000; 
-            border-top: 1px solid #1F2937; 
-        }
-
-        .btn-save { 
-            width: 100%; 
-            background: var(--primary); 
-            color: #000; 
-            border: none; 
-            padding: 18px; 
-            border-radius: 15px; 
-            font-weight: 700; 
-            font-size: 16px; 
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-save:active { transform: scale(0.98); opacity: 0.9; }
-
-    </style>
+  </style>
 </head>
 <body>
 
-    <div class="header">
-        <svg onclick="location.href='home.html'" style="cursor:pointer" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        <h2 style="margin:0; font-size:18px;">Agendar Lembrete</h2>
-    </div>
+<div class="header">
+    <button class="back-btn" onclick="location.href='home.html'">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2 style="margin:0; font-size: 18px;">Minhas Contas</h2>
+    <div style="width: 40px;"></div>
+</div>
 
-    <div class="scroll-content">
-        <div class="info-box">
-            <b>Organize suas finanças:</b> Cadastre suas contas mensais e o TechPay avisará você na tela inicial quando o vencimento estiver próximo.
+<div class="add-card">
+    <div style="margin-bottom: 15px; font-weight: 700; font-size: 14px;">Nova Conta</div>
+    <div class="input-group">
+        <label>Descrição</label>
+        <input type="text" id="desc-conta" placeholder="Ex: Aluguel, Luz, Internet">
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="input-group">
+            <label>Valor</label>
+            <input type="text" id="valor-conta" placeholder="R$ 0,00" oninput="mascaraMoeda(this)">
         </div>
-
-        <span class="label">O que você vai pagar?</span>
-        <input type="text" id="descConta" placeholder="Ex: Aluguel, Internet, Cartão">
-
-        <span class="label">Qual o valor total?</span>
-        <input type="text" id="valorConta" placeholder="R$ 0,00" oninput="maskMoney(this)">
-
-        <span class="label">Data de Vencimento</span>
-        <input type="date" id="dataConta">
-
-        <div class="row-reminder">
-            <span>Ativar Notificação</span>
-            <input type="checkbox" id="lembrarAtivo" checked style="width: 22px; height: 22px; accent-color: var(--primary);">
+        <div class="input-group">
+            <label>Vencimento</label>
+            <input type="date" id="data-conta">
         </div>
     </div>
+    <button class="btn-add" onclick="salvarConta()">Adicionar Conta</button>
+</div>
 
-    <div class="fixed-footer">
-        <button class="btn-save" onclick="salvarLembrete()">Salvar Conta</button>
+<div id="lista-contas" class="lista-contas">
     </div>
 
-    <script>
-        // Máscara simples para dinheiro
-        function maskMoney(i) {
-            let v = i.value.replace(/\D/g,'');
-            v = (v/100).toFixed(2).replace(".", ",");
-            v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-            i.value = "R$ " + v;
+<script>
+function mascaraMoeda(i) {
+    let v = i.value.replace(/\D/g,'');
+    v = (v/100).toFixed(2) + '';
+    v = v.replace(".", ",");
+    v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+    v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
+    i.value = "R$ " + v;
+}
+
+function salvarConta() {
+    const desc = document.getElementById('desc-conta').value;
+    const valor = document.getElementById('valor-conta').value;
+    const data = document.getElementById('data-conta').value;
+
+    if(!desc || valor === "R$ 0,00" || !data) {
+        alert("Preencha todos os campos!");
+        return;
+    }
+
+    const novaConta = {
+        id: Date.now(),
+        descricao: desc,
+        valor: valor,
+        data: data,
+        pago: false
+    };
+
+    let contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
+    contas.push(novaConta);
+    localStorage.setItem("minhasContas", JSON.stringify(contas));
+
+    // Limpar campos
+    document.getElementById('desc-conta').value = "";
+    document.getElementById('valor-conta').value = "R$ 0,00";
+    document.getElementById('data-conta').value = "";
+
+    renderizarContas();
+}
+
+function renderizarContas() {
+    const container = document.getElementById('lista-contas');
+    const contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
+    const hoje = new Date().toISOString().split('T')[0];
+
+    if(contas.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:gray; font-size:12px;">Nenhuma conta cadastrada.</p>';
+        return;
+    }
+
+    // Ordenar por data
+    contas.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+    container.innerHTML = contas.map(c => {
+        let statusClass = "status-ok";
+        if (!c.pago) {
+            if (c.data < hoje) statusClass = "status-vencido";
+            else if (c.data === hoje) statusClass = "status-hoje";
         }
 
-        function salvarLembrete() {
-            const desc = document.getElementById('descConta').value;
-            const valor = document.getElementById('valorConta').value;
-            const data = document.getElementById('dataConta').value;
-            const ativo = document.getElementById('lembrarAtivo').checked;
+        return `
+            <div class="conta-item ${statusClass}">
+                <div class="info">
+                    <b>${c.descricao}</b>
+                    <span>Vence em: ${c.data.split('-').reverse().join('/')} • ${c.valor}</span>
+                </div>
+                <button class="btn-pay ${c.pago ? 'pago' : ''}" onclick="marcarPago(${c.id})">
+                    ${c.pago ? 'Pago ✓' : 'Pagar'}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
 
-            if(!desc || !data) {
-                alert("Por favor, preencha o nome da conta e a data!");
-                return;
-            }
+function marcarPago(id) {
+    let contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
+    contas = contas.map(c => {
+        if(c.id === id) c.pago = !c.pago;
+        return c;
+    });
+    localStorage.setItem("minhasContas", JSON.stringify(contas));
+    renderizarContas();
+}
 
-            // Cria o objeto da conta
-            const novaConta = {
-                descricao: desc,
-                valor: valor,
-                data: data,
-                lembrete: ativo,
-                status: 'pendente'
-            };
+window.onload = renderizarContas;
+</script>
 
-            // Salva no LocalStorage (Array de contas)
-            let contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
-            contas.push(novaConta);
-            localStorage.setItem("minhasContas", JSON.stringify(contas));
-
-            // Feedback visual e volta para home
-            alert("Lembrete salvo! O TechPay avisará você.");
-            window.location.href = 'home.html';
-        }
-    </script>
 </body>
 </html>
