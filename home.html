@@ -16,12 +16,10 @@
     body { margin:0; font-family:'Inter',sans-serif; background: radial-gradient(circle at 20% 0%, #0f172a, #000 60%); -webkit-tap-highlight-color: transparent; overflow-x: hidden; color: #fff; }
     .container { padding:20px; padding-bottom:120px; max-width: 450px; margin: auto; }
     
-    /* HEADER */
     .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-top: 10px; }
     .user-info h2 { font-size: 20px; margin: 2px 0 0 0; color: #FFF; font-weight: 700; }
     .avatar { width:42px; height:42px; background: var(--bg-card); border-radius:50%; display:flex; align-items:center; justify-content:center; border: 1px solid var(--border); }
     
-    /* SALDO */
     .balance-circle { display: flex; justify-content: center; margin: 30px 0; cursor: pointer; }
     .circle {
         width: 190px; height: 190px; border-radius: 50%;
@@ -31,46 +29,39 @@
     }
     .circle span { font-size: 24px; font-weight: 800; }
 
-    /* RESUMO */
     .resumo-dia { display:flex; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:15px; margin-bottom:20px; }
     .resumo-dia div { display:flex; flex-direction:column; align-items:center; }
     .resumo-dia span { font-size:10px; color:var(--text-secondary); }
 
-    /* PIX CARD */
     .pix-card { display:flex; justify-content:space-between; align-items:center; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius:20px; padding:16px; margin-bottom:25px; }
     .pix-info b { font-size:14px; color:#fff; }
     .pix-btn { background:#fff; color:#16a34a; padding:8px 14px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; }
 
-    /* GRID DE ÍCONES (ABAIXO DO PIX) */
-    .actions-grid { 
-        display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; 
-    }
+    .actions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
     .action-item { text-decoration: none; display: flex; flex-direction: column; align-items: center; }
     .action-icon { 
         width: 62px; height: 62px; background: var(--bg-card); 
-        border: 1px solid rgba(255, 255, 255, 0.4); /* BORDA BRANCA VIVA */
+        border: 1px solid rgba(255, 255, 255, 0.4); 
         border-radius: 20px; display: flex; align-items: center; justify-content: center; color: #FFF; 
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     .action-item span { font-size: 11px; font-weight: 500; color: #FFF; margin-top: 8px; }
 
-    /* ESTEIRA DE CARDS (ABAIXO DOS BOTÕES) */
-    .scroll-container {
-        display: flex; overflow-x: auto; gap: 15px; margin: 0 -20px 25px -20px; padding: 0 20px;
-        scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    .banner-wrapper { width: 100%; margin-bottom: 25px; position: relative; overflow: hidden; }
+    .banner-container { display: flex; transition: transform 0.5s ease-in-out; width: 100%; }
+    .smart-banner {
+        min-width: 100%; background: var(--bg-card); border: 1px solid var(--border); 
+        border-radius: 22px; padding: 18px; box-sizing: border-box; 
+        display: flex; flex-direction: column; justify-content: center; min-height: 125px; position: relative;
     }
-    .scroll-container::-webkit-scrollbar { display: none; }
-    .smart-card-h { 
-        flex: 0 0 200px; background: var(--bg-card); border: 1px solid var(--border); 
-        border-radius: 22px; padding: 18px; position: relative; 
-    }
+    .banner-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+    .dot { width: 6px; height: 6px; background: #374151; border-radius: 50%; transition: 0.3s; }
+    .dot.active { background: var(--primary); width: 16px; border-radius: 10px; }
 
-    /* METAS */
     .smart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; }
     .progress-container { height: 6px; background: #1f2937; border-radius: 10px; margin: 10px 0; overflow: hidden; }
     .progress-bar { height: 100%; background: var(--primary); border-radius: 10px; }
 
-    /* NAV BAR */
     .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0 25px; z-index: 1000; }
     .nav-btn { background: none; border: none; color: #9CA3AF; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; }
     svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; }
@@ -89,9 +80,9 @@
         <svg viewBox="0 0 24 24"><path d="M1 12s4-6 11-6 11 6 11 6-4 6-11 6S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
       </div>
       <div class="avatar" onclick="location.href='perfil.html'" style="cursor:pointer;">
-    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-</div>
-
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </div>
   </header>
 
   <div class="balance-circle" onclick="location.href='extrato.html'">
@@ -117,8 +108,13 @@
         <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9h6m-6 4h6"/></svg></div>
         <span>Extrato</span>
     </a>
+        <a href="links-pagamento.html" class="action-item">
+        <div class="action-icon"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></div>
+        <span>Links</span>
+    </a>
+
     <a href="cobrar.html" class="action-item">
-        <div class="action-icon"><svg viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <div class="action-icon"><svg viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
         <span>Cobrar</span>
     </a>
     <a href="contas.html" class="action-item">
@@ -133,33 +129,11 @@
         <div class="action-icon"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></div>
         <span>Recarga</span>
     </a>
-    <a href="metas.html" class="action-item">
-        <div class="action-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
-        <span>Metas</span>
-    </a>
   </section>
 
-  <div class="scroll-container">
-    <div class="smart-card-h" style="border-style: dashed; border-color: var(--primary); text-align: center;">
-        <div style="font-size: 28px; color: var(--primary);">+</div>
-        <b style="font-size: 13px; display: block; margin-top: 5px;">Novo Cliente</b>
-    </div>
-
-    <div class="smart-card-h" style="border-color: #ef4444;">
-        <span style="font-size: 8px; background: #ef4444; color: white; padding: 2px 6px; border-radius: 6px; position: absolute; top: 15px; right: 15px; font-weight: 800;">VENCIDO</span>
-        <b style="font-size: 14px; display: block; margin-top: 5px;">João (Mecânica)</b>
-        <p style="font-size: 11px; color: var(--text-secondary); margin: 8px 0;">Pendente: <b>R$ 150,00</b></p>
-        <button style="width: 100%; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; border-radius: 10px; font-size: 10px; padding: 6px; font-weight: 700;">Cobrar</button>
-    </div>
-
-    <div class="smart-card-h" style="border-color: #f59e0b;">
-        <b style="font-size: 14px; display: block; margin-top: 5px;">Conta de Luz</b>
-        <p style="font-size: 11px; color: var(--text-secondary); margin: 8px 0;">Vencimento: 05/05/26</p>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #f59e0b; font-weight: 700; font-size: 12px;">R$ 240,00</span>
-            <button style="background: #f59e0b; color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 5px 10px; font-weight: 700;">Pagar</button>
-        </div>
-    </div>
+  <div class="banner-wrapper">
+    <div class="banner-container" id="banner-slider"></div>
+    <div class="banner-dots" id="banner-dots"></div>
   </div>
 
   <div class="smart-card">
@@ -181,30 +155,137 @@
 
 <script>
 let saldoOculto = false;
+let currentSlide = 0;
+let slideInterval;
+
 function atualizarHome() {
     const saldoSalvo = parseFloat(localStorage.getItem("saldo") || "1250.00");
-    document.getElementById("saldo-home").innerText = saldoOculto ? "••••••••" : saldoSalvo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const el = document.getElementById("saldo-home");
+    if(el) el.innerText = saldoOculto ? "••••••••" : saldoSalvo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
 function atualizarResumo() {
-    const historico = JSON.parse(localStorage.getItem("transacoes")) || [];
+    const historico = JSON.parse(localStorage.getItem("transacoes") || "[]");
     let entrada = 0, saida = 0;
     historico.forEach(tx => {
         let v = typeof tx.valor === 'string' ? parseFloat(tx.valor.replace("R$ ", "").replace(/\./g, "").replace(",", ".")) : tx.valor;
         if (tx.tipo === "entrada") entrada += v;
         if (tx.tipo === "saida" || tx.tipo === "enviado") saida += v;
     });
-    document.getElementById("entrada-dia").innerText = entrada.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    document.getElementById("saida-dia").innerText = saida.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    if(document.getElementById("entrada-dia")) document.getElementById("entrada-dia").innerText = entrada.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    if(document.getElementById("saida-dia")) document.getElementById("saida-dia").innerText = saida.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const lucroEl = document.getElementById("lucro-dia");
-    lucroEl.innerText = (entrada - saida).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    if(lucroEl) lucroEl.innerText = (entrada - saida).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
+function carregarBanners() {
+    const bannerSlider = document.getElementById('banner-slider');
+    const bannerDots = document.getElementById('banner-dots');
+    if(!bannerSlider) return;
+
+    const contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
+    const transacoes = JSON.parse(localStorage.getItem("transacoes") || "[]");
+    const hoje = new Date().toISOString().split('T')[0];
+    
+    let listaSlides = [];
+
+    // CARD 1: CARTÃO
+    listaSlides.push(`<div class="smart-banner" onclick="location.href='cartao.html'" style="cursor:pointer; border-left: 5px solid var(--primary);">
+            <b style="font-size: 15px; color: #fff;">Cartão Virtual TECH</b>
+            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Peça já o seu e faça compras online com segurança.</p>
+            <button style="background: var(--primary); color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Ativar Agora</button>
+        </div>`);
+
+    // CARD 2: LINK DE PAGAMENTO
+    listaSlides.push(`<div class="smart-banner" onclick="location.href='links-pagamento.html'" style="cursor:pointer; background: linear-gradient(135deg, #064e3b, #111827); border-left: 5px solid #10b981;">
+        <b style="font-size: 15px; color: #fff;">Venda por Link 🔗</b>
+        <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Crie cobranças rápidas e envie para seus clientes via WhatsApp.</p>
+        <button style="background: #10b981; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Gerar Link</button>
+    </div>`);
+
+    // CARD 3: COBRANÇA
+    const cobrancas = transacoes.filter(t => t.tipo === "entrada" && t.status === "pendente");
+    if (cobrancas.length > 0) {
+        cobrancas.forEach(c => {
+            listaSlides.push(`<div class="smart-banner" style="border-left: 5px solid #ef4444;">
+                <span style="font-size: 8px; background: #ef4444; color: white; padding: 2px 6px; border-radius: 6px; position: absolute; top: 15px; right: 15px; font-weight: 800;">PENDENTE</span>
+                <b style="font-size: 15px; color: #fff;">${c.descricao || 'Cliente'}</b>
+                <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Valor a receber: <b style="color:#fff;">${c.valor}</b></p>
+                <button onclick="location.href='cobrar.html'" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Cobrar Agora</button>
+            </div>`);
+        });
+    } else {
+        listaSlides.push(`<div class="smart-banner" onclick="location.href='cobrar.html'" style="cursor:pointer; border-left: 5px solid #a855f7;">
+            <b style="font-size: 15px; color: #fff;">Gestão de Cobranças</b>
+            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Organize quem te deve e envie lembretes Pix.</p>
+            <button style="background: #a855f7; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Ver Clientes</button>
+        </div>`);
+    }
+
+    // CARD 4: CONTAS
+    const contasVencidas = contas.filter(c => c.data <= hoje);
+    if (contasVencidas.length > 0) {
+        contasVencidas.forEach(c => {
+            const cor = c.data === hoje ? "#f59e0b" : "#ef4444";
+            listaSlides.push(`<div class="smart-banner" style="border-left: 5px solid ${cor};">
+                <span style="font-size: 8px; background: ${cor}; color: #000; padding: 2px 6px; border-radius: 6px; position: absolute; top: 15px; right: 15px; font-weight: 800;">VENCIMENTO</span>
+                <b style="font-size: 15px; color:#fff;">${c.descricao}</b>
+                <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Valor: <b style="color:#fff;">${c.valor}</b></p>
+                <button onclick="location.href='contas.html'" style="background: ${cor}; color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Pagar</button>
+            </div>`);
+        });
+    } else {
+        listaSlides.push(`<div class="smart-banner" onclick="location.href='contas.html'" style="cursor:pointer; border-left: 5px solid #f59e0b;">
+            <b style="font-size: 15px; color: #fff;">Contas e Boletos</b>
+            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Mantenha suas contas em dia e evite juros.</p>
+            <button style="background: #f59e0b; color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Gerenciar</button>
+        </div>`);
+    }
+
+    // CARD 5: RECARGA
+    listaSlides.push(`<div class="smart-banner" onclick="location.href='recarga.html'" style="cursor:pointer; border-left: 5px solid #3b82f6;">
+            <b style="font-size: 15px; color: #fff;">Recarga de Celular</b>
+            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Evite o bloqueio da sua linha. Recarregue agora.</p>
+            <button style="background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Recarregar</button>
+        </div>`);
+
+    bannerSlider.innerHTML = listaSlides.join('');
+    
+    let dotsHTML = "";
+    listaSlides.forEach((_, index) => {
+        dotsHTML += `<div class="dot ${index === 0 ? 'active' : ''}"></div>`;
+    });
+    bannerDots.innerHTML = dotsHTML;
+
+    currentSlide = 0;
+    iniciarRotacao(listaSlides.length);
+}
+
+function iniciarRotacao(total) {
+    if (total <= 1) return;
+    if (slideInterval) clearInterval(slideInterval);
+
+    slideInterval = setInterval(() => {
+        currentSlide = (currentSlide + 1) % total;
+        const slider = document.getElementById('banner-slider');
+        const dots = document.querySelectorAll('.dot');
+        if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+    }, 4000);
+}
+
 function toggleSaldoHome() {
     saldoOculto = !saldoOculto;
     atualizarHome();
 }
-window.onload = () => { atualizarHome(); atualizarResumo(); };
+
 function logout() { localStorage.setItem('techpay_user', 'false'); window.location.href = 'login.html'; }
+
+window.onload = () => { 
+    atualizarHome(); 
+    atualizarResumo(); 
+    carregarBanners(); 
+};
 </script>
-</body>
-  </html>
-  
+</body>   </html>
+                                                                                    
