@@ -3,13 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<title>Comprovante - TechPay</title>
-
+<title>Comprovante - Tech Pay</title>
 <style>
 :root{
   --bg: radial-gradient(circle at 20% 0%, #0f172a, #000 70%);
@@ -17,283 +13,106 @@
   --green:#22C55E;
   --red:#EF4444;
 }
-
 body{
-  margin:0;
-  font-family:'Inter',sans-serif;
-  background:var(--bg);
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  padding:20px;
+  margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:#fff;
+  display:flex; justify-content:center; padding:20px;
 }
-
 .card{
-  width:100%;
-  max-width:420px;
-  border-radius:28px;
-  padding:30px 20px;
-  backdrop-filter:blur(20px);
-  background:var(--card);
-  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  width:100%; max-width:420px; border-radius:28px; padding:30px 20px;
+  backdrop-filter:blur(20px); background:var(--card); box-shadow:0 20px 50px rgba(0,0,0,0.5);
 }
-
-/* CHECK */
 .check{
-  width:80px;
-  height:80px;
-  margin:0 auto 20px;
+  width:80px; height:80px; margin:0 auto 20px;
 }
-
-circle{
-  fill:none;
-  stroke:var(--green);
-  stroke-width:2;
-  stroke-dasharray:200;
-  stroke-dashoffset:200;
-  animation:circle 0.6s forwards;
-}
-
-path{
-  fill:none;
-  stroke:var(--green);
-  stroke-width:3;
-  stroke-dasharray:50;
-  stroke-dashoffset:50;
-  animation:check 0.4s 0.6s forwards;
-}
-
+circle{ fill:none; stroke:var(--green); stroke-width:2; stroke-dasharray:200; stroke-dashoffset:200; animation:circle 0.6s forwards;}
+path{ fill:none; stroke:var(--green); stroke-width:3; stroke-dasharray:50; stroke-dashoffset:50; animation:check 0.4s 0.6s forwards;}
 @keyframes circle{to{stroke-dashoffset:0}}
 @keyframes check{to{stroke-dashoffset:0}}
-
-.valor{
-  font-size:34px;
-  font-weight:700;
-  text-align:center;
-}
-
-.status{
-  text-align:center;
-  color:var(--green);
-  margin-bottom:25px;
-}
-
-/* LINHAS */
-.linha{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:12px;
-  font-size:13px;
-}
-
-/* BOTÕES */
-.actions{
-  margin-top:25px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-button{
-  padding:14px;
-  border-radius:14px;
-  border:none;
-  font-weight:600;
-}
-
-.primary{
-  background:var(--green);
-  color:#000;
-}
-
-.secondary{
-  background:transparent;
-  border:1px solid rgba(255,255,255,0.1);
-  color:#fff;
-}
-
-/* TOAST */
-.toast{
-  position:fixed;
-  bottom:30px;
-  background:#111;
-  padding:12px 20px;
-  border-radius:12px;
-  opacity:0;
-  transition:.3s;
-}
-/* MODO COMPARTILHAMENTO */
-.export-mode {
-  background: #ffffff !important;
-  color: #000 !important;
-}
-
-.export-mode .card {
-  background: #ffffff !important;
-  color: #000 !important;
-  box-shadow: none !important;
-}
-
-.export-mode .status {
-  color: #16a34a !important;
-}
+.valor{ font-size:34px; font-weight:700; text-align:center;}
+.status{ text-align:center; color:var(--green); margin-bottom:25px;}
+.linha{ display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;}
+.actions{ margin-top:25px; display:flex; flex-direction:column; gap:10px;}
+button{ padding:14px; border-radius:14px; border:none; font-weight:600;}
+.primary{ background:var(--green); color:#000;}
+.secondary{ background:transparent; border:1px solid rgba(255,255,255,0.1); color:#fff;}
+.toast{ position:fixed; bottom:30px; background:#111; padding:12px 20px; border-radius:12px; opacity:0; transition:.3s;}
+.export-mode { background: #fff !important; color: #000 !important; }
+.export-mode .card { background:#fff !important; color:#000 !important; box-shadow:none !important; }
+.export-mode .status { color:#16a34a !important; }
 </style>
 </head>
-
 <body>
 
 <div class="card" id="card">
+  <div class="check">
+    <svg viewBox="0 0 52 52">
+      <circle cx="26" cy="26" r="25"/>
+      <path d="M14 27 L22 34 L38 18"/>
+    </svg>
+  </div>
 
-<div class="check">
-<svg viewBox="0 0 52 52">
-  <circle cx="26" cy="26" r="25"/>
-  <path d="M14 27 L22 34 L38 18"/>
-</svg>
-</div>
+  <div class="valor" id="valor"></div>
+  <div class="status" id="status"></div>
 
-<div class="valor" id="valor"></div>
-<div class="status" id="status"></div>
+  <div id="conteudo"></div>
 
-<div id="conteudo"></div>
-
-<div class="actions">
-<button class="primary" onclick="compartilhar()">Compartilhar</button>
-<button class="secondary" onclick="baixar()">Salvar imagem</button>
-<button class="secondary" onclick="copiar()">Copiar</button>
-<button class="secondary" onclick="voltar()">Voltar</button>
-</div>
-
+  <div class="actions">
+    <button class="primary" onclick="compartilhar()">Compartilhar</button>
+    <button class="secondary" onclick="baixar()">Salvar imagem</button>
+    <button class="secondary" onclick="copiar()">Copiar</button>
+    <button class="secondary" onclick="voltar()">Voltar</button>
+  </div>
 </div>
 
 <div class="toast" id="toast">Copiado!</div>
 
 <script>
+const dados=JSON.parse(localStorage.getItem("comprovante"))||{};
+const tipo=dados.tipo||"Pix";
+const valor=dados.valor||"R$ 0,00";
+const nome=dados.nome||"-";
+const banco=dados.banco||"-";
+const numero=dados.numero||"-";
+const operadora=dados.operadora||"-";
+const data=dados.data||new Date().toLocaleString();
+const id=dados.id||"TP"+Date.now();
 
-// 🔥 PEGA DADOS DINÂMICOS
-const dados = JSON.parse(localStorage.getItem("comprovante")) || {};
+document.getElementById("valor").innerText=valor;
+const labelTipo={
+  pix:"PIX Enviado", transferencia:"Transferência", recarga:"Recarga", pagamento:"Pagamento"
+}[tipo]||tipo;
+document.getElementById("status").innerText=labelTipo+" realizado";
 
-// DEFAULT
-const tipo = dados.tipo || "Pix";
-const valor = dados.valor || "R$ 0,00";
-const nome = dados.nome || "-";
-const banco = dados.banco || "-";
-const data = dados.data || new Date().toLocaleString();
+let html="";
+if(tipo==="pix"||tipo==="transferencia"){ html+=`<div class="linha"><span>Destinatário</span><span>${nome}</span></div><div class="linha"><span>Banco</span><span>${banco}</span></div>`;}
+if(tipo==="recarga"){ html+=`<div class="linha"><span>Número</span><span>${numero}</span></div><div class="linha"><span>Operadora</span><span>${operadora}</span></div>`;}
+html+=`<div class="linha"><span>Data</span><span>${data}</span></div><div class="linha"><span>ID</span><span>${id}</span></div>`;
+document.getElementById("conteudo").innerHTML=html;
 
-// ID
-const id = dados.id || "TP" + Date.now();
-
-// TOPO
-document.getElementById("valor").innerText = valor;
-document.getElementById("status").innerText = tipo + " realizado";
-
-// 🧠 CONTEÚDO DINÂMICO
-let html = "";
-
-// PIX / TRANSFERÊNCIA
-if(tipo === "pix" || tipo === "transferencia"){
-  html += `
-  <div class="linha"><span>Destinatário</span><span>${nome}</span></div>
-  <div class="linha"><span>Banco</span><span>${banco}</span></div>
-  `;
-}
-
-// RECARGA
-if(tipo === "recarga"){
-  html += `
-  <div class="linha"><span>Número</span><span>${dados.numero}</span></div>
-  <div class="linha"><span>Operadora</span><span>${dados.operadora}</span></div>
-  `;
-}
-
-// TECHTAP
-if(tipo === "techtap"){
-  html += `
-  <div class="linha"><span>Pagamento</span><span>Contactless</span></div>
-  `;
-}
-
-// COMUM PRA TODOS
-html += `
-<div class="linha"><span>Data</span><span>${data}</span></div>
-<div class="linha"><span>ID</span><span>${id}</span></div>
-`;
-
-document.getElementById("conteudo").innerHTML = html;
-
-// 📤 COMPARTILHAR
 async function compartilhar(){
-
-  const card = document.getElementById("card");
-
-  // 👉 ativa modo branco
+  const card=document.getElementById("card");
   document.body.classList.add("export-mode");
-
-  const canvas = await html2canvas(card, {
-    backgroundColor: "#ffffff",
-    scale: 3
-  });
-
+  const canvas=await html2canvas(card,{backgroundColor:"#fff",scale:3});
   document.body.classList.remove("export-mode");
-
-  const blob = await (await fetch(canvas.toDataURL())).blob();
-  const file = new File([blob], "comprovante.png", {type:"image/png"});
-
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    navigator.share({files:[file]});
-  } else {
-    baixarImagem(canvas);
-  }
+  const blob=await(await fetch(canvas.toDataURL())).blob();
+  const file=new File([blob],"comprovante.png",{type:"image/png"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]});} 
+  else{baixarImagem(canvas);}
 }
 
-// 📥 BAIXAR
-function baixar(){
-
-  const card = document.getElementById("card");
-
+function baixar(){ 
+  const card=document.getElementById("card");
   document.body.classList.add("export-mode");
-
-  html2canvas(card, {
-    backgroundColor: "#ffffff",
-    scale: 3
-  }).then(canvas => {
-
+  html2canvas(card,{backgroundColor:"#fff",scale:3}).then(canvas=>{
     document.body.classList.remove("export-mode");
-
     baixarImagem(canvas);
   });
 }
-
-function baixarImagem(canvas){
-  const link = document.createElement("a");
-  link.download = "comprovante.png";
-  link.href = canvas.toDataURL();
-  link.click();
-}
-
-// 📋 COPIAR
-function copiar(){
-  navigator.clipboard.writeText(valor+" "+nome);
-  toast("Copiado!");
-}
-
-// 🔔 TOAST
-function toast(msg){
-  const t=document.getElementById("toast");
-  t.innerText=msg;
-  t.style.opacity=1;
-  setTimeout(()=>t.style.opacity=0,2000);
-}
-
-// VOLTAR
-function voltar(){
-  history.back();
-}
-
-// VIBRAÇÃO
-if(navigator.vibrate){
-  navigator.vibrate([100,50,100]);
-}
-
+function baixarImagem(canvas){ const link=document.createElement("a"); link.download="comprovante.png"; link.href=canvas.toDataURL(); link.click();}
+function copiar(){ navigator.clipboard.writeText(valor+" "+nome); toast("Copiado!"); }
+function toast(msg){ const t=document.getElementById("toast"); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2000);}
+function voltar(){ history.back();}
+if(navigator.vibrate){navigator.vibrate([100,50,100]);}
 </script>
 
 </body>
