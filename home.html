@@ -138,31 +138,29 @@ body {
 }
 
 /* BANNER 
-    .banner-wrapper {
+    #banner-wrapper {
     width: 100%;
-    overflow: hidden; /* impede scroll manual */
-    margin-bottom: 25px;
+    overflow: hidden; /* corta o excesso para fora da tela */
     position: relative;
-    padding: 10px 0;
+    margin-bottom: 25px;
 }
 
-.banner-container {
+#banner-slider {
     display: flex;
     transition: transform 0.5s ease-in-out;
+    width: 100%;
 }
 
 .smart-banner {
-    min-width: 85%;
-    margin: 0 10px;
+    min-width: 100%; /* cada slide ocupa 100% do container */
+    margin: 0 5px;
     border-radius: 20px;
     padding: 18px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 125px;
     position: relative;
-    flex-shrink: 0;
 }
 /* CARD PADRÃO */
 .smart-card {
@@ -492,76 +490,74 @@ function abrirPDV() {
 // =======================
 // BANNER ROTATIVO DINÂMICO
 // =======================
+let currentSlide = 0;
+let slideInterval;
 
 function carregarBanners() {
-    const bannerWrapper = document.getElementById('banner-wrapper');
     const bannerSlider = document.getElementById('banner-slider');
     const bannerDots = document.getElementById('banner-dots');
     if (!bannerSlider) return;
 
-    // Limpa o slider
-    bannerSlider.innerHTML = '';
-
     const contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
     const hoje = new Date().toISOString().split('T')[0];
+
     let listaSlides = [];
 
     // CARD 1: CARTÃO
-    listaSlides.push(`
-        <div class="smart-banner" onclick="location.href='cartao.html'" style="border-left: 5px solid var(--primary);">
-            <b style="font-size: 15px; color: #fff;">Cartão Virtual TECH</b>
-            <p style="font-size: 12px; color: var(--text-secondary);">Peça já o seu e faça compras online com segurança.</p>
-            <button style="background: var(--primary); color: #000;">Ativar Agora</button>
-        </div>
-    `);
+    listaSlides.push(`<div class="smart-banner" onclick="location.href='cartao.html'" style="border-left: 5px solid var(--primary);">
+        <b style="font-size: 15px; color: #fff;">Cartão Virtual TECH</b>
+        <p style="font-size: 12px; color: var(--text-secondary);">Peça já o seu e faça compras online com segurança.</p>
+        <button style="background: var(--primary); color: #000;">Ativar Agora</button>
+    </div>`);
 
-    // CARD 2: COBRAR POR LINK
-    listaSlides.push(`
-        <div class="smart-banner" onclick="location.href='links-pagamento.html'" style="background: linear-gradient(135deg, #064e3b, #111827); border-left: 5px solid #10b981;">
-            <b style="font-size: 15px; color: #fff;">Venda por Link 🔗</b>
-            <p style="font-size: 12px; color: var(--text-secondary);">Crie cobranças rápidas e envie via WhatsApp.</p>
-            <button style="background: #10b981; color: #fff;">Gerar Link</button>
-        </div>
-    `);
+    // CARD 2: COBRAR LINK
+    listaSlides.push(`<div class="smart-banner" onclick="location.href='links-pagamento.html'" style="background: linear-gradient(135deg, #064e3b, #111827); border-left: 5px solid #10b981;">
+        <b style="font-size: 15px; color: #fff;">Venda por Link 🔗</b>
+        <p style="font-size: 12px; color: var(--text-secondary);">Crie cobranças rápidas e envie via WhatsApp.</p>
+        <button style="background: #10b981; color: #fff;">Gerar Link</button>
+    </div>`);
 
     // CARD 3: CONTAS
     const contasPendentes = contas.filter(c => !c.pago);
     contasPendentes.forEach(c => {
-        let cor = "#22c55e"; // Verde normal
-        if (c.data < hoje) cor = "#ef4444"; // vermelho atrasado
-        else if (c.data === hoje) cor = "#f59e0b"; // laranja hoje
+        let cor = "#22c55e";
+        if (c.data < hoje) cor = "#ef4444";
+        else if (c.data === hoje) cor = "#f59e0b";
 
-        listaSlides.push(`
-            <div class="smart-banner" style="border-left: 5px solid ${cor};">
-                <b style="font-size: 15px;">${c.descricao}</b>
-                <p style="font-size: 12px; color: var(--text-secondary);">Valor: <span style="color:#fff; font-weight:700;">${c.valor}</span></p>
-                <button onclick="location.href='contas.html'" style="background: ${cor}; color: #000;">Pagar Agora</button>
-            </div>
-        `);
+        listaSlides.push(`<div class="smart-banner" style="border-left: 5px solid ${cor};">
+            <b style="font-size: 15px;">${c.descricao}</b>
+            <p style="font-size: 12px; color: var(--text-secondary);">Valor: <span style="color:#fff; font-weight:700;">${c.valor}</span></p>
+            <button onclick="location.href='contas.html'" style="background: ${cor}; color: #000;">Pagar Agora</button>
+        </div>`);
     });
 
     // CARD 4: RECARGA
-    listaSlides.push(`
-        <div class="smart-banner" onclick="location.href='recarga.html'" style="border-left: 5px solid #3b82f6;">
-            <b style="font-size: 15px; color: #fff;">Recarga de Celular</b>
-            <p style="font-size: 12px; color: var(--text-secondary);">Evite o bloqueio da sua linha.</p>
-            <button style="background: #3b82f6; color: #fff;">Recarregar</button>
-        </div>
-    `);
+    listaSlides.push(`<div class="smart-banner" onclick="location.href='recarga.html'" style="border-left: 5px solid #3b82f6;">
+        <b style="font-size: 15px; color: #fff;">Recarga de Celular</b>
+        <p style="font-size: 12px; color: var(--text-secondary);">Evite o bloqueio da sua linha.</p>
+        <button style="background: #3b82f6; color: #fff;">Recarregar</button>
+    </div>`);
 
-    // Coloca os slides no slider
     bannerSlider.innerHTML = listaSlides.join('');
 
-    // Cria dots
+    // Dots
     if (bannerDots) {
         bannerDots.innerHTML = listaSlides.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('');
     }
 
-    // Ajusta container para rotativo automático
-    if (bannerWrapper) bannerWrapper.style.overflow = "hidden"; // fundamental pro rotativo
+    // Rotação automática
+    if (slideInterval) clearInterval(slideInterval);
     currentSlide = 0;
-    iniciarRotacao(listaSlides.length);
+    slideInterval = setInterval(() => {
+        currentSlide = (currentSlide + 1) % listaSlides.length;
+        bannerSlider.style.transform = `translateX(-${currentSlide * 100}%)`;
+        if (bannerDots) {
+            const dots = bannerDots.querySelectorAll('.dot');
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        }
+    }, 4000);
 }
+
 // =======================
 // LOGOUT
 // =======================
