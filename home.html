@@ -446,6 +446,7 @@ svg {
 let saldoOculto = false;
 let currentSlide = 0;
 let slideInterval;
+  
 function atualizarHome() {  
     const saldoSalvo = parseFloat(localStorage.getItem("saldo") || "1250.00");  
     const el = document.getElementById("saldo-home");  
@@ -453,10 +454,8 @@ function atualizarHome() {
         // Se saldoOculto for true, mostra asteriscos, senão mostra o valor formatado
         el.innerText = saldoOculto ? "••••••••" : saldoSalvo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });  
     }
-                                  }
-  
-
-function atualizarResumo() {
+                                  
+  function atualizarResumo() {
     const historico = JSON.parse(localStorage.getItem("transacoes") || "[]");
     let entrada = 0, saida = 0;
     historico.forEach(tx => {
