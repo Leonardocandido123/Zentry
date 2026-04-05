@@ -1,11 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tech Pay - Checkout Integrado</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Tech Pay - Checkout</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
 :root {
   --primary: #22C55E;
@@ -14,169 +15,200 @@
   --border: rgba(255,255,255,0.05);
   --text-sec: #9CA3AF;
 }
-body { margin:0; font-family:'Inter',sans-serif; background: var(--bg); color:white; padding:20px; min-height:100vh; }
-.header { display:flex; align-items:center; gap:15px; margin-bottom:25px; }
-.back-btn { background: var(--card); border:1px solid var(--border); border-radius:12px; padding:10px; cursor:pointer; display:flex; align-items:center; }
-h2 { margin:0; font-size:18px; }
-.card { background: var(--card); border-radius:28px; padding:25px; margin-bottom:20px; backdrop-filter: blur(20px); box-shadow:0 20px 50px rgba(0,0,0,0.5); }
-.input-group { margin-bottom:20px; }
-.input-group label { display:block; font-size:12px; color: var(--text-sec); margin-bottom:8px; }
-.input-group input, .input-group select { width:100%; background: rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:12px; padding:15px; color:#fff; font-size:16px; box-sizing:border-box; }
-.btn-pay { width:100%; background: var(--primary); color:#000; border:none; border-radius:15px; padding:18px; font-weight:700; font-size:16px; cursor:pointer; transition:0.2s; }
-.btn-pay:hover {opacity:0.9;}
-.comprovante-card { background: var(--card); border-radius:28px; padding:20px; margin-top:20px; backdrop-filter: blur(20px); box-shadow:0 20px 50px rgba(0,0,0,0.5); text-align:center; display:none; position: relative; }
-.comprovante-card .linha { display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px; }
-.actions-share { display:flex; gap:10px; margin-top:20px; }
-.actions-share button { flex:1; padding:14px; border-radius:14px; font-weight:600; border:none; cursor:pointer; transition:0.2s; }
-.btn-copy { background: rgba(255,255,255,0.05); color:#fff; }
-.btn-share { background: var(--primary); color:#000; }
-.toast { position:fixed; bottom:30px; background:#111; padding:12px 20px; border-radius:12px; opacity:0; transition:.3s; }
-/* Check animation */
-.check { width: 60px; height: 60px; border-radius:50%; background: var(--primary); display:flex; justify-content:center; align-items:center; margin: 0 auto 15px; position: relative; transform: scale(0); animation: pop 0.5s forwards; }
-.check::after { content: '✔'; font-size:30px; color:#000; }
-@keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
-/* Confetti */
-.confetti-piece { position: absolute; width: 8px; height: 8px; background-color: var(--primary); opacity:0.8; top:0; animation: fall 2s linear forwards; }
-@keyframes fall { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(200px) rotate(360deg); opacity:0; } }
+
+body {
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background: var(--bg);
+  color:white;
+  padding:20px;
+}
+
+.card {
+  background: var(--card);
+  border-radius:25px;
+  padding:25px;
+  margin-bottom:20px;
+}
+
+.input-group {
+  margin-bottom:20px;
+}
+
+.input-group input, select {
+  width:100%;
+  padding:15px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.05);
+  color:#fff;
+}
+
+.btn {
+  width:100%;
+  padding:18px;
+  border:none;
+  border-radius:15px;
+  background:var(--primary);
+  font-weight:700;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.comprovante {
+  display:none;
+  background: var(--card);
+  border-radius:25px;
+  padding:20px;
+  text-align:center;
+}
+
+.linha {
+  display:flex;
+  justify-content:space-between;
+  margin:10px 0;
+  font-size:14px;
+}
+
+.link {
+  word-break: break-all;
+  font-size:12px;
+  color: var(--primary);
+}
+
 </style>
 </head>
+
 <body>
 
-<div class="header">
-  <button class="back-btn" onclick="history.back()">←</button>
-  <h2>Checkout Integrado</h2>
-</div>
+<h2>Checkout Tech Pay</h2>
 
 <div class="card">
   <div class="input-group">
-    <label>Valor</label>
-    <input type="text" id="valor" placeholder="R$ 0,00" oninput="mascaraMoeda(this)">
+    <input id="valor" placeholder="R$ 0,00">
   </div>
+
   <div class="input-group">
-    <label>Descrição</label>
-    <input type="text" id="descricao" placeholder="Ex: Upgrade de Plano">
+    <input id="descricao" placeholder="Descrição">
   </div>
+
   <div class="input-group">
-    <label>Método de Pagamento</label>
     <select id="metodo">
       <option value="pix">Pix</option>
       <option value="cartao">Cartão</option>
       <option value="boleto">Boleto</option>
     </select>
   </div>
-  <button class="btn-pay" onclick="pagar()">Pagar</button>
+
+  <button class="btn" onclick="pagar()">Pagar</button>
 </div>
 
-<div class="comprovante-card" id="comprovante">
-  <div class="check"></div>
-  <h3>Pagamento Concluído!</h3>
-  <div class="linha"><span>Valor:</span><span id="c-valor"></span></div>
-  <div class="linha"><span>Descrição:</span><span id="c-desc"></span></div>
-  <div class="linha"><span>Data:</span><span id="c-data"></span></div>
-  <div class="linha"><span>ID:</span><span id="c-id"></span></div>
-  <div class="linha"><span>Método:</span><span id="c-metodo"></span></div>
-  <div class="linha"><span>Link:</span><span id="c-link"></span></div>
-  <div class="actions-share">
-    <button class="btn-copy" onclick="copiar()">Copiar</button>
-    <button class="btn-share" onclick="compartilhar()">Compartilhar</button>
-  </div>
-</div>
+<div class="comprovante" id="comprovante">
+  <h3>✅ Pagamento aprovado</h3>
 
-<div class="toast" id="toast">Copiado!</div>
+  <div class="linha"><span>Valor</span><span id="c-valor"></span></div>
+  <div class="linha"><span>Descrição</span><span id="c-desc"></span></div>
+  <div class="linha"><span>Data</span><span id="c-data"></span></div>
+  <div class="linha"><span>ID</span><span id="c-id"></span></div>
+
+  <p class="link" id="c-link"></p>
+
+  <button class="btn" onclick="copiar()">Copiar comprovante</button>
+</div>
 
 <script>
-function mascaraMoeda(i){
-  let v=i.value.replace(/\D/g,'');
-  v=(v/100).toFixed(2)+'';
-  v=v.replace(".",",");
-  v=v.replace(/(\d)(\d{3})(\d{3}),/g,"$1.$2.$3,");
-  v=v.replace(/(\d)(\d{3}),/g,"$1.$2,");
-  i.value="R$ "+v;
+
+// FORMATA MOEDA
+function mascaraMoeda(input){
+  let v = input.value.replace(/\D/g,'');
+  v = (v/100).toFixed(2)+'';
+  v = v.replace(".",",");
+  v = v.replace(/(\d)(\d{3}),/g,"$1.$2,");
+  input.value = "R$ "+v;
 }
 
-function pagar(){
-  const valor = document.getElementById('valor').value;
-  const desc = document.getElementById('descricao').value || "Venda sem descrição";
-  const metodo = document.getElementById('metodo').value;
-  if(!valor || valor === "R$ 0,00"){ alert("Digite um valor válido"); return; }
+// AUTO FORMATAR
+document.getElementById("valor").addEventListener("input", function(){
+  mascaraMoeda(this);
+});
 
-  // Pega a chave Pix configurada (simulado localStorage)
-  const config = JSON.parse(localStorage.getItem("tp_config") || "{}");
-  if(!config.pix){ alert("Configure sua chave Pix antes!"); return; }
+// PEGAR PARAMETROS DO LINK
+window.onload = () => {
+  const params = new URLSearchParams(window.location.search);
 
-  const data = new Date().toLocaleString();
-  const id = "TP"+Date.now();
+  const v = params.get("v");
+  const d = params.get("d");
 
-  // Gera link Tech Pay
-  const valorClean = valor.replace("R$ ","");
-  const link = `https://techpay.me/checkout.html?v=${valorClean}&d=${encodeURIComponent(desc)}&n=${encodeURIComponent(config.nome||'Tech Pay')}&px=${encodeURIComponent(config.pix)}`;
+  if(v){
+    const valorFormatado = (parseInt(v)/100).toLocaleString('pt-BR',{
+      style:'currency',
+      currency:'BRL'
+    });
 
-  // Preenche comprovante
-  document.getElementById('c-valor').innerText = valor;
-  document.getElementById('c-desc').innerText = desc;
-  document.getElementById('c-data').innerText = data;
-  document.getElementById('c-id').innerText = id;
-  document.getElementById('c-metodo').innerText = metodo.charAt(0).toUpperCase()+metodo.slice(1);
-  document.getElementById('c-link').innerHTML = `<a href="${link}" style="color:var(--primary)" target="_blank">${link}</a>`;
-
-  const comp = document.getElementById('comprovante');
-  comp.style.display = "block";
-
-  // Confetti
-  for(let i=0;i<50;i++){
-    const piece = document.createElement('div');
-    piece.classList.add('confetti-piece');
-    piece.style.left = Math.random()*100 + "%";
-    piece.style.backgroundColor = `hsl(${Math.random()*360},80%,60%)`;
-    piece.style.animationDuration = (1+Math.random()*2)+"s";
-    comp.appendChild(piece);
-    setTimeout(()=>piece.remove(),2000);
+    document.getElementById("valor").value = valorFormatado;
   }
-}
 
-function copiar(){
-  const c = {
-    valor: document.getElementById('c-valor').innerText,
-    desc: document.getElementById('c-desc').innerText,
-    data: document.getElementById('c-data').innerText,
-    id: document.getElementById('c-id').innerText,
-    metodo: document.getElementById('c-metodo').innerText,
-    link: document.getElementById('c-link').innerText
-  };
-  navigator.clipboard.writeText(`Valor: ${c.valor}\nDescrição: ${c.desc}\nData: ${c.data}\nID: ${c.id}\nMétodo: ${c.metodo}\nLink: ${c.link}`);
-  toast("Copiado!");
-}
-
-function compartilhar(){
-  const c = {
-    valor: document.getElementById('c-valor').innerText,
-    desc: document.getElementById('c-desc').innerText,
-    data: document.getElementById('c-data').innerText,
-    id: document.getElementById('c-id').innerText,
-    metodo: document.getElementById('c-metodo').innerText,
-    link: document.getElementById('c-link').innerText
-  };
-  const texto = `Comprovante Tech Pay:\nValor: ${c.valor}\nDescrição: ${c.desc}\nData: ${c.data}\nID: ${c.id}\nMétodo: ${c.metodo}\nLink: ${c.link}`;
-  if(navigator.canShare && navigator.canShare({text:texto})){
-    navigator.share({text:texto});
-  } else {
-    alert("Use o botão de copiar para compartilhar.");
+  if(d){
+    document.getElementById("descricao").value = d;
   }
-}
-
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.innerText = msg;
-  t.style.opacity = 1;
-  setTimeout(()=>t.style.opacity = 0,2000);
-}
-
-// Carrega dados Pix simulados
-window.onload = ()=>{
-  const config = JSON.parse(localStorage.getItem("tp_config") || "{}");
-  if(!config.nome) config.nome="Tech Pay";
-  if(!config.pix) config.pix="seu-pix@exemplo.com";
 };
+
+// PAGAMENTO
+function pagar(){
+
+  const valor = document.getElementById("valor").value;
+  const desc = document.getElementById("descricao").value || "Sem descrição";
+  const metodo = document.getElementById("metodo").value;
+
+  if(!valor || valor === "R$ 0,00"){
+    alert("Digite um valor");
+    return;
+  }
+
+  const id = "TP" + Date.now();
+  const data = new Date().toLocaleString();
+
+  // SALVAR COMO PAGO
+  let lista = JSON.parse(localStorage.getItem("cobrancas") || "[]");
+
+  lista.unshift({
+    valor,
+    desc,
+    status: "pago",
+    id,
+    data
+  });
+
+  localStorage.setItem("cobrancas", JSON.stringify(lista));
+
+  // MOSTRAR COMPROVANTE
+  document.getElementById("c-valor").innerText = valor;
+  document.getElementById("c-desc").innerText = desc;
+  document.getElementById("c-data").innerText = data;
+  document.getElementById("c-id").innerText = id;
+
+  document.getElementById("c-link").innerText = window.location.href;
+
+  document.getElementById("comprovante").style.display = "block";
+
+}
+
+// COPIAR
+function copiar(){
+  const texto = `
+Comprovante Tech Pay
+
+Valor: ${document.getElementById("c-valor").innerText}
+Descrição: ${document.getElementById("c-desc").innerText}
+Data: ${document.getElementById("c-data").innerText}
+ID: ${document.getElementById("c-id").innerText}
+`;
+
+  navigator.clipboard.writeText(texto);
+  alert("Copiado!");
+}
+
 </script>
+
 </body>
 </html>
