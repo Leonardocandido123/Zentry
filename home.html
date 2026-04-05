@@ -440,68 +440,97 @@ svg {
     Sair
   </button>
 </nav>
-
-  
 <script>
 let saldoOculto = false;
 let currentSlide = 0;
-let slideInterval;
-  
-  function atualizarHome() {  
-    // Busca o saldo ou define 0 se estiver vazio
+let slideInterval = null;
+
+// =======================
+// ATUALIZA SALDO NA HOME
+// =======================
+function atualizarHome() {  
     const saldoSalvo = parseFloat(localStorage.getItem("saldo") || "0");  
     const el = document.getElementById("saldo-home");  
     
     if(el) {
-        if(saldoOculto) {
-            el.innerText = "••••••••";
-        } else {
-            el.innerText = saldoSalvo.toLocaleString('pt-BR', { 
-                style: 'currency', 
-                currency: 'BRL' 
-            });
-        }
+        el.innerText = saldoOculto
+            ? "••••••••"
+            : saldoSalvo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 }
 
-// Garanta que o TECHTAP abra a tela
-function abrirPDV() {
-    window.location.href = 'pdv.html';
+function toggleSaldoHome() {
+    saldoOculto = !saldoOculto;
+    atualizarHome();
 }
-  
-                                  
-  function atualizarResumo() {
+
+// =======================
+// SAUDAÇÃO AUTOMÁTICA
+// =======================
+function atualizarSaudacao() {
+    const hora = new Date().getHours();
+    let saudacao = "Olá,";
+
+    if (hora >= 5 && hora < 12) saudacao = "Bom dia,";
+    else if (hora >= 12 && hora < 18) saudacao = "Boa tarde,";
+    else saudacao = "Boa noite,";
+
+    const el = document.getElementById("greeting");
+    if(el) el.innerText = saudacao;
+}
+setInterval(atualizarSaudacao, 60000);
+
+// =======================
+// RESUMO DO DIA
+// =======================
+function atualizarResumo() {
     const historico = JSON.parse(localStorage.getItem("transacoes") || "[]");
     let entrada = 0, saida = 0;
+
     historico.forEach(tx => {
-        let v = typeof tx.valor === 'string' ? parseFloat(tx.valor.replace("R$ ", "").replace(/\./g, "").replace(",", ".")) : tx.valor;
+        let v = typeof tx.valor === 'string' 
+            ? parseFloat(tx.valor.replace("R$ ", "").replace(/\./g, "").replace(",", ".")) 
+            : tx.valor;
         if (tx.tipo === "entrada") entrada += v;
         if (tx.tipo === "saida" || tx.tipo === "enviado") saida += v;
     });
-    if(document.getElementById("entrada-dia")) document.getElementById("entrada-dia").innerText = entrada.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    if(document.getElementById("saida-dia")) document.getElementById("saida-dia").innerText = saida.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    const entradaEl = document.getElementById("entrada-dia");
+    const saidaEl = document.getElementById("saida-dia");
     const lucroEl = document.getElementById("lucro-dia");
+
+    if(entradaEl) entradaEl.innerText = entrada.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    if(saidaEl) saidaEl.innerText = saida.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     if(lucroEl) lucroEl.innerText = (entrada - saida).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+// =======================
+// ABRIR PDV / TECHTAP
+// =======================
+function abrirPDV() {
+    window.location.href = 'pdv.html';
+}
+
+// =======================
+// BANNER ROTATIVO DINÂMICO
+// =======================
 function carregarBanners() {
     const bannerSlider = document.getElementById('banner-slider');
     const bannerDots = document.getElementById('banner-dots');
     if(!bannerSlider) return;
 
     const contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
-    const transacoes = JSON.parse(localStorage.getItem("transacoes") || "[]");
-  const cobrancas = JSON.parse(localStorage.getItem("cobrancas") || "[]");
+    const cobrancas = JSON.parse(localStorage.getItem("cobrancas") || "[]");
     const hoje = new Date().toISOString().split('T')[0];
-    
+
     let listaSlides = [];
 
     // CARD 1: CARTÃO
     listaSlides.push(`<div class="smart-banner" onclick="location.href='cartao.html'" style="cursor:pointer; border-left: 5px solid var(--primary);">
-            <b style="font-size: 15px; color: #fff;">Cartão Virtual TECH</b>
-            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Peça já o seu e faça compras online com segurança.</p>
-            <button style="background: var(--primary); color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Ativar Agora</button>
-        </div>`);
+        <b style="font-size: 15px; color: #fff;">Cartão Virtual TECH</b>
+        <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Peça já o seu e faça compras online com segurança.</p>
+        <button style="background: var(--primary); color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Ativar Agora</button>
+    </div>`);
 
     // CARD 2: LINK DE PAGAMENTO
     listaSlides.push(`<div class="smart-banner" onclick="location.href='links-pagamento.html'" style="cursor:pointer; background: linear-gradient(135deg, #064e3b, #111827); border-left: 5px solid #10b981;">
@@ -510,9 +539,8 @@ function carregarBanners() {
         <button style="background: #10b981; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Gerar Link</button>
     </div>`);
 
-    // CARD 3: COBRANÇA
-    const cobrancasPendentes = cobrancas.filter(c => c.status === "pendente");
-    if (cobrancas.length > 0) {
+    // CARD 3: COBRANÇAS
+    if(cobrancas.length > 0) {
         cobrancas.forEach(c => {
             listaSlides.push(`<div class="smart-banner" style="border-left: 5px solid #ef4444;">
                 <span style="font-size: 8px; background: #ef4444; color: white; padding: 2px 6px; border-radius: 6px; position: absolute; top: 15px; right: 15px; font-weight: 800;">PENDENTE</span>
@@ -521,119 +549,72 @@ function carregarBanners() {
                 <button onclick="location.href='cobrar.html'" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Cobrar Agora</button>
             </div>`);
         });
-    } else {
-        listaSlides.push(`<div class="smart-banner" onclick="location.href='cobrar.html'" style="cursor:pointer; border-left: 5px solid #a855f7;">
-            <b style="font-size: 15px; color: #fff;">Gestão de Cobranças</b>
-            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Organize quem te deve e envie lembretes Pix.</p>
-            <button style="background: #a855f7; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Ver Clientes</button>
-        </div>`);
     }
-  // 🔥 CONTAS PRA PAGAR (NOVO)
-const hoje = new Date().toISOString().split('T')[0];
-
-const contasPendentes = contas.filter(c => !c.pago);
-
-contasPendentes.forEach(c => {
-
-    let cor = "#22c55e";
-
-    if (c.data < hoje) cor = "#ef4444"; // vencida
-    else if (c.data === hoje) cor = "#f59e0b"; // hoje
-
-    listaSlides.push(`
-    <div class="smart-banner" style="border-left: 5px solid ${cor};">
-        <b style="font-size: 15px;">${c.descricao}</b>
-        <p style="font-size: 12px;">Pagar ${c.valor}</p>
-        <button onclick="location.href='contas.html'">Pagar</button>
-    </div>
-    `);
-});
 
     // CARD 4: CONTAS
-    const contasVencidas = contas.filter(c => c.data <= hoje);
-    if (contasVencidas.length > 0) {
-        contasVencidas.forEach(c => {
-            const cor = c.data === hoje ? "#f59e0b" : "#ef4444";
-            listaSlides.push(`<div class="smart-banner" style="border-left: 5px solid ${cor};">
-                <span style="font-size: 8px; background: ${cor}; color: #000; padding: 2px 6px; border-radius: 6px; position: absolute; top: 15px; right: 15px; font-weight: 800;">VENCIMENTO</span>
-                <b style="font-size: 15px; color:#fff;">${c.descricao}</b>
-                <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Valor: <b style="color:#fff;">${c.valor}</b></p>
-                <button onclick="location.href='contas.html'" style="background: ${cor}; color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Pagar</button>
-            </div>`);
-        });
-    } else {
-        listaSlides.push(`<div class="smart-banner" onclick="location.href='contas.html'" style="cursor:pointer; border-left: 5px solid #f59e0b;">
-            <b style="font-size: 15px; color: #fff;">Contas e Boletos</b>
-            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Mantenha suas contas em dia e evite juros.</p>
-            <button style="background: #f59e0b; color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Gerenciar</button>
+    const contasPendentes = contas.filter(c => !c.pago);
+    contasPendentes.forEach(c => {
+        let cor = "#22c55e";
+        if(c.data < hoje) cor = "#ef4444"; // vencida
+        else if(c.data === hoje) cor = "#f59e0b"; // hoje
+        listaSlides.push(`
+        <div class="smart-banner" style="border-left: 5px solid ${cor};">
+            <b style="font-size: 15px;">${c.descricao}</b>
+            <p style="font-size: 12px;">Pagar ${c.valor}</p>
+            <button onclick="location.href='contas.html'">Pagar</button>
         </div>`);
-    }
+    });
 
     // CARD 5: RECARGA
     listaSlides.push(`<div class="smart-banner" onclick="location.href='recarga.html'" style="cursor:pointer; border-left: 5px solid #3b82f6;">
-            <b style="font-size: 15px; color: #fff;">Recarga de Celular</b>
-            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Evite o bloqueio da sua linha. Recarregue agora.</p>
-            <button style="background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Recarregar</button>
-        </div>`);
+        <b style="font-size: 15px; color: #fff;">Recarga de Celular</b>
+        <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Evite o bloqueio da sua linha. Recarregue agora.</p>
+        <button style="background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Recarregar</button>
+    </div>`);
 
     bannerSlider.innerHTML = listaSlides.join('');
-    
+
+    // BANNERS DOTS
     let dotsHTML = "";
-    listaSlides.forEach((_, index) => {
-        dotsHTML += `<div class="dot ${index === 0 ? 'active' : ''}"></div>`;
-    });
-    bannerDots.innerHTML = dotsHTML;
+    listaSlides.forEach((_, i) => dotsHTML += `<div class="dot ${i === 0 ? 'active' : ''}"></div>`);
+    if(bannerDots) bannerDots.innerHTML = dotsHTML;
 
     currentSlide = 0;
     iniciarRotacao(listaSlides.length);
 }
 
 function iniciarRotacao(total) {
-    if (total <= 1) return;
-    if (slideInterval) clearInterval(slideInterval);
+    if(total <= 1) return;
+    if(slideInterval) clearInterval(slideInterval);
 
     slideInterval = setInterval(() => {
         currentSlide = (currentSlide + 1) % total;
         const slider = document.getElementById('banner-slider');
         const dots = document.querySelectorAll('.dot');
-        if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+        if(slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
         dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
     }, 4000);
 }
 
-function toggleSaldoHome() {
-    saldoOculto = !saldoOculto;
-    atualizarHome();
+// =======================
+// LOGOUT
+// =======================
+function logout() {
+    localStorage.setItem('techpay_user', 'false'); 
+    window.location.href = 'login.html'; 
 }
 
-function logout() { localStorage.setItem('techpay_user', 'false'); window.location.href = 'login.html'; }
-
+// =======================
+// ONLOAD
+// =======================
 window.onload = () => { 
     atualizarHome(); 
     atualizarResumo(); 
     carregarBanners(); 
+    atualizarSaudacao();
 };
-  function abrirPDV() {
-  window.location.href = 'pdv.html';
-  }
-
-  function atualizarSaudacao() {
-    const agora = new Date();
-    const hora = agora.getHours();
-    let saudacao = "Olá,";
-
-    if (hora >= 5 && hora < 12) {
-      saudacao = "Bom dia,";
-    } else if (hora >= 12 && hora < 18) {
-      saudacao = "Boa tarde,";
-    } else {
-      saudacao = "Boa noite,";
-    }
-
-    document.getElementById("greeting").innerText = saudacao;
-  }
-
-  atualizarSaudacao();
-  setInterval(atualizarSaudacao, 60000);
 </script>
+  
+
+
 </body>   </html>
