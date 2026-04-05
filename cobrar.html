@@ -1,237 +1,275 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  
-  <title>Tech Pay - Cobrar e Clientes</title>
-  <style>
-    :root { 
-        --primary: #22c55e; 
-        --danger: #ef4444;
-        --bg-card: #111827;
-        --border: rgba(255, 255, 255, 0.15); 
-        --text-secondary: #9CA3AF; 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tech Pay - Business Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+    :root{
+        --primary:#22c55e;
+        --card-bg: rgba(18,24,38,0.9);
+        --border-white: rgba(255,255,255,0.08);
+        --text-secondary:#94a3b8;
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+   body{
+    font-family:'Inter',sans-serif;
+    background: radial-gradient(circle at 20% 0%, #0f172a,#000 70%) no-repeat fixed;
+    color:#fff;
+    min-height:100vh;
+    padding:20px;
+
+    overflow-x: hidden; /* remove scroll lateral */
+}
+    .container{ width:100%; max-width:420px; margin: 0 auto; }
+
+    .nav-tabs{
+        display:flex; background: rgba(255,255,255,0.03);
+        padding:4px; border-radius:16px; margin-bottom:24px;
+        border:1px solid var(--border-white);
+    }
+    .tab-btn{
+        flex:1; padding:12px; border:none; background:transparent; color:var(--text-secondary);
+        font-weight:600; font-size:13px; cursor:pointer; border-radius:12px; transition:.3s;
+    }
+    .tab-btn.active{ background: var(--card-bg); color:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+
+    .card{
+        background: var(--card-bg); backdrop-filter: blur(12px);
+        border:1px solid var(--border-white); border-radius:28px; padding:24px; 
+        display:none; animation:fadeIn 0.4s ease;
+    }
+    .card.active{ display:block; }
+
+    .input-group{ margin-bottom:18px; }
+    .input-group label{ display:block; font-size:10px; font-weight:800; color:var(--text-secondary); margin-bottom:8px; text-transform: uppercase;}
+    .input-group input{
+        width:100%; background: rgba(0,0,0,0.3); border:1px solid var(--border-white);
+        border-radius:14px; padding:14px; color:#fff; font-size:16px; outline:none;
     }
 
-    /* Notificação de Sucesso */
-    .toast-success {
-        position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-        width: 90%; max-width: 380px; background: #16a34a; color: white;
-        padding: 16px; border-radius: 16px; display: flex; align-items: center; gap: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9999;
-        transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .toast-success.show { top: 20px; }
-    .toast-icon { background: rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-
-    /* Modal de Cobrança Profissional */
-    .overlay-cobranca {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-        display: none; justify-content: center; align-items: center; z-index: 10000;
+    .btn-main{
+        width:100%; background:var(--primary); color:#052e16; border:none; border-radius:16px;
+        padding:16px; font-weight:800; font-size:15px; cursor:pointer;
     }
 
-    .card-profissional {
-        width: 92%; 
-        max-width: 380px; 
-        background: #FFFFFF; 
-        border-radius: 4px; 
-        padding: 0; 
-        text-align: left; 
-        position: relative;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-        overflow: hidden;
-        border-top: 6px solid var(--primary);
-    }
-
-    .doc-header { padding: 20px; border-bottom: 1px solid #EEEEEE; }
-    .doc-title { color: #111827; font-size: 18px; font-weight: 700; margin: 0; }
-    .doc-body { padding: 20px; }
-    .doc-label { font-size: 11px; text-transform: uppercase; color: #6B7280; font-weight: 700; margin-bottom: 4px; display: block; }
-    .doc-value { font-size: 15px; color: #111827; font-weight: 500; margin-bottom: 18px; display: block; }
-    .doc-amount { font-size: 22px; color: var(--primary); font-weight: 800; margin-bottom: 20px; }
-    .doc-divider { height: 1px; background: #EEEEEE; margin: 15px 0; }
-
-    .btn-doc-share {
-        width: 100%; background: #F3F4F6; color: #111827; border: none; padding: 20px;
-        font-weight: 700; font-size: 15px; cursor: pointer; border-top: 1px solid #E5E7EB;
-    }
+    .section-title { font-size: 11px; font-weight: 800; color: var(--text-secondary); margin: 20px 5px 10px; text-transform: uppercase; }
     
-   body { 
-    margin: 0; 
-    font-family: 'Inter', sans-serif; 
-    /* Degradê suave e profundo, sem divisões bruscas */
-    background: linear-gradient(180deg, #0f172a 0%, #000000 100%); 
-    color: #fff; 
-    min-height: 100vh;
-    padding-bottom: 100px; 
-}
+    /* Card de Cliente que Aceita Clique */
+    .item-cliente{
+        background: var(--card-bg); border:1px solid var(--border-white);
+        padding:16px; border-radius:18px; display:flex; justify-content:space-between; align-items:center;
+        margin-bottom:10px; cursor: pointer; transition: 0.2s;
+    }
+    .item-cliente:active { transform: scale(0.98); background: rgba(255,255,255,0.05); }
+    .item-info b{ display:block; font-size:15px; }
+    .item-info span{ font-size:11px; color:var(--text-secondary); }
+    .badge-ativo { color:var(--primary); font-size:10px; font-weight:800; border: 1px solid var(--primary); padding: 2px 8px; border-radius: 20px; }
 
-    .container { padding: 20px; max-width: 450px; margin: auto; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-   /* Se não tiver, adicione este estilo para o ícone */
-.back-btn svg {
-    width: 24px;
-    height: 24px;
-    fill: none;
-    stroke: var(--primary); /* Ou #fff se preferir branca */
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-    .amount-input { background: transparent; border: none; color: #fff; font-size: 42px; font-weight: 800; text-align: center; width: 100%; outline: none; }
-  .btn-generate { 
-    width: 100%; 
-    background: #22c55e; /* Verde Tech Pay */
-    color: #000; /* Texto preto para leitura rápida */
-    border: none; 
-    padding: 16px; 
-    border-radius: 14px; /* Canto um pouco menos arredondado fica mais sério */
-    font-weight: 700; 
-    font-size: 16px; 
-    cursor: pointer; 
-    margin-bottom: 30px;
-    transition: opacity 0.2s;
-}
-
-.btn-generate:active { opacity: 0.8; }
-
-
-    .client-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: pointer; }
-    .avatar { width: 48px; height: 48px; border-radius: 14px; background: #1F2937; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .status-paid { background: var(--primary); }
-    .status-debt { background: var(--danger); }
-  </style>
+    @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+</style>
 </head>
 <body>
 
-<div id="modalCobranca" class="overlay-cobranca">
-    <div class="card-profissional" id="area-documento">
-        <div onclick="fecharModal()" id="btn-fechar-modal" style="position:absolute; right:15px; top:15px; cursor:pointer; color:#9CA3AF; font-size: 18px; z-index: 10;">✕</div>
-        
-        <div class="doc-header">
-            <b style="color: var(--primary); font-size: 14px; display: block; margin-bottom: 4px;">tech pay</b>
-            <h1 class="doc-title">Ordem de Cobrança</h1>
-        </div>
-      
-        <div style="padding: 15px 20px 0 20px;">
-            <p style="color: #111827; font-size: 14px; margin: 0; line-height: 1.5;">
-                Sr(a). <b id="render-frase-nome">Leonardo</b>, constatamos uma pendência do Senhor(a).
-            </p>
-        </div>
-      
-        <div class="doc-body">
-            <span class="doc-label">Valor da Cobrança</span>
-            <div class="doc-amount" id="render-valor">R$ 0,00</div>
-            <div class="doc-divider"></div>
-            <span class="doc-label">Pagador</span>
-            <span class="doc-value" id="render-cliente">Nome do Cliente</span>
-            <div style="display: flex; justify-content: space-between;">
-                <div><span class="doc-label">Vencimento</span><span class="doc-value">12/12/2025</span></div>
-                <div style="text-align: right;"><span class="doc-label">Status</span><span class="doc-value" style="color: #F59E0B;">Pendente</span></div>
-            </div>
-            <div class="doc-divider"></div>
-            <span class="doc-label">Dados para Pagamento (PIX)</span>
-            <span class="doc-value" id="render-chave">leonardo.silva@email.com</span>
-            <span class="doc-label">Instituição</span>
-            <span class="doc-value">Tech Pay Pagamentos S.A.</span>
-        </div>
-
-        <button class="btn-doc-share" id="btn-compartilhar" onclick="compartilharCobranca()">
-            Enviar Documento para Cliente
-        </button>
-    </div>
-</div>
-
 <div class="container">
-  <div class="header">
-    <a href="home.html" class="back-btn">
-    <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-</a>
+    <h1 style="text-align:center; margin-bottom:20px; font-weight:800;">Tech<span style="color:var(--primary)">Pay</span></h1>
 
-    <b style="font-size: 18px;">Cobrar Cliente</b>
-    <div style="width:40px"></div>
-  </div>
-
-  <div class="amount-container" style="text-align:center; margin:30px 0;">
-    <label style="color:var(--text-secondary); font-size:13px;">Valor a cobrar</label>
-    <input type="text" class="amount-input" id="main-amount" value="R$ 0,00" oninput="mascaraMoeda(this)">
-    <div id="selected-name" style="color:var(--primary); font-size:14px; margin-top:5px; height:20px; font-weight:600;"></div>
-  </div>
-
-  <button class="btn-generate" onclick="gerarCobranca()">Gerar Cobrança</button>
-
-  <div id="lista-clientes">
-    <div class="client-card" onclick="selecionarParaCobranca('Ricardo Frete', '150,00')">
-        <div class="avatar">RF</div>
-        <div style="flex:1;"><b>Ricardo Frete</b><br><span style="color:var(--danger); font-size:11px;">R$ 150,00</span></div>
-        <div class="status-dot status-debt"></div>
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab(event,'gerar')">Gerar Link</button>
+        <button class="tab-btn" onclick="switchTab(event,'cadastro')">Cadastrar Cliente</button>
     </div>
-  </div>
+
+    <div id="tab-gerar" class="card active">
+        <div class="input-group">
+            <label>NOME DO CLIENTE</label>
+            <input type="text" id="link-nome" placeholder="Selecione abaixo ou digite">
+        </div>
+        <div class="input-group">
+            <label>VALOR DO PAGAMENTO</label>
+            <input type="text" id="link-valor" placeholder="R$ 0,00" oninput="mascaraMoeda(this)">
+        </div>
+        <div class="input-group">
+            <label>O QUE ESTÁ SENDO VENDIDO?</label>
+            <input type="text" id="link-desc" placeholder="Ex: Upgrade de Plano">
+        </div>
+        <button class="btn-main" onclick="enviarLink()">Enviar Link de Cobrança</button>
+    </div>
+
+    <div id="tab-cadastro" class="card">
+        <h3 style="font-size:16px; margin-bottom:15px;">Novo Cadastro</h3>
+        <div class="input-group">
+            <label>NOME COMPLETO</label>
+            <input type="text" id="cad-nome" placeholder="Ex: Ricardo Frete">
+        </div>
+        <div class="input-group">
+            <label>VALOR PADRÃO</label>
+            <input type="text" id="cad-valor" placeholder="R$ 0,00" oninput="mascaraMoeda(this)">
+        </div>
+        <div class="input-group">
+            <label>SERVIÇO RECORRENTE</label>
+            <input type="text" id="cad-desc" placeholder="Ex: Mensalidade Frete">
+        </div>
+        <button class="btn-main" style="background:white; color:black;" onclick="salvarCliente()">Salvar no Banco</button>
+    </div>
+
+    <div class="section-title">SELECIONE PARA PREENCHER</div>
+    <div id="lista-clientes"></div>
 </div>
+
+   <div id="comprovante-wrapper" style="position: absolute; top: 0; left: 0; z-index: -1; opacity: 0.01; pointer-events: none;">
+   <div style="position: absolute; top: 0; left: 0; z-index: -9999; opacity: 0.01; pointer-events: none;">
+    <div id="comprovante-template" style="width: 400px; min-height: 500px; background-color: #ffffff !important; color: #000000 !important; padding: 40px; font-family: Arial, sans-serif; box-sizing: border-box;">
+        
+        <div style="background-color: #ffffff !important; border-top: 6px solid #22c55e; padding-top: 20px;">
+            <div style="display: flex; justify-content: space-between; background-color: #ffffff !important;">
+                <span style="color: #22c55e !important; font-weight: 900; font-size: 22px; text-transform: lowercase;">tech pay</span>
+                <span style="color: #999999 !important; font-size: 10px; font-weight: bold;">VIA DO CLIENTE</span>
+            </div>
+
+            <h2 style="color: #000000 !important; margin: 30px 0 10px; font-size: 26px; font-weight: 800;">Ordem de Cobrança</h2>
+         <p id="pdf-mensagem" style="color: #333333; font-size: 14px; line-height: 1.6; margin-bottom: 30px;"></p>
+            <div style="background-color: #f1f5f9 !important; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px;">
+                <span style="color: #64748b !important; font-size: 11px; font-weight: 800; text-transform: uppercase;">Valor a Pagar</span>
+                <div id="pdf-valor" style="color: #166534 !important; font-size: 40px; font-weight: 900; margin-top: 5px;">R$ 0,00</div>
+            </div>
+
+            <div style="border-top: 2px dashed #dddddd; padding-top: 25px; background-color: #ffffff !important;">
+                <div style="margin-bottom: 15px; background-color: #ffffff !important;">
+                    <span style="color: #999999 !important; font-size: 11px; font-weight: bold;">REFERÊNCIA:</span><br>
+                    <b id="pdf-desc" style="color: #000000 !important; font-size: 15px;">...</b>
+                </div>
+                <div style="margin-bottom: 15px; background-color: #ffffff !important;">
+                    <span style="color: #999999 !important; font-size: 11px; font-weight: bold;">EMITIDO EM:</span><br>
+                    <b id="pdf-data" style="color: #000000 !important; font-size: 15px;">00/00/0000</b>
+                </div>
+                <div style="background-color: #ffffff !important;">
+                    <span style="color: #999999 !important; font-size: 11px; font-weight: bold;">EMISSOR:</span><br>
+                    <b style="color: #000000 !important; font-size: 15px;">Tech Pay S.A.</b>
+                </div>
+            </div>
+            <div style="margin-top:20px; font-size:12px; color:#666;">
+Pagamento via link seguro Tech Pay
+</div>
+
+            <div style="margin-top: 50px; text-align: center; border-top: 1px solid #eeeeee; padding-top: 20px; background-color: #ffffff !important;">
+                <p style="color: #999999 !important; font-size: 10px;">Documento gerado digitalmente. <br> O pagamento confirma a aceitação dos termos.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
-function selecionarParaCobranca(nome, valor) {
-    document.getElementById('main-amount').value = "R$ " + valor;
-    document.getElementById('selected-name').innerText = "Cobrando " + nome;
+// Troca de abas
+function switchTab(e, tab){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    document.getElementById('tab-'+tab).classList.add('active');
 }
 
-function mascaraMoeda(i) {
-    let v = i.value.replace(/\D/g,'');
-    v = (v/100).toFixed(2) + '';
-    v = v.replace(".", ",");
-    v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
-    v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
-    i.value = "R$ " + v;
+// Máscara de Real
+function mascaraMoeda(i){
+    let v=i.value.replace(/\D/g,'');
+    v=(v/100).toFixed(2).replace(".",",");
+    v=v.replace(/(\d)(\d{3})(\d{3}),/g,"$1.$2.$3,");
+    v=v.replace(/(\d)(\d{3}),/g,"$1.$2,");
+    i.value="R$ "+v;
 }
 
-function gerarCobranca() {
-    const valor = document.getElementById('main-amount').value;
-    const nome = document.getElementById('selected-name').innerText.replace("Cobrando ", "") || "Cliente";
-    if(valor === "R$ 0,00") return alert("Digite um valor");
+// Função para salvar o cliente no cadastro
+function salvarCliente(){
+    const nome = document.getElementById('cad-nome').value;
+    const valor = document.getElementById('cad-valor').value;
+    const desc = document.getElementById('cad-desc').value;
+
+    if(!nome || valor === "R$ 0,00") return alert("Preencha nome e valor!");
+
+    let clientes = JSON.parse(localStorage.getItem("tp_clientes") || "[]");
+    clientes.unshift({ nome, valor, desc });
+    localStorage.setItem("tp_clientes", JSON.stringify(clientes));
+
+    // Limpa campos e volta para aba gerar
+    document.getElementById('cad-nome').value = "";
+    document.getElementById('cad-valor').value = "";
+    document.getElementById('cad-desc').value = "";
     
-    document.getElementById('render-valor').innerText = valor;
-    document.getElementById('render-cliente').innerText = nome;
-    document.getElementById('render-frase-nome').innerText = nome;
-    document.getElementById('modalCobranca').style.display = 'flex';
+    alert("Cliente cadastrado!");
+    renderizarClientes();
+    switchTab({currentTarget: document.querySelector('[onclick*="gerar"]')}, 'gerar');
 }
 
-function fecharModal() { document.getElementById('modalCobranca').style.display = 'none'; }
+// A MÁGICA: Clicar no cliente e os dados "subirem" para os campos
+function selecionarCliente(nome, valor, desc){
+    document.getElementById('link-nome').value = nome;
+    document.getElementById('link-valor').value = valor;
+    document.getElementById('link-desc').value = desc;
+    
+    // Feedback visual de que subiu
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-async function compartilharCobranca() {
-    const elemento = document.getElementById('area-documento');
-    const btnShare = document.getElementById('btn-compartilhar');
-    const btnClose = document.getElementById('btn-fechar-modal');
+function renderizarClientes(){
+    const clientes = JSON.parse(localStorage.getItem("tp_clientes") || "[]");
+    const lista = document.getElementById('lista-clientes');
+    
+    lista.innerHTML = clientes.map(c => `
+        <div class="item-cliente" onclick="selecionarCliente('${c.nome}', '${c.valor}', '${c.desc}')">
+            <div class="item-info">
+                <b>${c.nome}</b>
+                <span>${c.desc} • ${c.valor}</span>
+            </div>
+            <div class="badge-ativo">CADASTRADO</div>
+        </div>
+    `).join('');
+}
 
-    // Esconde botões para a foto ficar limpa
-    btnShare.style.opacity = '0';
-    btnClose.style.opacity = '0';
+// Substitua a função enviarLink anterior por esta:
+async function enviarLink() {
+    const nome = document.getElementById('link-nome').value;
+    const valor = document.getElementById('link-valor').value;
+    const desc = document.getElementById('link-desc').value;
+
+    if (!nome || valor === "R$ 0,00") {
+        return alert("Selecione um cliente primeiro!");
+    }
+
+    const vClean = valor.replace(/\D/g, '');
+    const linkFinal = `https://techpay.me/checkout.html?v=${vClean}&d=${encodeURIComponent(desc)}&n=${encodeURIComponent(nome)}`;
+
+    const mensagemTexto = 
+`Tech Pay - Ordem de Cobrança
+
+Sr(a). ${nome},
+constatamos uma pendência em seu nome.
+
+Valor: ${valor}
+Referente a: ${desc}
+
+Pagar agora:
+${linkFinal}`;
 
     try {
-        const canvas = await html2canvas(elemento, { backgroundColor: "#FFFFFF", scale: 2 });
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        const file = new File([blob], 'cobranca-techpay.png', { type: 'image/png' });
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        if (navigator.share) {
             await navigator.share({
-                files: [file],
-                title: 'Ordem de Cobrança',
-                text: 'Prezado, segue documento de cobrança Tech Pay.'
+                title: 'Cobrança Tech Pay',
+                text: mensagemTexto
             });
-            fecharModal();
         } else {
-            alert("Seu navegador não suporta envio de arquivos.");
+            window.open(
+                `https://api.whatsapp.com/send?text=${encodeURIComponent(mensagemTexto)}`,
+                '_blank'
+            );
         }
     } catch (err) {
-        alert("Erro ao gerar imagem");
-    } finally {
-        btnShare.style.opacity = '1';
-        btnClose.style.opacity = '1';
+        console.error("Erro:", err);
+
+        window.open(
+            `https://api.whatsapp.com/send?text=${encodeURIComponent(mensagemTexto)}`,
+            '_blank'
+        );
     }
 }
 </script>
