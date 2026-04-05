@@ -490,74 +490,77 @@ function abrirPDV() {
 // =======================
 // BANNER ROTATIVO DINÂMICO
 // =======================
+  
 let currentSlide = 0;
 let slideInterval;
 
 function carregarBanners() {
-    const bannerSlider = document.getElementById('banner-slider');
-    const bannerDots = document.getElementById('banner-dots');
-    if (!bannerSlider) return;
+  const bannerSlider = document.getElementById('banner-slider');
+  const bannerDots = document.getElementById('banner-dots');
+  if (!bannerSlider) return;
 
-    const contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
-    const hoje = new Date().toISOString().split('T')[0];
+  const contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
+  const hoje = new Date().toISOString().split('T')[0];
 
-    let listaSlides = [];
+  const listaSlides = [];
 
-    // CARD 1: CARTÃO
-    listaSlides.push(`<div class="smart-banner" onclick="location.href='cartao.html'" style="border-left: 5px solid var(--primary);">
-        <b style="font-size: 15px; color: #fff;">Cartão Virtual TECH</b>
-        <p style="font-size: 12px; color: var(--text-secondary);">Peça já o seu e faça compras online com segurança.</p>
-        <button style="background: var(--primary); color: #000;">Ativar Agora</button>
-    </div>`);
+  // CARTÃO
+  listaSlides.push(`
+    <div class="smart-banner" onclick="location.href='cartao.html'" style="border-left: 5px solid var(--primary);">
+      <b style="font-size: 15px; color: #fff;">Cartão Virtual TECH</b>
+      <p style="font-size: 12px; color: var(--text-secondary);">Peça já o seu e faça compras online.</p>
+      <button style="background: var(--primary); color: #000;">Ativar Agora</button>
+    </div>
+  `);
 
-    // CARD 2: COBRAR LINK
-    listaSlides.push(`<div class="smart-banner" onclick="location.href='links-pagamento.html'" style="background: linear-gradient(135deg, #064e3b, #111827); border-left: 5px solid #10b981;">
-        <b style="font-size: 15px; color: #fff;">Venda por Link 🔗</b>
-        <p style="font-size: 12px; color: var(--text-secondary);">Crie cobranças rápidas e envie via WhatsApp.</p>
-        <button style="background: #10b981; color: #fff;">Gerar Link</button>
-    </div>`);
+  // COBRAR POR LINK
+  listaSlides.push(`
+    <div class="smart-banner" onclick="location.href='links-pagamento.html'" style="background: linear-gradient(135deg, #064e3b, #111827); border-left: 5px solid #10b981;">
+      <b style="font-size: 15px; color: #fff;">Venda por Link 🔗</b>
+      <p style="font-size: 12px; color: var(--text-secondary);">Crie cobranças rápidas e envie via WhatsApp.</p>
+      <button style="background: #10b981; color: #fff;">Gerar Link</button>
+    </div>
+  `);
 
-    // CARD 3: CONTAS
-    const contasPendentes = contas.filter(c => !c.pago);
-    contasPendentes.forEach(c => {
-        let cor = "#22c55e";
-        if (c.data < hoje) cor = "#ef4444";
-        else if (c.data === hoje) cor = "#f59e0b";
+  // CONTAS
+  contas.filter(c => !c.pago).forEach(c => {
+    let cor = c.data < hoje ? "#ef4444" : (c.data === hoje ? "#f59e0b" : "#22c55e");
+    listaSlides.push(`
+      <div class="smart-banner" style="border-left: 5px solid ${cor};">
+        <b style="font-size: 15px;">${c.descricao}</b>
+        <p style="font-size: 12px; color: var(--text-secondary);">Valor: <span style="color:#fff; font-weight:700;">${c.valor}</span></p>
+        <button onclick="location.href='contas.html'" style="background: ${cor}; color: #000;">Pagar Agora</button>
+      </div>
+    `);
+  });
 
-        listaSlides.push(`<div class="smart-banner" style="border-left: 5px solid ${cor};">
-            <b style="font-size: 15px;">${c.descricao}</b>
-            <p style="font-size: 12px; color: var(--text-secondary);">Valor: <span style="color:#fff; font-weight:700;">${c.valor}</span></p>
-            <button onclick="location.href='contas.html'" style="background: ${cor}; color: #000;">Pagar Agora</button>
-        </div>`);
-    });
+  // RECARGA
+  listaSlides.push(`
+    <div class="smart-banner" onclick="location.href='recarga.html'" style="border-left: 5px solid #3b82f6;">
+      <b style="font-size: 15px; color: #fff;">Recarga de Celular</b>
+      <p style="font-size: 12px; color: var(--text-secondary);">Evite o bloqueio da sua linha.</p>
+      <button style="background: #3b82f6; color: #fff;">Recarregar</button>
+    </div>
+  `);
 
-    // CARD 4: RECARGA
-    listaSlides.push(`<div class="smart-banner" onclick="location.href='recarga.html'" style="border-left: 5px solid #3b82f6;">
-        <b style="font-size: 15px; color: #fff;">Recarga de Celular</b>
-        <p style="font-size: 12px; color: var(--text-secondary);">Evite o bloqueio da sua linha.</p>
-        <button style="background: #3b82f6; color: #fff;">Recarregar</button>
-    </div>`);
+  bannerSlider.innerHTML = listaSlides.join('');
 
-    bannerSlider.innerHTML = listaSlides.join('');
+  // Dots
+  if (bannerDots) {
+    bannerDots.innerHTML = listaSlides.map((_, i) => `<div class="dot ${i===0?'active':''}"></div>`).join('');
+  }
 
-    // Dots
+  // Rotação automática
+  if (slideInterval) clearInterval(slideInterval);
+  currentSlide = 0;
+  slideInterval = setInterval(() => {
+    currentSlide = (currentSlide + 1) % listaSlides.length;
+    bannerSlider.style.transform = `translateX(-${currentSlide * 100}%)`;
     if (bannerDots) {
-        bannerDots.innerHTML = listaSlides.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('');
+      bannerDots.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active', i===currentSlide));
     }
-
-    // Rotação automática
-    if (slideInterval) clearInterval(slideInterval);
-    currentSlide = 0;
-    slideInterval = setInterval(() => {
-        currentSlide = (currentSlide + 1) % listaSlides.length;
-        bannerSlider.style.transform = `translateX(-${currentSlide * 100}%)`;
-        if (bannerDots) {
-            const dots = bannerDots.querySelectorAll('.dot');
-            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
-        }
-    }, 4000);
+  }, 4000);
 }
-
 // =======================
 // LOGOUT
 // =======================
