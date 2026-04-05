@@ -477,109 +477,19 @@ function abrirPDV() {
 // =======================
 // BANNER ROTATIVO DINÂMICO
 // =======================
-  
-let currentSlide = 0;
-let slideInterval;
-
-function carregarBanners() {
+  function carregarBanners() {
     const bannerSlider = document.getElementById('banner-slider');
     const bannerDots = document.getElementById('banner-dots');
     if(!bannerSlider) return;
 
-    const contas = JSON.parse(localStorage.getItem("minhasContas") || "[]");
-    const transacoes = JSON.parse(localStorage.getItem("transacoes") || "[]");
-    const hoje = new Date().toISOString().split('T')[0];
-    
-    let listaSlides = [];
-
-    // CARD 1: CARTÃO
-    listaSlides.push(`<div class="smart-banner" onclick="location.href='cartao.html'" style="border-left: 5px solid var(--primary);">
-        <b style="font-size: 15px; color: #fff;">Cartão Virtual TECH</b>
-        <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Peça já o seu e faça compras online com segurança.</p>
-        <button style="background: var(--primary); color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Ativar Agora</button>
-    </div>`);
-
-    // CARD 2: LINK DE PAGAMENTO
-    listaSlides.push(`<div class="smart-banner" onclick="location.href='links-pagamento.html'" style="background: linear-gradient(135deg, #064e3b, #111827); border-left: 5px solid #10b981;">
-        <b style="font-size: 15px; color: #fff;">Venda por Link 🔗</b>
-        <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Crie cobranças rápidas via WhatsApp.</p>
-        <button style="background: #10b981; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Gerar Link</button>
-    </div>`);
-
-    // CARD 3: COBRANÇA
-    const cobrancas = transacoes.filter(t => t.tipo === "entrada" && t.status === "pendente");
-    if(cobrancas.length > 0){
-        cobrancas.forEach(c => {
-            listaSlides.push(`<div class="smart-banner" style="border-left: 5px solid #ef4444;">
-                <span style="font-size: 8px; background: #ef4444; color: white; padding: 2px 6px; border-radius: 6px; position: absolute; top: 15px; right: 15px; font-weight: 800;">PENDENTE</span>
-                <b style="font-size: 15px; color: #fff;">${c.descricao || 'Cliente'}</b>
-                <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Valor a receber: <b style="color:#fff;">${c.valor}</b></p>
-                <button onclick="location.href='cobrar.html'" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Cobrar Agora</button>
-            </div>`);
-        });
-    } else {
-        listaSlides.push(`<div class="smart-banner" onclick="location.href='cobrar.html'" style="border-left: 5px solid #a855f7;">
-            <b style="font-size: 15px; color: #fff;">Gestão de Cobranças</b>
-            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Organize quem te deve e envie lembretes Pix.</p>
-            <button style="background: #a855f7; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Ver Clientes</button>
-        </div>`);
-    }
-
-    // CARD 4: CONTAS
-    const contasVencidas = contas.filter(c => c.data <= hoje);
-    if(contasVencidas.length > 0){
-        contasVencidas.forEach(c => {
-            const cor = c.data === hoje ? "#f59e0b" : "#ef4444";
-            listaSlides.push(`<div class="smart-banner" style="border-left: 5px solid ${cor};">
-                <span style="font-size: 8px; background: ${cor}; color: #000; padding: 2px 6px; border-radius: 6px; position: absolute; top: 15px; right: 15px; font-weight: 800;">VENCIMENTO</span>
-                <b style="font-size: 15px; color:#fff;">${c.descricao}</b>
-                <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Valor: <b style="color:#fff;">${c.valor}</b></p>
-                <button onclick="location.href='contas.html'" style="background: ${cor}; color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Pagar</button>
-            </div>`);
-        });
-    } else {
-        listaSlides.push(`<div class="smart-banner" onclick="location.href='contas.html'" style="border-left: 5px solid #f59e0b;">
-            <b style="font-size: 15px; color: #fff;">Contas e Boletos</b>
-            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Mantenha suas contas em dia e evite juros.</p>
-            <button style="background: #f59e0b; color: #000; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Gerenciar</button>
-        </div>`);
-    }
-
-    // CARD 5: RECARGA
-    listaSlides.push(`<div class="smart-banner" onclick="location.href='recarga.html'" style="border-left: 5px solid #3b82f6;">
-        <b style="font-size: 15px; color: #fff;">Recarga de Celular</b>
-        <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Evite o bloqueio da sua linha. Recarregue agora.</p>
-        <button style="background: #3b82f6; color: #fff; border: none; border-radius: 8px; font-size: 10px; padding: 6px 12px; font-weight: 700;">Recarregar</button>
-    </div>`);
-
-    bannerSlider.innerHTML = listaSlides.join('');
-
-    // Dots
-    let dotsHTML = "";
-    listaSlides.forEach((_, index) => {
-        dotsHTML += `<div class="dot ${index === 0 ? 'active' : ''}"></div>`;
-    });
-    bannerDots.innerHTML = dotsHTML;
-
-    currentSlide = 0;
-    iniciarRotacao(listaSlides.length);
-}
-
-function iniciarRotacao(total) {
-    if (total <= 1) return;
-    if (slideInterval) clearInterval(slideInterval);
-
-    slideInterval = setInterval(() => {
-        currentSlide = (currentSlide + 1) % total;
-        const slider = document.getElementById('banner-slider');
-        const dots = document.querySelectorAll('.dot');
-        if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-        dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
-    }, 4000);
-}
-
-window.onload = () => carregarBanners();
-
+    bannerSlider.innerHTML = `
+        <div class="smart-banner">
+            <b style="font-size: 15px; color: #fff;">Teste Banner</b>
+            <p style="font-size: 12px; color: var(--text-secondary); margin: 8px 0;">Se você ver isso, o CSS e HTML estão ok!</p>
+        </div>
+    `;
+    if(bannerDots) bannerDots.innerHTML = `<div class="dot active"></div>`;
+  }
 // =======================
 // LOGOUT
 // =======================
