@@ -231,15 +231,12 @@ ID: ${document.getElementById("c-id").innerText}
 
     // 🟢 2. ATUALIZA TRANSAÇÕES
     let transacoes = JSON.parse(localStorage.getItem("transacoes") || "[]");
-
-    transacoes = transacoes.map(t => {
-        if (t.descricao && t.status === "pendente") {
-            // aqui você pode melhorar depois com ID também
-            t.status = "pago";
-        }
-        return t;
-    });
-
+transacoes = transacoes.map(t => 
+    t.id === id 
+        ? { ...t, status: "pago" } 
+        : t
+);
+ 
     localStorage.setItem("transacoes", JSON.stringify(transacoes));
 
     // 🟢 3. ATUALIZA SALDO
