@@ -248,6 +248,21 @@ svg {
   stroke: currentColor;
   stroke-width: 1.8;
   }
+    /* Adicione isso para dar espaço no final da tela por causa da nav-bar */
+.container { 
+    padding: 20px 20px 100px 20px; /* O 100px garante que o último card apareça */
+}
+
+/* Ajuste no card de atividade para não vazar */
+.smart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px; /* Espaço entre ele e o próximo elemento */
+    box-sizing: border-box;
+}
+    
   </style>
 </head>
 <body>
@@ -426,16 +441,20 @@ svg {
   </button>
 </nav>
 
+  
 <script>
 let saldoOculto = false;
 let currentSlide = 0;
 let slideInterval;
-
-function atualizarHome() {
-    const saldoSalvo = parseFloat(localStorage.getItem("saldo") || "1250.00");
-    const el = document.getElementById("saldo-home");
-    if(el) el.innerText = saldoOculto ? "••••••••" : saldoSalvo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
+function atualizarHome() {  
+    const saldoSalvo = parseFloat(localStorage.getItem("saldo") || "1250.00");  
+    const el = document.getElementById("saldo-home");  
+    if(el) {
+        // Se saldoOculto for true, mostra asteriscos, senão mostra o valor formatado
+        el.innerText = saldoOculto ? "••••••••" : saldoSalvo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });  
+    }
+                                  }
+  
 
 function atualizarResumo() {
     const historico = JSON.parse(localStorage.getItem("transacoes") || "[]");
