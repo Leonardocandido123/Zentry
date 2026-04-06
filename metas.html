@@ -1,379 +1,229 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <title>Tech Pay - Verde Total</title>
-    <style>
-       :root { 
-    --primary: #22c55e; /* VERDE PRINCIPAL */
-    --bg: #000;
-    --card: rgba(17, 24, 39, 0.9);
-    --border: rgba(255, 255, 255, 0.1);
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meta TechPay</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --primary:#22c55e;
+  --bg:#000;
+  --card:#0f172a;
+  --border:rgba(255,255,255,0.08);
+  --text:#9CA3AF;
 }
 
-/* RESET */
-* {
-    box-sizing: border-box;
+body {
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #000);
+  color:#fff;
 }
 
-body { 
-    margin: 0;
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: #fff; 
-    padding: 20px;
-    padding-bottom: 150px;
-    min-height: 100vh;
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
+.container { padding:20px; }
+
+/* HEADER */
+.header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.header h2 {
+  font-size:20px;
+  font-weight:800;
 }
 
 /* CARD PRINCIPAL */
 .goal-card {
-    background: var(--card);
-    border-radius: 30px;
-    padding: 25px;
-    border: 1px solid var(--border);
-    backdrop-filter: blur(15px);
-    text-align: center;
-    margin-bottom: 20px;
+  background: linear-gradient(145deg,#111827,#020617);
+  border-radius:26px;
+  padding:22px;
+  border:1px solid var(--border);
+  margin-bottom:20px;
 }
 
-/* GRID DE ÍCONES */
-.icon-select {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
+/* NOME */
+.goal-name {
+  font-size:13px;
+  color:var(--text);
 }
 
-.icon-opt { 
-    background: rgba(255,255,255,0.03);
-    height: 50px;
-    border-radius: 15px; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: 0.3s;
-    color: #4b5563;
+.goal-value {
+  font-size:34px;
+  font-weight:800;
+  margin:5px 0;
 }
 
-.icon-opt svg {
-    width: 22px;
-    height: 22px;
-    stroke-width: 1.5;
+/* BARRA */
+.bar {
+  height:8px;
+  background:#1f2937;
+  border-radius:20px;
+  overflow:hidden;
+  margin:15px 0;
 }
 
-/* ESTADO ATIVO (VERDE PREMIUM) */
-.icon-opt.active { 
-    background: rgba(255,255,255,0.08) !important;
-    color: var(--primary) !important; 
-    border-color: var(--primary) !important; 
-    transform: scale(1.05); 
-    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+.fill {
+  height:100%;
+  width:0%;
+  background:var(--primary);
+  border-radius:20px;
+  transition:1s;
 }
 
-/* BOTÃO DE ADICIONAR (+) */
-.icon-opt.add-btn {
-    border: 2px dashed var(--border);
-    color: #666;
+/* TEXTO */
+.goal-info {
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:var(--text);
 }
 
-/* INPUT NOME */
-#nomeMeta {
-    width: 100%;
-    background: transparent;
-    border: none; 
-    border-bottom: 2px solid var(--border);
-    color: var(--primary); 
-    text-align: center;
-    font-weight: 700;
-    font-size: 18px;
-    outline: none;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
+/* INPUT CARD */
+.input-card {
+  background:var(--card);
+  border-radius:20px;
+  padding:16px;
+  border:1px solid var(--border);
+  margin-bottom:15px;
 }
 
-/* TÍTULO */
-h2, h3 {
-    color: var(--primary);
+.input-card input {
+  width:100%;
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:22px;
+  font-weight:800;
+  outline:none;
 }
 
-/* VALOR PRINCIPAL */
-.amount-main {
-    font-size: 38px;
-    font-weight: 800;
-    margin: 5px 0;
-    letter-spacing: -1px;
+/* BOTÃO */
+.btn {
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:14px;
+  font-weight:800;
+  margin-top:10px;
 }
 
-/* BARRA DE PROGRESSO */
-.bar-bg {
-    background: rgba(255,255,255,0.1);
-    height: 14px;
-    border-radius: 50px;
-    margin: 20px 0 10px;
-    overflow: hidden;
+.primary {
+  background:var(--primary);
+  color:#000;
 }
 
-.bar-fill { 
-    height: 100%;
-    width: 0%;
-    background: var(--primary); 
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
-    transition: 1s ease-out;
+.secondary {
+  background:transparent;
+  border:1px solid var(--border);
+  color:#fff;
 }
-
-/* TEXTOS AUXILIARES */
-.small-text {
-    font-size: 12px;
-    color: #aaa;
-}
-
-/* INPUT BOX */
-.input-box { 
-    background: var(--card);
-    border-radius: 20px;
-    padding: 15px; 
-    border: 1px solid var(--border);
-    margin-bottom: 15px;
-}
-
-.input-box label {
-    font-size: 10px;
-    color: #888;
-    text-transform: uppercase;
-    font-weight: 700;
-}
-
-.input-box input { 
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: #fff; 
-    font-size: 20px;
-    font-weight: 700;
-    outline: none;
-    margin-top: 5px;
-}
-
-/* BOTÕES */
-.btn { 
-    width: 100%;
-    padding: 16px;
-    border-radius: 15px;
-    font-weight: 800; 
-    cursor: pointer;
-    border: none;
-    transition: 0.2s;
-    margin-top: 5px;
-}
-
-.btn-primary {
-    background: var(--primary);
-    color: #000;
-    box-shadow: 0 5px 20px rgba(34, 197, 94, 0.4);
-}
-
-.btn-primary:active {
-    transform: scale(0.97);
-}
-
-.btn-secondary {
-    background: #fff;
-    color: #000;
-    margin-top: 15px;
-}
-
-/* NAVBAR */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: rgba(10, 10, 10, 0.98);
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-around;
-    padding: 15px 0 30px;
-    backdrop-filter: blur(15px);
-}
-
-.nav-item {
-    text-decoration: none;
-    color: #555;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 10px;
-    gap: 5px;
-}
-
-.nav-item.active {
-    color: var(--primary);
-}
-
-.nav-item svg {
-    width: 22px;
-    height: 22px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
-}
-    </style>
+</style>
 </head>
+
 <body>
 
-    <h2 style="text-align: center; font-weight: 800; letter-spacing: -1px;">Definir Foco</h2>
+<div class="container">
 
-    <div class="goal-card">
-        <div class="icon-select">
-            <div class="icon-opt active" onclick="selectIcon('car', this)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3C13 6.8 11.8 6 10.5 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h3m3 0h6m0 0a3 3 0 1 1-6 0m6 0v1m-6-1v1"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg>
-            </div>
-            <div class="icon-opt" onclick="selectIcon('home', this)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            </div>
-            <div class="icon-opt" onclick="selectIcon('tech', this)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            </div>
-            <div class="icon-opt" onclick="selectIcon('game', this)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="15.5" cy="10.5" r=".5"/><circle cx="15.5" cy="13.5" r=".5"/><circle cx="17.5" cy="12" r=".5"/></svg>
-            </div>
-            <div class="icon-opt" onclick="selectIcon('shop', this)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            </div>
-            <div class="icon-opt" onclick="selectIcon('book', this)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </div>
-            <div class="icon-opt" onclick="selectIcon('plane', this)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
-            </div>
-            <div class="icon-opt add-btn" onclick="iniciarAdicao()" id="btn-add-mais">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 28px; height: 28px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </div>
-        </div>
+<div class="header">
+  <h2>Metas</h2>
+</div>
 
-        <div class="name-input-container">
-            <input type="text" id="nomeMeta" placeholder="Dê um nome ao seu sonho" onchange="salvarNome(this)">
-        </div>
+<!-- META -->
+<div class="goal-card">
+  <div class="goal-name" id="nome">Meu objetivo</div>
+  <div class="goal-value" id="valor">R$ 0,00</div>
 
-        <div style="font-size: 11px; color: var(--primary); font-weight: 700; text-transform: uppercase;" id="txt-meta-final">OBJETIVO: R$ 0,00</div>
-        <div class="amount-main" id="txt-acumulado">R$ 0,00</div>
-        
-        <div class="bar-bg">
-            <div class="bar-fill" id="progresso-barra"></div>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #777;">
-            <span id="txt-porcentagem">0% concluído</span>
-            <span id="txt-restante">Faltam R$ 0,00</span>
-        </div>
-    </div>
+  <div class="bar">
+    <div class="fill" id="barra"></div>
+  </div>
 
-    <div class="input-box">
-        <label>Depositar no Cofre</label>
-        <input type="text" id="valorAporte" placeholder="R$ 0,00" oninput="mascara(this)">
-        <button class="btn btn-primary" onclick="depositar()">GUARDAR AGORA</button>
-    </div>
+  <div class="goal-info">
+    <span id="porc">0%</span>
+    <span id="restante">Faltam R$ 0,00</span>
+  </div>
+</div>
 
-    <div class="input-box">
-        <label>Valor Total da Meta</label>
-        <input type="text" id="valorTotalMeta" placeholder="R$ 0,00" oninput="mascara(this)">
-        <button class="btn btn-secondary" onclick="configurarMeta()">SALVAR DEFINIÇÕES</button>
-    </div>
+<!-- DEPOSITAR -->
+<div class="input-card">
+  <small>Guardar dinheiro</small>
+  <input id="deposito" placeholder="R$ 0,00" oninput="mascara(this)">
+  <button class="btn primary" onclick="depositar()">Guardar</button>
+</div>
 
-    <script>function aplicarCorIdentidade() {
-    let cor = localStorage.getItem("cor_primaria");
+<!-- CONFIG -->
+<div class="input-card">
+  <small>Definir meta</small>
+  <input id="metaTotal" placeholder="R$ 0,00" oninput="mascara(this)">
+  <input id="metaNome" placeholder="Nome da meta">
+  <button class="btn secondary" onclick="salvar()">Salvar</button>
+</div>
 
-    // Se não existir OU se for amarelo, força verde
-    if (!cor || cor === "#ffff00" || cor === "yellow") {
-        cor = "#22c55e";
-        localStorage.setItem("cor_primaria", cor);
-    }
+</div>
 
-    document.documentElement.style.setProperty('--primary', cor);
+<script>
+// máscara
+function mascara(i){
+ let v=i.value.replace(/\D/g,'');
+ v=(v/100).toFixed(2)+'';
+ v=v.replace(".",",");
+ v=v.replace(/(\d)(\d{3}),/g,"$1.$2,");
+ i.value="R$ "+v;
 }
 
-    function mascara(i) {
-        let v = i.value.replace(/\D/g,'');
-        v = (v/100).toFixed(2) + '';
-        v = v.replace(".", ",");
-        v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
-        v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
-        i.value = "R$ " + v;
-    }
+// parse
+function parse(v){
+ return parseFloat(v.replace(/[^\d]/g,''))/100||0;
+}
 
-    function parseMoeda(str) {
-        if(!str) return 0;
-        return parseFloat(str.replace(/[^\d]/g, '')) / 100;
-    }
+// salvar meta
+function salvar(){
+ let valor=parse(document.getElementById("metaTotal").value);
+ let nome=document.getElementById("metaNome").value;
 
-    function selectIcon(iconName, el) {
-        document.querySelectorAll('.icon-opt').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        localStorage.setItem("meta_icon_final", iconName);
-    }
+ localStorage.setItem("meta_valor",valor);
+ localStorage.setItem("meta_nome",nome);
 
-    function iniciarAdicao() {
-        document.querySelectorAll('.icon-opt').forEach(i => i.classList.remove('active'));
-        document.getElementById('btn-add-mais').classList.add('active');
-        localStorage.removeItem("meta_icon_final"); // Remove ícone pré-definido
-        
-        const input = document.getElementById('nomeMeta');
-        input.value = "";
-        input.placeholder = "Escreva o seu novo objetivo...";
-        input.focus();
-    }
+ atualizar();
+}
 
-    function salvarNome(input) {
-        localStorage.setItem("nome_objetivo_final", input.value);
-        atualizarUI();
-    }
+// depositar
+function depositar(){
+ let v=parse(document.getElementById("deposito").value);
+ let atual=parseFloat(localStorage.getItem("meta_guardado")||0);
 
-    function configurarMeta() {
-        const valor = document.getElementById('valorTotalMeta').value;
-        const nome = document.getElementById('nomeMeta').value || "Meu Sonho";
-        if(parseMoeda(valor) <= 0) return alert("Insira um valor!");
-        
-        localStorage.setItem("valor_objetivo_final", valor);
-        localStorage.setItem("nome_objetivo_final", nome);
-        atualizarUI();
-        alert("Meta guardada com sucesso! 🚀");
-    }
+ localStorage.setItem("meta_guardado",atual+v);
 
-    function depositar() {
-        const aporte = parseMoeda(document.getElementById('valorAporte').value);
-        if(aporte <= 0) return;
-        let atual = parseFloat(localStorage.getItem("saldo_guardado_final") || 0);
-        localStorage.setItem("saldo_guardado_final", atual + aporte);
-        document.getElementById('valorAporte').value = "";
-        atualizarUI();
-    }
+ atualizar();
+}
 
-    function atualizarUI() {
-        aplicarCorIdentidade();
-        const nome = localStorage.getItem("nome_objetivo_final") || "Meu Sonho";
-        const valorObj = localStorage.getItem("valor_objetivo_final") || "R$ 0,00";
-        const guardado = parseFloat(localStorage.getItem("saldo_guardado_final") || 0);
-        const valorObjNum = parseMoeda(valorObj);
+// atualizar UI
+function atualizar(){
+ let nome=localStorage.getItem("meta_nome")||"Meu objetivo";
+ let total=parseFloat(localStorage.getItem("meta_valor")||0);
+ let guardado=parseFloat(localStorage.getItem("meta_guardado")||0);
 
-        document.getElementById('nomeMeta').value = nome;
-        document.getElementById('txt-meta-final').innerText = `${nome.toUpperCase()}: ${valorObj}`;
-        document.getElementById('txt-acumulado').innerText = guardado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+ document.getElementById("nome").innerText=nome;
+ document.getElementById("valor").innerText=
+ guardado.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 
-        const porc = valorObjNum > 0 ? Math.min((guardado / valorObjNum) * 100, 100) : 0;
-        document.getElementById('progresso-barra').style.width = porc + "%";
-        document.getElementById('txt-porcentagem').innerText = Math.floor(porc) + "% concluído";
-        document.getElementById('txt-restante').innerText = "Faltam " + (Math.max(valorObjNum - guardado, 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
+ let p= total>0 ? (guardado/total)*100 : 0;
 
-    window.onload = atualizarUI;
+ document.getElementById("barra").style.width=p+"%";
+ document.getElementById("porc").innerText=Math.floor(p)+"%";
+
+ let falta=total-guardado;
+ document.getElementById("restante").innerText=
+ "Faltam "+falta.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+
+atualizar();
 </script>
+
 </body>
-          </html>
-          
+</html>
