@@ -162,7 +162,7 @@ Pagamento via link seguro Tech Pay
 
 
 <script>
-// Troca de abas
+// Troca de abas (CORRIGIDO)
 function switchTab(e, tab){
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
@@ -179,29 +179,36 @@ function mascaraMoeda(i){
     i.value="R$ "+v;
 }
 
-// Função para salvar o cliente no cadastro
+// Salvar Cliente (CORRIGIDO PARA ATUALIZAR A LISTA NA HORA)
 function salvarCliente(){
     const nome = document.getElementById('cad-nome').value;
     const valor = document.getElementById('cad-valor').value;
     const desc = document.getElementById('cad-desc').value;
 
-    if(!nome || valor === "R$ 0,00") return alert("Preencha nome e valor!");
+    if(!nome || valor === "R$ 0,00") {
+        return alert("Preencha nome e valor!");
+    }
 
     let clientes = JSON.parse(localStorage.getItem("tp_clientes") || "[]");
     clientes.unshift({ nome, valor, desc });
     localStorage.setItem("tp_clientes", JSON.stringify(clientes));
 
-    // Limpa campos e volta para aba gerar
+    // Limpa campos
     document.getElementById('cad-nome').value = "";
     document.getElementById('cad-valor').value = "";
     document.getElementById('cad-desc').value = "";
     
-    alert("Cliente cadastrado!");
+    alert("Cliente cadastrado com sucesso!");
+    
+    // Atualiza a lista lá embaixo
     renderizarClientes();
-    switchTab({currentTarget: document.querySelector('[onclick*="gerar"]')}, 'gerar');
+    
+    // Volta para a aba de Gerar Link automaticamente
+    const tabGerar = document.querySelector('.tab-btn:first-child');
+    switchTab({currentTarget: tabGerar}, 'gerar');
 }
 
-// A MÁGICA: Clicar no cliente e os dados "subirem" para os campos
+// Clicar no cliente e os dados subirem
 function selecionarCliente(nome, valor, desc){
     document.getElementById('link-nome').value = nome;
     document.getElementById('link-valor').value = valor;
@@ -211,10 +218,16 @@ function selecionarCliente(nome, valor, desc){
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// Renderizar Clientes (CORRIGIDO)
 function renderizarClientes(){
     const clientes = JSON.parse(localStorage.getItem("tp_clientes") || "[]");
     const lista = document.getElementById('lista-clientes');
     
+    if(clientes.length === 0) {
+        lista.innerHTML = '<p style="text-align:center; font-size:12px; color:gray; margin-top:10px;">Nenhum cliente cadastrado.</p>';
+        return;
+    }
+
     lista.innerHTML = clientes.map(c => `
         <div class="item-cliente" onclick="selecionarCliente('${c.nome}', '${c.valor}', '${c.desc}')">
             <div class="item-info">
@@ -226,68 +239,47 @@ function renderizarClientes(){
     `).join('');
 }
 
-// Substitua a função enviarLink anterior por esta:
+// Gerar e Enviar Link (LIMPO E SEM ERROS DE SINTAXE)
 function enviarLink() {
     const nome = document.getElementById('link-nome').value;
     const valor = document.getElementById('link-valor').value;
     const desc = document.getElementById('link-desc').value;
 
     if (!nome || valor === "R$ 0,00") {
-        return alert("Selecione um cliente primeiro!");
+        return alert("Preencha os dados ou selecione um cliente!");
     }
 
     const vClean = valor.replace(/\D/g, '');
     const id = "TP" + Date.now();
     const data = new Date().toLocaleString();
 
-    // 🔗 LINK DO CHECKOUT
     const linkFinal = `checkout.html?id=${id}&v=${vClean}&d=${encodeURIComponent(desc)}&n=${encodeURIComponent(nome)}`;
 
-    // 🔥 SALVAR COBRANÇA (BASE DO APP)
+    // Salvar Cobrança
     let cobrancas = JSON.parse(localStorage.getItem("cobrancas") || "[]");
-
-    cobrancas.unshift({
-        id: id,
-        nome: nome,
-        valor: valor,
-        desc: desc,
-        status: "pendente",
-        data: data,
-        link: linkFinal
-    });
-
+    cobrancas.unshift({ id, nome, valor, desc, status: "pendente", data, link: linkFinal });
     localStorage.setItem("cobrancas", JSON.stringify(cobrancas));
 
-    // 🔥 INTEGRA COM HOME (card rotativo usa "transacoes")
+    // Integra com a Home
     let transacoes = JSON.parse(localStorage.getItem("transacoes") || "[]");
-
     transacoes.unshift({
-    id: id, // 🔥 IMPORTANTE
-    tipo: "entrada",
-    valor: valor,
-    descricao: nome,
-    status: "pendente",
-    data: new Date().toISOString()
-});
-
-
+        id: id,
+        tipo: "entrada",
+        valor: valor,
+        descricao: nome,
+        status: "pendente",
+        data: new Date().toISOString()
+    });
     localStorage.setItem("transacoes", JSON.stringify(transacoes));
 
-    // 📲 MENSAGEM
-    const mensagemTexto = 
-`💳 Tech Pay - Cobrança
-
-Cliente: ${nome}
-Valor: ${valor}
-Referente: ${desc}
-
-Pagar agora:
-${linkFinal}`;
-
+    const mensagemTexto = `💳 Tech Pay - Cobrança\n\nCliente: ${nome}\nValor: ${valor}\nReferente: ${desc}\n\nPagar agora:\n${linkFinal}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensagemTexto)}`, '_blank');
+}
 
-    alert("Cobrança criada com sucesso!");
-        
+// Carregar a lista assim que abrir a página
+window.onload = renderizarClientes;
 </script>
+       
+
 </body>
 </html>
