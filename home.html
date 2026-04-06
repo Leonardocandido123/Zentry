@@ -375,6 +375,54 @@ svg {
   transform: scale(0.92);
   transition: 0.15s;
 }
+    <style>
+  .resumo-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .resumo-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+  .resumo-header small { color: var(--text-muted); font-size: 12px; }
+  .resumo-header h2 { margin: 0; font-size: 26px; font-weight: 800; }
+  
+  .badge-lucro { 
+    background: rgba(34, 197, 94, 0.1); 
+    color: var(--primary); 
+    padding: 4px 10px; 
+    border-radius: 20px; 
+    font-size: 12px; 
+    font-weight: 700; 
+  }
+
+  /* Estética do Gráfico */
+  .grafico-container { 
+    height: 100px; 
+    width: 100%; 
+    margin: 10px 0;
+    display: flex;
+    align-items: flex-end;
+  }
+  .grafico-svg { width: 100%; height: 80px; overflow: visible; }
+
+  .resumo-footer { 
+    display: flex; 
+    justify-content: space-between; 
+    border-top: 1px solid var(--border); 
+    padding-top: 15px; 
+    margin-top: 10px;
+  }
+  
+  .info-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .azul { background: #3B82F6; box-shadow: 0 0 8px #3B82F6; }
+  .amarelo { background: #FBBF24; box-shadow: 0 0 8px #FBBF24; }
+</style>
+  
   </style>
 </head>
 <body>
@@ -401,12 +449,39 @@ svg {
         <small>Saldo disponível</small>
     </div>
   </div>
-  
-  <div class="resumo-dia">
-    <div><span>Entrou</span><b id="entrada-dia">R$ 0,00</b></div>
-    <div><span>Saiu</span><b id="saida-dia">R$ 0,00</b></div>
-    <div><span>Lucro</span><b id="lucro-dia" style="color: var(--primary);">R$ 0,00</b></div>
+  <div class="resumo-card">
+  <div class="resumo-header">
+    <div>
+      <small>Lucro Estimado</small>
+      <h2 id="lucroValor">R$ 850,00</h2>
+    </div>
+    <span class="badge-lucro">+12%</span>
   </div>
+
+  <div class="grafico-container">
+    <svg viewBox="0 0 500 100" class="grafico-svg">
+      <path d="M0,80 Q125,75 250,78 T500,75" fill="none" stroke="var(--primary)" stroke-width="3" opacity="0.8" />
+      
+      <path d="M0,90 L50,40 L100,60 L150,20 L200,45 L250,10 L300,50 L350,15 L400,40 L450,5 L500,30" 
+            fill="none" stroke="#3B82F6" stroke-width="2" />
+            
+      <path d="M0,95 L60,85 L120,95 L180,75 L240,90 L300,80 L360,95 L420,85 L500,98" 
+            fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="5,5" />
+    </svg>
+  </div>
+
+  <div class="resumo-footer">
+    <div class="info-item">
+      <div class="dot azul"></div>
+      <span>Entrou: <strong style="color:#3B82F6">R$ 1.200</strong></span>
+    </div>
+    <div class="info-item">
+      <div class="dot amarelo"></div>
+      <span>Saiu: <strong style="color:#FBBF24">R$ 350</strong></span>
+    </div>
+  </div>
+  </div>
+  
 
   <div class="pix-card">
     <div class="pix-info"><b>Pix rápido ⚡</b><br><span style="font-size: 11px; opacity: 0.8;">Mande dinheiro agora</span></div>
