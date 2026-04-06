@@ -220,6 +220,7 @@ function salvarCliente(){
     const tabGerar = document.querySelector('.tab-btn:first-child');
     switchTab({currentTarget: tabGerar}, 'gerar');
 }
+// --- INÍCIO DO BLOCO DE GESTÃO DE CLIENTES ---
 
 function renderizarClientes(){
     const clientes = JSON.parse(localStorage.getItem("tp_clientes") || "[]");
@@ -230,57 +231,73 @@ function renderizarClientes(){
         return;
     }
 
+    const hoje = new Date();
+    hoje.setHours(0,0,0,0);
+
     lista.innerHTML = clientes.map(c => {
-        // Formata a data para o padrão brasileiro (DD/MM/AAAA)
-        let dataFormatada = "---";
+        let cor = "#22c55e"; 
+        let statusTxt = "PRAZO OK";
+        let anim = "";
+        let dataExibicao = "---";
+
         if(c.dataVenc && c.dataVenc !== "Não definida") {
             const [ano, mes, dia] = c.dataVenc.split('-');
-            dataFormatada = `${dia}/${mes}/${ano}`;
+            const dVenc = new Date(ano, mes - 1, dia);
+            dataExibicao = `${dia}/${mes}/${ano}`;
+
+            const diff = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
+
+            if(diff < 0) { 
+                cor = "#ff4444"; 
+                statusTxt = "VENCIDO"; 
+                anim = "anim-pulsa"; 
+            } else if(diff === 0) { 
+                cor = "#ffbb33"; 
+                statusTxt = "VENCE HOJE"; 
+            } else if(diff === 1) { 
+                cor = "#22c55e"; 
+                statusTxt = "VENCE AMANHÃ"; 
+            }
         }
 
         return `
-            <div class="item-cliente" onclick="selecionarCliente('${c.nome}', '${c.valor}', '${c.desc}')">
-                <div class="item-info">
+            <div class="item-cliente ${anim}" style="border-left: 5px solid ${cor}; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div class="item-info" onclick="selecionarCliente('${c.nome}', '${c.valor}', '${c.desc}')" style="flex: 1; cursor: pointer;">
                     <b>${c.nome}</b>
                     <span>${c.desc} • ${c.valor}</span>
-                    <span style="display:block; color:var(--primary); font-size:10px; margin-top:4px;">📅 Vence dia: ${dataFormatada}</span>
+                    <span style="display:block; color:${cor}; font-size:10px; margin-top:4px; font-weight:800;">📅 Vencimento: ${dataExibicao}</span>
                 </div>
-                <div class="badge-ativo">CADASTRADO</div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <div class="badge-status" style="color:${cor}; border: 1px solid ${cor}; font-size: 8px; padding: 2px 6px; border-radius: 6px; font-weight: 900;">${statusTxt}</div>
+                    <button onclick="removerCliente('${c.nome}')" style="background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px;">✅</button>
+                </div>
             </div>
         `;
     }).join('');
 }
-    
-// Clicar no cliente e os dados subirem
+
+// 1. FUNÇÃO PARA SUBIR OS DADOS (A que estava no meio das outras)
 function selecionarCliente(nome, valor, desc){
     document.getElementById('link-nome').value = nome;
     document.getElementById('link-valor').value = valor;
     document.getElementById('link-desc').value = desc;
     
-    // Feedback visual de que subiu
+    // Feedback visual suave de que os dados subiram para o topo
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Renderizar Clientes (CORRIGIDO)
-function renderizarClientes(){
-    const clientes = JSON.parse(localStorage.getItem("tp_clientes") || "[]");
-    const lista = document.getElementById('lista-clientes');
-    
-    if(clientes.length === 0) {
-        lista.innerHTML = '<p style="text-align:center; font-size:12px; color:gray; margin-top:10px;">Nenhum cliente cadastrado.</p>';
-        return;
+// 2. FUNÇÃO PARA DAR BAIXA (Sumir com o card)
+function removerCliente(nome) {
+    if(confirm("Confirmar pagamento e remover " + nome + " da lista?")) {
+        let clientes = JSON.parse(localStorage.getItem("tp_clientes") || "[]");
+        clientes = clientes.filter(c => c.nome !== nome);
+        localStorage.setItem("tp_clientes", JSON.stringify(clientes));
+        renderizarClientes();
     }
-
-    lista.innerHTML = clientes.map(c => `
-        <div class="item-cliente" onclick="selecionarCliente('${c.nome}', '${c.valor}', '${c.desc}')">
-            <div class="item-info">
-                <b>${c.nome}</b>
-                <span>${c.desc} • ${c.valor}</span>
-            </div>
-            <div class="badge-ativo">CADASTRADO</div>
-        </div>
-    `).join('');
 }
+
+// --- FIM DO BLOCO ---
+    
 
 // Gerar e Enviar Link (LIMPO E SEM ERROS DE SINTAXE)
 function enviarLink() {
