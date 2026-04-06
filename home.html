@@ -618,6 +618,30 @@ function abrirPDV() {
     currentSlide = 0;
     iniciarRotacao(listaSlides.length);
   }
+  function iniciarRotacao(total) {
+    if (total <= 1) return;
+
+    if (slideInterval) clearInterval(slideInterval);
+
+    const slider = document.getElementById('banner-slider');
+
+    slideInterval = setInterval(() => {
+        currentSlide++;
+
+        if (currentSlide >= total) {
+            currentSlide = 0;
+        }
+
+        slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+        // Atualiza bolinhas
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+
+    }, 3000);
+  }
 
 
 // =======================
