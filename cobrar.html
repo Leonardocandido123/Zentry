@@ -69,6 +69,48 @@
     .badge-ativo { color:var(--primary); font-size:10px; font-weight:800; border: 1px solid var(--primary); padding: 2px 8px; border-radius: 20px; }
 
     @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+    /* Estilo para o botão da lixeira (SVG) */
+.btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    opacity: 0.6; /* Deixa apagadinha quando não tá pago */
+}
+
+.btn-delete:hover { opacity: 1; } /* Acende ao passar o mouse */
+.btn-delete:active { transform: scale(0.9); } /* Efeito de clique */
+
+/* Ícone da Lixeira (Cor Chumbo) */
+.btn-delete svg {
+    width: 22px;
+    height: 22px;
+    fill: #64748b; /* Cor slate/chumbo */
+}
+
+/* Badge de Pago */
+.badge-pago {
+    background: #052e16; /* Fundo verde bem escuro */
+    color: var(--primary); /* Texto verde vivo */
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--primary);
+    animation: anim-pago-pulsa 1.5s infinite; /* Efeito pisca */
+}
+
+/* Animação que pisca (Excluir) */
+@keyframes anim-pago-pulsa {
+    0% { opacity: 0.5; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.3); }
+    50% { opacity: 1; box-shadow: 0 0 10px rgba(34, 197, 94, 0.6); }
+    100% { opacity: 0.5; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+    
 </style>
 </head>
 <body>
@@ -221,7 +263,6 @@ function salvarCliente(){
     switchTab({currentTarget: tabGerar}, 'gerar');
 }
 // --- INÍCIO DO BLOCO DE GESTÃO DE CLIENTES ---
-
 function renderizarClientes(){
     const clientes = JSON.parse(localStorage.getItem("tp_clientes") || "[]");
     const lista = document.getElementById('lista-clientes');
@@ -231,50 +272,38 @@ function renderizarClientes(){
         return;
     }
 
-    const hoje = new Date();
-    hoje.setHours(0,0,0,0);
-
     lista.innerHTML = clientes.map(c => {
-        let cor = "#22c55e"; 
-        let statusTxt = "PRAZO OK";
-        let anim = "";
-        let dataExibicao = "---";
+        // Lógica para saber se está Pago (Simulando uma integração)
+        // No futuro, isso virá de uma API real de checkout.
+        const estaPago = (c.status === "pago"); // Verifica se o status mudou
 
-        if(c.dataVenc && c.dataVenc !== "Não definida") {
-            const [ano, mes, dia] = c.dataVenc.split('-');
-            const dVenc = new Date(ano, mes - 1, dia);
-            dataExibicao = `${dia}/${mes}/${ano}`;
+        let corStatus = estaPago ? "var(--primary)" : (c.corLateral || "rgba(255,255,255,0.05)");
+        let badgeStatusHtml = estaPago 
+            ? `<div class="badge-pago">PAGO - EXCLUIR</div>`
+            : `<div class="badge-ativo">CADASTRADO</div>`;
 
-            const diff = Math.ceil((dVenc - hoje) / (1000 * 60 * 60 * 24));
-
-            if(diff < 0) { 
-                cor = "#ff4444"; 
-                statusTxt = "VENCIDO"; 
-                anim = "anim-pulsa"; 
-            } else if(diff === 0) { 
-                cor = "#ffbb33"; 
-                statusTxt = "VENCE HOJE"; 
-            } else if(diff === 1) { 
-                cor = "#22c55e"; 
-                statusTxt = "VENCE AMANHÃ"; 
-            }
-        }
+        // O SVG da lixeira que você pediu (Mano)
+        const svgLixeiraHtml =estaPago 
+            ? `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="#ff4444"></path></svg>` // Lixeira vermelha se tiver pago
+            : `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"></path></svg>`; // Lixeira chumbo normal
 
         return `
-            <div class="item-cliente ${anim}" style="border-left: 5px solid ${cor}; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <div class="item-info" onclick="selecionarCliente('${c.nome}', '${c.valor}', '${c.desc}')" style="flex: 1; cursor: pointer;">
+            <div class="item-cliente" onclick="selecionarCliente('${c.nome}', '${c.valor}', '${c.desc}')" style="border-left: 4px solid ${corStatus}">
+                <div class="item-info">
                     <b>${c.nome}</b>
                     <span>${c.desc} • ${c.valor}</span>
-                    <span style="display:block; color:${cor}; font-size:10px; margin-top:4px; font-weight:800;">📅 Vencimento: ${dataExibicao}</span>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                    <div class="badge-status" style="color:${cor}; border: 1px solid ${cor}; font-size: 8px; padding: 2px 6px; border-radius: 6px; font-weight: 900;">${statusTxt}</div>
-                    <button onclick="removerCliente('${c.nome}')" style="background: none; border: none; font-size: 20px; cursor: pointer; padding: 5px;">✅</button>
+                    ${badgeStatusHtml}
+                    <button class="btn-delete" onclick="removerCliente('${c.nome}')">
+                        ${svgLixeiraHtml}
+                    </button>
                 </div>
             </div>
         `;
     }).join('');
 }
+    
 
 // 1. FUNÇÃO PARA SUBIR OS DADOS (A que estava no meio das outras)
 function selecionarCliente(nome, valor, desc){
@@ -338,6 +367,24 @@ function enviarLink() {
 
 // Carregar a lista assim que abrir a página
 window.onload = renderizarClientes;
+    // Função para dar baixa manual (Excluir)
+function removerCliente(nome) {
+    // Alerta de confirmação para não apagar sem querer
+    if(confirm("Deseja dar baixa e remover o cliente " + nome + " da lista de pendentes?")) {
+        // Carrega a lista atual
+        let clientes = JSON.parse(localStorage.getItem("tp_clientes") || "[]");
+        
+        // FILTRO: Cria uma nova lista SEM o cliente que você quer excluir
+        clientes = clientes.filter(c => c.nome !== nome);
+        
+        // Salva a lista limpa de volta
+        localStorage.setItem("tp_clientes", JSON.stringify(clientes));
+        
+        // Atualiza a tela imediatamente
+        renderizarClientes();
+    }
+}
+    
 </script>
        
 
