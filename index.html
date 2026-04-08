@@ -1,38 +1,155 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZENTRY</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZENTRY - Splash</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-<style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+        body {
+            height: 100vh;
+            overflow: hidden;
+            background-color: #000; /* Fundo de segurança */
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
 
-body{
-  height:100vh;
-  overflow:hidden;
+        /* --- IMAGEM DE FUNDO (AVENIDA) --- */
+        .fundo-avenida {
+            position: absolute;
+            inset: 0;
+            /* Certifique-se de que a imagem gerada está com este nome na mesma pasta */
+            background: url('splash-avenida.jpg') no-repeat center;
+            background-size: cover;
+            z-index: 1;
+        }
 
-  /* IMAGEM LIMPA (SEM ESCURECER) */
-  background: url('splash.jpg') no-repeat center;
-  background-size: cover;
-}
-</style>
+        /* --- CAMADA ESCURA (OVERLAY) --- */
+        /* Essencial para o texto branco e verde ser lido sobre as luzes da cidade */
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5); /* 50% de escurecimento */
+            z-index: 2;
+        }
+
+        /* --- CONTAINER DO LOGO (ZENTRY) --- */
+        .zentry-logo {
+            position: relative;
+            z-index: 3; /* Acima do fundo e do overlay */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            font-weight: 800; /* Extra Bold */
+            font-size: 56px; /* Tamanho grande para splash */
+        }
+
+        /* --- ESTILOS DO EFEITO MÁQUINA DE ESCREVER --- */
+        .typewriter {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Texto base (invisível no início para segurar o espaço) */
+        .text-part {
+            position: relative;
+            white-space: nowrap;
+        }
+
+        /* ZEN (Branco) */
+        .zen { color: #ffffff; }
+        /* TRY (Verde) */
+        .try { color: #22c55e; } /* Verde Zentry */
+
+        /* A camada de animação que "apaga" a palavra */
+        .typewriter-mask {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            background-color: transparent; /* Cor do fundo atrás dela */
+            border-left: 4px solid transparent; /* O cursor */
+            width: 100%; /* Começa cobrindo tudo */
+        }
+
+        /* --- CONFIGURAÇÃO DAS ANIMAÇÕES --- */
+
+        /* Animação do ZEN */
+        .zen-mask {
+            background-color: black; /* Deve ser a cor média do fundo ou overlay */
+            animation: 
+                typing 1.5s steps(3) 0.5s forwards, /* 3 letras, delay 0.5s */
+                blinkCaretZen 0.75s step-end infinite 0.5s;
+        }
+
+        /* Animação do TRY */
+        .try-mask {
+            background-color: black;
+            animation: 
+                typing 1s steps(3) 2.2s forwards, /* 3 letras, começa após ZEN */
+                blinkCaretTry 0.75s step-end infinite 2.2s;
+        }
+
+        /* --- KEYFRAMES DAS ANIMAÇÕES --- */
+
+        /* 1. Efeito Escrever (A máscara encolhe da direita para a esquerda) */
+        @keyframes typing {
+            from { width: 100%; }
+            to { width: 0%; border-left-color: transparent; }
+        }
+
+        /* 2. Cursor Piscando (Branco para ZEN) */
+        @keyframes blinkCaretZen {
+            from, to { border-left-color: transparent }
+            50% { border-left-color: #ffffff; }
+        }
+
+        /* 3. Cursor Piscando (Verde para TRY) */
+        @keyframes blinkCaretTry {
+            from, to { border-left-color: transparent }
+            50% { border-left-color: #22c55e; }
+        }
+
+    </style>
 </head>
-
 <body>
 
-<script>
-// Tempo da splash (3,5 segundos)
-setTimeout(()=>{
-  window.location.href = "login.html";
-}, 3500);
-</script>
+    <div class="fundo-avenida"></div>
+    <div class="overlay"></div>
+
+    <div class="zentry-logo">
+        <div class="typewriter">
+            <span class="text-part zen">
+                ZEN
+                <div class="typewriter-mask zen-mask"></div>
+            </span>
+            <span class="text-part try">
+                TRY
+                <div class="typewriter-mask try-mask"></div>
+            </span>
+        </div>
+    </div>
+
+    <script>
+        // --- REDIRECIONAMENTO AUTOMÁTICO ---
+        // A animação total dura cerca de 3.2s. Redirecionamos após 4s.
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 4000);
+    </script>
 
 </body>
 </html>
