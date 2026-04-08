@@ -1,1 +1,86 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zentry - Notificações</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #22c55e; 
+            --card-bg: rgba(255, 255, 255, 0.05); 
+            --border: rgba(255, 255, 255, 0.08); 
+            --text-sec: #94a3b8;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 20% 0%, #0f172a, #000 60%);
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .container { padding: 25px; max-width: 450px; margin: auto; }
+        .back-nav {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 45px; height: 45px; background: var(--card-bg);
+            border-radius: 50%; color: #fff; text-decoration: none;
+            margin-bottom: 20px; border: 1px solid var(--border);
+        }
+        h1 { font-size: 28px; font-weight: 800; margin-bottom: 30px; color: var(--primary); letter-spacing: -1px; }
+
+        .notif-item {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        .notif-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: rgba(34, 197, 94, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary); flex-shrink: 0;
+        }
+        .notif-content b { font-size: 15px; display: block; margin-bottom: 4px; }
+        .notif-content p { margin: 0; font-size: 13px; color: var(--text-sec); line-height: 1.4; }
+        .notif-time { font-size: 10px; color: var(--text-sec); margin-top: 8px; display: block; opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="home.html" class="back-nav">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <h1>Notificações</h1>
+
+        <div class="notif-item">
+            <div class="notif-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div class="notif-content">
+                <b>Pix Recebido!</b>
+                <p>Você recebeu um Pix de <b>R$ 150,00</b> de Leonardo Silva.</p>
+                <span class="notif-time">Há 5 minutos</span>
+            </div>
+        </div>
+
+        <div class="notif-item">
+            <div class="notif-icon" style="color: #60a5fa; background: rgba(96, 165, 250, 0.1);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="notif-content">
+                <b>Segurança</b>
+                <p>Sua conta foi acessada em um novo dispositivo: iPhone 15 Pro.</p>
+                <span class="notif-time">Ontem às 18:30</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
