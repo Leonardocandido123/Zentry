@@ -226,111 +226,103 @@ body {
         </div>
     </div>
     
+<script>
+    let valorRaw = "";
+    let metodoGlobal = "";
 
-    <script>
-        let valorRaw = "";
-        let metodoGlobal = "";
+    function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
 
-        function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
-
-        function typeNum(n) { if(valorRaw.length < 9) valorRaw += n; vibrate(15); updateDisplay(); }
-        function backspace() { valorRaw = valorRaw.slice(0, -1); vibrate(10); updateDisplay(); }
-
-        function updateDisplay() {
-            let v = valorRaw.padStart(3, '0');
-            let num = (parseInt(v)/100).toFixed(2);
-            let formatado = "R$ " + num.replace(".",",").replace(/\B(?=(\d{3})+(?!\d))/g,".");
-            document.getElementById('val-display').innerText = formatado;
-            
-            const btn = document.getElementById('btn-next-1');
-            if(parseInt(valorRaw) > 0) {
-                document.getElementById('val-display').classList.add('has-content');
-                btn.style.background = "var(--primary)"; btn.style.color = "#000"; btn.style.pointerEvents = "all";
-            } else {
-                document.getElementById('val-display').classList.remove('has-content');
-                btn.style.background = "#111"; btn.style.color = "#444"; btn.style.pointerEvents = "none";
-            }
-        }
+    // --- FUNÇÃO QUE ESTAVA FALTANDO (Navegação) ---
+    function goStep(stepId) {
+        // Esconde todas as telas (screens)
+        document.querySelectorAll('.screen').forEach(el => {
+            el.classList.remove('active-screen');
+            el.style.display = 'none'; 
+        });
         
-function gerarParcelas() {
-    const container = document.getElementById('lista-parcelas');
-    if (!container) return;
-    
-    container.innerHTML = "";
-    let valorNum = parseInt(valorRaw) / 100;
-    
-    for(let i=1; i<=12; i++) {
-        let pVal = (valorNum / i).toFixed(2).replace(".",",");
-        container.innerHTML += `
-            <div class="mode-card" style="padding: 18px; margin-bottom: 10px;" onclick="iniciarNFC('Crédito ${i}x')">
-                <div style="flex: 1;">
-                    <span style="font-size: 16px; font-weight: 600;">${i}x de <b style="color: var(--primary);">R$ ${pVal}</b></span>
-                </div>
-                <i data-lucide="chevron-right" style="color: #444;"></i>
-            </div>`;
-    }
-    // Atualiza os ícones da lista de parcelas
-    lucide.createIcons();
-}
-        
-        function gerarParcelas() {
-            const container = document.getElementById('lista-parcelas');
-            container.innerHTML = "";
-            let valorNum = parseInt(valorRaw) / 100;
-            for(let i=1; i<=12; i++) {
-                let pVal = (valorNum / i).toFixed(2).replace(".",",");
-                container.innerHTML += `
-                    <div class="parcela-item" onclick="iniciarNFC('Crédito ${i}x')">
-                        <span>${i}x de <b>R$ ${pVal}</b></span>
-                        <i data-lucide="chevron-right"></i>
-                    </div>`;
-            }
-            lucide.createIcons();
+        // Mostra a tela selecionada
+        const nextScreen = document.getElementById(stepId);
+        if (nextScreen) {
+            nextScreen.classList.add('active-screen');
+            nextScreen.style.display = 'flex';
         }
 
-        function iniciarNFC(metodo) {
-            metodoGlobal = metodo;
-            document.getElementById('txt-metodo-nfc').innerText = "Aproxime para " + metodo;
-            document.getElementById('txt-total-nfc').innerText = document.getElementById('val-display').innerText;
-            goStep('step-nfc');
+        // Se for para as parcelas, gera a lista
+        if(stepId === 'step-parcelas') {
+            gerarParcelas();
         }
 
-        function simularPagamento(metodo) {
-    metodoGlobal = metodo;
-    
-    // 1. Mostra a tela de "Processando..."
-    goStep('step-wait');
-    
-    // 2. Espera o tempo da "transação"
-    setTimeout(() => {
-        vibrate([100, 50, 100]);
-        
-        // 3. SALVA OS DADOS (Agora no momento certo!)
-        const dadosParaSalvar = {
-            valor: document.getElementById('val-display').innerText,
-            metodo: metodoGlobal
-        };
-        localStorage.setItem("comprovante", JSON.stringify(dadosParaSalvar));
-
-        // 4. SÓ AGORA pula para a tela branca do comprovante
-        window.location.href = "comprovante_tap.html";
-        
-    }, 2000); // 2 segundos de loading
-        }
-        
-
-        async function compartilhar() {
-            const dados = {
-                title: 'Comprovante TechPay',
-                text: `Pagamento Aprovado\nValor: ${document.getElementById('res-valor').innerText}\nMetodo: ${metodoGlobal}`,
-                url: window.location.href
-            };
-            if (navigator.share) await navigator.share(dados);
-            else alert("Copiado!");
-        }
-
+        // Atualiza os ícones do Lucide
         lucide.createIcons();
-    </script>
+    }
+
+    // Funções do Teclado Numérico
+    function typeNum(n) { if(valorRaw.length < 9) valorRaw += n; vibrate(15); updateDisplay(); }
+    function backspace() { valorRaw = valorRaw.slice(0, -1); vibrate(10); updateDisplay(); }
+
+    function updateDisplay() {
+        let v = valorRaw.padStart(3, '0');
+        let num = (parseInt(v)/100).toFixed(2);
+        let formatado = "R$ " + num.replace(".",",").replace(/\B(?=(\d{3})+(?!\d))/g,".");
+        document.getElementById('val-display').innerText = formatado;
+        
+        const btn = document.getElementById('btn-next-1');
+        if(parseInt(valorRaw) > 0) {
+            document.getElementById('val-display').classList.add('has-content');
+            btn.style.background = "var(--primary)"; 
+            btn.style.color = "#000"; 
+            btn.style.pointerEvents = "all";
+        } else {
+            document.getElementById('val-display').classList.remove('has-content');
+            btn.style.background = "#111"; 
+            btn.style.color = "#444"; 
+            btn.style.pointerEvents = "none";
+        }
+    }
+
+    // Gera as parcelas do cartão
+    function gerarParcelas() {
+        const container = document.getElementById('lista-parcelas');
+        if (!container) return;
+        container.innerHTML = "";
+        let valorNum = parseInt(valorRaw) / 100;
+        for(let i=1; i<=12; i++) {
+            let pVal = (valorNum / i).toFixed(2).replace(".",",");
+            container.innerHTML += `
+                <div class="mode-card" style="padding: 18px; margin-bottom: 10px;" onclick="iniciarNFC('Crédito ${i}x')">
+                    <div style="flex: 1;"><span style="font-size: 16px; font-weight: 600;">${i}x de <b style="color: var(--primary);">R$ ${pVal}</b></span></div>
+                    <i data-lucide="chevron-right" style="color: #444;"></i>
+                </div>`;
+        }
+        lucide.createIcons();
+    }
+
+    function iniciarNFC(metodo) {
+        metodoGlobal = metodo;
+        document.getElementById('txt-metodo-nfc').innerText = "Aproxime para " + metodo;
+        document.getElementById('txt-total-nfc').innerText = document.getElementById('val-display').innerText;
+        goStep('step-nfc');
+    }
+
+    function simularPagamento(metodo) {
+        metodoGlobal = metodo;
+        goStep('step-wait');
+        
+        setTimeout(() => {
+            vibrate([100, 50, 100]);
+            const dadosParaSalvar = {
+                valor: document.getElementById('val-display').innerText,
+                metodo: metodoGlobal
+            };
+            localStorage.setItem("comprovante", JSON.stringify(dadosParaSalvar));
+            window.location.href = "comprovante_tap.html";
+        }, 2000);
+    }
+
+    // Inicia os ícones ao carregar a página
+    window.onload = () => { lucide.createIcons(); };
+</script>
+    
 </body>
   </html>
   
