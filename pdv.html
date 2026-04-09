@@ -125,36 +125,33 @@ body {
     </div>
 
     <div id="step-2" class="screen">
-    <h2>Meio de pagamento</h2>
+    <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 25px;">Meio de pagamento</h2>
     
     <div class="mode-card" onclick="goStep('step-pix-qr')">
         <div class="mode-icon"><i data-lucide="zap"></i></div>
-        <div style="flex: 1;">
+        <div class="mode-info">
             <b>Pix</b>
-            <small>Pagamento instantâneo</small>
+            <small>QR Code dinâmico</small>
         </div>
-        <i data-lucide="chevron-right" style="color: #444; width: 18px;"></i>
     </div>
 
     <div class="mode-card" onclick="iniciarNFC('Débito')">
         <div class="mode-icon"><i data-lucide="banknote"></i></div>
-        <div style="flex: 1;">
+        <div class="mode-info">
             <b>Débito</b>
-            <small>Aproximação (NFC)</small>
+            <small>Tap to Pay</small>
         </div>
-        <i data-lucide="chevron-right" style="color: #444; width: 18px;"></i>
     </div>
 
     <div class="mode-card" onclick="goStep('step-parcelas')">
         <div class="mode-icon"><i data-lucide="credit-card"></i></div>
-        <div style="flex: 1;">
+        <div class="mode-info">
             <b>Crédito</b>
             <small>À vista ou parcelado</small>
         </div>
-        <i data-lucide="chevron-right" style="color: #444; width: 18px;"></i>
     </div>
 
-    <button class="btn-full btn-secondary" style="margin-top: auto" onclick="goStep('step-1')">Voltar</button>
+    <button class="btn-full btn-secondary" style="margin-top: auto;" onclick="goStep('step-1')">Voltar</button>
     </div>
     
 
