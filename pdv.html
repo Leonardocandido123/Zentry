@@ -251,13 +251,6 @@ body {
                 btn.style.background = "#111"; btn.style.color = "#444"; btn.style.pointerEvents = "none";
             }
         }
-// Dentro da função simularPagamento, quando der sucesso:
-const dadosParaSalvar = {
-    valor: document.getElementById('val-display').innerText,
-    metodo: metodoGlobal
-};
-localStorage.setItem("comprovante", JSON.stringify(dadosParaSalvar));
-window.location.href = "comprovante_tap.html"; // Pula direto pra tela branca
         
 function gerarParcelas() {
     const container = document.getElementById('lista-parcelas');
@@ -303,16 +296,28 @@ function gerarParcelas() {
         }
 
         function simularPagamento(metodo) {
-            metodoGlobal = metodo;
-            goStep('step-wait');
-            setTimeout(() => {
-                vibrate([100, 50, 100]);
-                document.getElementById('res-valor').innerText = document.getElementById('val-display').innerText;
-                document.getElementById('res-metodo').innerText = metodoGlobal;
-                document.getElementById('res-data').innerText = new Date().toLocaleString('pt-BR');
-                goStep('step-success');
-            }, 2000);
+    metodoGlobal = metodo;
+    
+    // 1. Mostra a tela de "Processando..."
+    goStep('step-wait');
+    
+    // 2. Espera o tempo da "transação"
+    setTimeout(() => {
+        vibrate([100, 50, 100]);
+        
+        // 3. SALVA OS DADOS (Agora no momento certo!)
+        const dadosParaSalvar = {
+            valor: document.getElementById('val-display').innerText,
+            metodo: metodoGlobal
+        };
+        localStorage.setItem("comprovante", JSON.stringify(dadosParaSalvar));
+
+        // 4. SÓ AGORA pula para a tela branca do comprovante
+        window.location.href = "comprovante_tap.html";
+        
+    }, 2000); // 2 segundos de loading
         }
+        
 
         async function compartilhar() {
             const dados = {
