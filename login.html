@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+5<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -183,78 +183,76 @@ window.auth = auth;
 window.signInWithEmailAndPassword = signInWithEmailAndPassword;
   </script>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
-    authDomain: "zentry-app-74275.firebaseapp.com",
-    projectId: "zentry-app-74275",
-    storageBucket: "zentry-app-74275.firebasestorage.app",
-    messagingSenderId: "571422826071",
-    appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
-  };
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "zentry-app-74275.firebaseapp.com",
+  projectId: "zentry-app-74275",
+  storageBucket: "zentry-app-74275.appspot.com",
+  messagingSenderId: "571422826071",
+  appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-  const input = document.getElementById("senha");
-  const btn = document.getElementById("btnEntrar");
-  const eye = document.getElementById("eyeIcon");
+// ELEMENTOS
+const input = document.getElementById("senha");
+const btn = document.getElementById("btnEntrar");
+const eye = document.getElementById("eyeIcon");
 
-  // Mostrar botão
-  input.addEventListener("input", () => {
-    if(input.value.length >= 6){
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
-  });
-
-  // Mostrar/ocultar senha
-  window.toggleSenha = function(){
-    const slash = document.getElementById("eyeSlash");
-    if(input.type === "password"){
-      input.type = "text";
-      slash.style.opacity = "0";
-      eye.classList.add("active");
-    } else {
-      input.type = "password";
-      slash.style.opacity = "1";
-      eye.classList.remove("active");
-    }
+// MOSTRAR BOTÃO
+input.addEventListener("input", () => {
+  if(input.value.length >= 6){
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
   }
+});
 
-  // LOGIN REAL 🔐
-  window.entrar = async function(){
-    if(input.value.length < 6) return;
+// 👁️ TOGGLE SENHA
+function toggleSenha(){
+  const slash = document.getElementById("eyeSlash");
+  if(input.type === "password"){
+    input.type = "text";
+    slash.style.opacity = "0";
+    eye.classList.add("active");
+  } else {
+    input.type = "password";
+    slash.style.opacity = "1";
+    eye.classList.remove("active");
+  }
+}
 
-    const senha = input.value;
+// 🔐 LOGIN REAL
+function entrar(){
+  if(input.value.length < 6) return;
 
-    // ⚠️ EMAIL TEMPORÁRIO (vamos melhorar depois)
-    const email = "user@zentry.com";
+  const email = localStorage.getItem("usuarioEmail");
 
-    try {
-      await signInWithEmailAndPassword(auth, email, senha);
-
+  signInWithEmailAndPassword(auth, email, input.value)
+    .then(() => {
       document.body.style.opacity = "0";
       setTimeout(() => {
         window.location.href = "home.html";
       }, 400);
-
-    } catch (error) {
+    })
+    .catch(() => {
       alert("Senha incorreta ou usuário não existe");
-      console.log(error);
-    }
-  }
+    });
+}
 
-  // Enter do teclado
-  input.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") entrar();
-  });
+// ENTER DO TECLADO
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") entrar();
+});
 
-      </script>
+// 🔥 TORNAR GLOBAL (ESSA É A CORREÇÃO)
+window.toggleSenha = toggleSenha;
+window.entrar = entrar;
 
-
+</script>
 </body>
 </html>
