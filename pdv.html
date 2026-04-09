@@ -7,75 +7,80 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --primary: #22c55e; --bg: #000; --card: #111; --border: rgba(255,255,255,0.08); --text-muted: #888; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
+/* AJUSTE DO FUNDO E PROFUNDIDADE */
 body { 
     margin: 0; 
     font-family: 'Inter', sans-serif; 
-    /* O mesmo gradiente radial que usamos na Home para dar profundidade */
-    background: radial-gradient(circle at 20% 0%, #0f172a, #000 60%); 
+    background: radial-gradient(circle at 20% 0%, #0f172a, #000 65%) !important; 
     color: #fff; 
     height: 100vh; 
     overflow: hidden; 
 }
+
+/* CARDS DE MODO (O segredo da separação e bordas) */
+.mode-card {
+    background: rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px !important; /* Bordas bem redondas */
+    padding: 22px;
+    margin-bottom: 16px; /* Separação entre os campos */
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.mode-card:active {
+    transform: scale(0.97);
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* AJUSTE DOS ÍCONES NOS CARDS */
+.mode-icon { 
+    width: 48px; 
+    height: 48px; 
+    background: rgba(34, 197, 94, 0.15); 
+    border-radius: 14px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+/* TEXTOS DENTRO DOS CARDS */
+.mode-card b {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.mode-card small {
+    font-size: 12px;
+    color: #888;
+}
+
+/* BOTÃO VOLTAR */
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+}
+
+/* TÍTULO DA TELA */
+h2 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 25px;
+}
         
-         .screen { 
-    position: absolute; 
-    inset: 0; 
-    display: none; 
-    flex-direction: column; 
-    padding: 25px; 
-    background: transparent; /* Garante que o gradiente apareça */
-    animation: fadeIn 0.3s ease; 
-         }
-        
-        .active-screen { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* TECLADO E DISPLAY */
-        .display-val { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .val-main { font-size: 60px; font-weight: 800; letter-spacing: -2px; color: #333; }
-        .val-main.has-content { color: #fff; }
-        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 10px; }
-        .key { height: 65px; background: var(--card); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); }
-        .key:active { background: #222; transform: scale(0.95); }
-
-        /* CARDS DE MODO */
-        .mode-card, .receipt-card, .parcela-item, .key {
-    background: rgba(255, 255, 255, 0.03); /* Fundo bem sutil */
-    backdrop-filter: blur(10px); /* Efeito de vidro opcional */
-    border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        
-        .mode-icon { width: 45px; height: 45px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
-
-        /* PARCELAMENTO */
-        .parcela-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-        .parcela-item { padding: 18px; background: var(--card); border: 1px solid var(--border); border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* PIX QR CODE */
-        .qr-container { background: #fff; padding: 15px; border-radius: 20px; margin: 20px auto; width: 220px; height: 220px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .qr-img { width: 100%; height: 100%; object-fit: contain; }
-
-        /* RECEIPT */
-        .receipt-card { background: #111; border-radius: 24px; padding: 25px; border: 1px solid var(--border); margin-top: 10px; }
-        .receipt-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .receipt-row:last-child { border: none; }
-        .label { color: var(--text-muted); font-size: 13px; }
-        .value { font-weight: 600; font-size: 14px; text-align: right; }
-
-        /* NFC WAVE */
-        .nfc-anim { position: relative; width: 100px; height: 100px; margin: 30px auto; color: var(--primary); cursor: pointer; }
-        .wave { position: absolute; border: 2px solid var(--primary); border-radius: 50%; inset: 0; animation: ripple 1.5s infinite; }
-        @keyframes ripple { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-
-        .btn-full { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 800; font-size: 15px; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn-primary { background: var(--primary); color: #000; }
-        .btn-secondary { background: #222; color: #fff; }
-        
-        .loader { width: 30px; height: 30px; border: 3px solid #222; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 10px auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
