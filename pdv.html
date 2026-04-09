@@ -8,78 +8,93 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         
-/* AJUSTE DO FUNDO E PROFUNDIDADE */
+        :root { 
+    --primary: #22c55e; 
+    --bg-gradient: radial-gradient(circle at 20% 0%, #0f172a, #000 65%);
+    --card: #111; 
+    --border: rgba(255,255,255,0.08); 
+    --text-muted: #888; 
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
 body { 
-    margin: 0; 
     font-family: 'Inter', sans-serif; 
-    background: radial-gradient(circle at 20% 0%, #0f172a, #000 65%) !important; 
+    background: var(--bg-gradient) !important; 
     color: #fff; 
     height: 100vh; 
     overflow: hidden; 
 }
 
-/* CARDS DE MODO (O segredo da separação e bordas) */
-.mode-card {
-    background: rgba(255, 255, 255, 0.04) !important;
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px !important; /* Bordas bem redondas */
-    padding: 22px;
-    margin-bottom: 16px; /* Separação entre os campos */
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    transition: 0.2s;
-    cursor: pointer;
+.screen { 
+    position: absolute; 
+    inset: 0; 
+    display: none; 
+    flex-direction: column; 
+    padding: 25px; 
+    animation: fadeIn 0.3s ease; 
 }
 
-.mode-card:active {
-    transform: scale(0.97);
-    background: rgba(255, 255, 255, 0.08) !important;
+.active-screen { display: flex; }
+
+/* TECLADO ORGANIZADO */
+.display-val { flex: 1; display: flex; justify-content: center; align-items: center; }
+.val-main { font-size: 54px; font-weight: 800; letter-spacing: -2px; color: #333; }
+.val-main.has-content { color: #fff; }
+
+.keypad { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 12px; 
+    margin-bottom: 20px; 
 }
 
-/* AJUSTE DOS ÍCONES NOS CARDS */
-.mode-icon { 
-    width: 48px; 
-    height: 48px; 
-    background: rgba(34, 197, 94, 0.15); 
-    border-radius: 14px; 
+.key { 
+    height: 60px; 
+    background: rgba(255,255,255,0.03); 
+    border-radius: 18px; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    color: var(--primary);
-    flex-shrink: 0;
+    font-size: 22px; 
+    font-weight: 600; 
+    border: 1px solid var(--border); 
 }
 
-/* TEXTOS DENTRO DOS CARDS */
-.mode-card b {
-    font-size: 16px;
-    font-weight: 700;
-    color: #fff;
-    display: block;
-    margin-bottom: 2px;
+/* CARDS DE PAGAMENTO (COMO NA IMAGEM) */
+.mode-card {
+    background: #0a0a0a !important;
+    border: 1px solid var(--border);
+    border-radius: 24px !important;
+    padding: 20px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-.mode-card small {
-    font-size: 12px;
-    color: #888;
+.mode-icon { 
+    width: 50px; height: 50px; 
+    background: rgba(34, 197, 94, 0.1); 
+    border-radius: 15px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: var(--primary); 
 }
 
-/* BOTÃO VOLTAR */
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-}
+.mode-info b { font-size: 17px; display: block; margin-bottom: 2px; }
+.mode-info small { color: var(--text-muted); font-size: 13px; }
 
-/* TÍTULO DA TELA */
-h2 {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    margin-bottom: 25px;
+/* BOTÕES */
+.btn-full { 
+    width: 100%; padding: 18px; border-radius: 20px; border: none; 
+    font-weight: 800; font-size: 15px; transition: 0.3s; 
 }
+.btn-primary { background: var(--primary); color: #000; }
+.btn-secondary { background: #111; color: #fff; border: 1px solid var(--border); }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
     </style>
 </head>
