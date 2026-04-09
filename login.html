@@ -162,13 +162,27 @@
     <a href="reset.html">Esqueci a senha</a>
     <a href="cadastro_nome.html" style="color: var(--accent); font-weight: 600;">Criar conta </a>
   </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
+    authDomain: "zentry-app-74275.firebaseapp.com",
+    projectId: "zentry-app-74275",
+    storageBucket: "zentry-app-74275.firebasestorage.app",
+    messagingSenderId: "571422826071",
+    appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
   const input = document.getElementById("senha");
   const btn = document.getElementById("btnEntrar");
   const eye = document.getElementById("eyeIcon");
 
-  // Mostrar botão ao digitar 6 caracteres
+  // Mostrar botão
   input.addEventListener("input", () => {
     if(input.value.length >= 6){
       btn.classList.add("active");
@@ -177,8 +191,8 @@
     }
   });
 
-  // Alternar visibilidade da senha
-  function toggleSenha(){
+  // Mostrar/ocultar senha
+  window.toggleSenha = function(){
     const slash = document.getElementById("eyeSlash");
     if(input.type === "password"){
       input.type = "text";
@@ -191,21 +205,36 @@
     }
   }
 
-  // Função Entrar (Usando o link home.html do seu código original)
-  function entrar(){
+  // LOGIN REAL 🔐
+  window.entrar = async function(){
     if(input.value.length < 6) return;
-    document.body.style.opacity = "0";
-    setTimeout(() => {
-      localStorage.setItem("techpay_user","true");
-      window.location.href = "home.html";
-    }, 400);
+
+    const senha = input.value;
+
+    // ⚠️ EMAIL TEMPORÁRIO (vamos melhorar depois)
+    const email = "user@zentry.com";
+
+    try {
+      await signInWithEmailAndPassword(auth, email, senha);
+
+      document.body.style.opacity = "0";
+      setTimeout(() => {
+        window.location.href = "home.html";
+      }, 400);
+
+    } catch (error) {
+      alert("Senha incorreta ou usuário não existe");
+      console.log(error);
+    }
   }
 
-  // Tecla Enter do teclado
+  // Enter do teclado
   input.addEventListener("keypress", (e) => {
     if (e.key === "Enter") entrar();
   });
-</script>
+
+      </script>
+
 
 </body>
 </html>
