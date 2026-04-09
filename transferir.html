@@ -202,13 +202,34 @@
       btn.disabled = true;
     }
   }
+function irParaRevisao() {
+    const valorDigitado = valorInput.value;
+    const chave = chaveInput.value;
+    const nomeDestino = document.querySelector(".dest-name").innerText;
+    const bancoDestino = document.querySelector(".dest-bank").innerText;
 
-  function irParaRevisao() {
+    // Criamos o objeto que a tela de comprovante entende
+    const dadosComprovante = {
+        tipo: "pix",
+        valor: valorDigitado,
+        nome: nomeDestino,
+        banco: bancoDestino,
+        data: new Date().toLocaleString('pt-BR'),
+        id: "TP" + Math.floor(Math.random() * 9999999)
+    };
+
+    // Salvamos exatamente como o script do comprovante vai buscar
+    localStorage.setItem("comprovante", JSON.stringify(dadosComprovante));
+    
+    // Mantemos os seus antigos por segurança caso use na revisão
     localStorage.setItem("tipoOperacao", "Pix");
-    localStorage.setItem("ultimoValor", valorInput.value);
-    localStorage.setItem("chaveDigitada", chaveInput.value);
+    localStorage.setItem("ultimoValor", valorDigitado);
+    localStorage.setItem("chaveDigitada", chave);
+
     window.location.href = 'revisao.html';
-  }
+}
+  
+
 </script>
 </body>
 </html>
