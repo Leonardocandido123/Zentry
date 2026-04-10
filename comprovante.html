@@ -73,89 +73,122 @@ button{ padding:14px; border-radius:14px; border:none; font-weight:600;}
   
 
 <div class="toast" id="toast">Copiado!</div>
-
 <script>
-const dados=JSON.parse(localStorage.getItem("comprovante"))||{};
-const tipo=dados.tipo||"Pix";
-const valor=dados.valor||"R$ 0,00";
-const nome=dados.nome||"-";
-const banco=dados.banco||"-";
-const numero=dados.numero||"-";
-const operadora=dados.operadora||"-";
-const data=dados.data||new Date().toLocaleString();
-const id=dados.id||"TP"+Date.now();
+// AJUSTE DE LEITURA: Tenta ler 'comprovante_final' (novo) ou 'comprovante' (antigo/recarga)
+const dados = JSON.parse(localStorage.getItem("comprovante_final")) || JSON.parse(localStorage.getItem("comprovante")) || {};
 
-document.getElementById("valor").innerText=valor;
-const labelTipo={
-  pix:"PIX Enviado", transferencia:"Transferência", recarga:"Recarga", pagamento:"Pagamento"
-}[tipo]||tipo;
-document.getElementById("status").innerText=labelTipo+" realizado";
+const tipo = dados.tipo || "Pix";
+const valor = dados.valor || "R$ 0,00";
+// Adaptando nomes de campos que podem vir diferentes
+const nome = dados.nome || dados.nomeDestino || "-";
+const banco = dados.banco || dados.bancoDestino || "-";
+const numero = dados.numero || dados.telefone || "-";
+const operadora = dados.operadora || "-";
+const data = dados.data || new Date().toLocaleString();
+const id = dados.id || "ZNT" + Math.floor(Math.random() * 999999);
 
-let html="";
-if(tipo==="pix"||tipo==="transferencia"){ html+=`<div class="linha"><span>Destinatário</span><span>${nome}</span></div><div class="linha"><span>Banco</span><span>${banco}</span></div>`;}
-if(tipo==="recarga"){ html+=`<div class="linha"><span>Número</span><span>${numero}</span></div><div class="linha"><span>Operadora</span><span>${operadora}</span></div>`;}
-html+=`<div class="linha"><span>Data</span><span>${data}</span></div><div class="linha"><span>ID</span><span>${id}</span></div>`;
-document.getElementById("conteudo").innerHTML=html;
+document.getElementById("valor").innerText = valor;
+const labelTipo = {
+  pix: "PIX Enviado", 
+  transferencia: "Transferência", 
+  recarga: "Recarga Celular", 
+  pagamento: "Pagamento"
+}[tipo] || tipo;
 
-async function compartilhar(){
-  const card = document.getElementById("card");
-  
-  // Ativa modo exportação (fundo branco/texto preto)
-  document.body.classList.add("export-mode");
-  
-  // Tira a foto APENAS do elemento 'card' (que agora está sem botões)
-  const canvas = await html2canvas(card, {
-    backgroundColor: "#ffffff",
-    scale: 3, // Alta qualidade
-    useCORS: true
-  });
-  
-  document.body.classList.remove("export-mode");
-  
-  // ... resto do seu código de envio ...
-          // --- O QUE ESTAVA FALTANDO (DENTRO DA ÁREA VERMELHA) ---
-        
-        // 1. Transforma o desenho (canvas) em um endereço de imagem (Data URL)
-        const dataUrl = canvas.toDataURL("image/png");
-        
-        // 2. Converte esse endereço em um arquivo real (Blob)
-        const blob = await (await fetch(dataUrl)).blob();
-        const file = new File([blob], "comprovante.png", { type: "image/png" });
+document.getElementById("status").innerText = labelTipo + " realizado";
 
-        // 3. Verifica se o celular suporta o compartilhamento de arquivos
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: 'Comprovante Tech Pay',
-                text: 'Segue meu comprovante de pagamento.'
-            });
-        } else {
-            // Se o navegador for antigo e não suportar, ele apenas baixa a imagem
-            const link = document.createElement("a");
-            link.download = "comprovante.png";
-            link.href = dataUrl;
-            link.click();
-        }
-        
-        // --- FIM DO CÓDIGO QUE FALTA ---
-  
+let html = "";
+if(tipo === "pix" || tipo === "transferencia"){ 
+    html += `
+        <div class="linha"><span>Destinatário</span><span>${nome}</span></div>
+        <div class="linha"><span>Instituição</span><span>${banco}</span></div>
+    `;
 }
-  
+if(tipo === "recarga"){ 
+    html += `
+        <div class="linha"><span>Número</span><span>${numero}</span></div>
+        <div class="linha"><span>Operadora</span><span>${operadora}</span></div>
+    `;
+}
+html += `
+    <div class="linha"><span>Data</span><span>${data}</span></div>
+    <div class="linha"><span>ID da Transação</span><span>${id}</span></div>
+`;
+document.getElementById("conteudo").innerHTML = html;
 
-function baixar(){ 
-  const card=document.getElementById("card");
+// FUNÇÃO COMPARTILHAR TURBINADA
+async function compartilhar() {
+  const card = document.getElementById("card");
   document.body.classList.add("export-mode");
-  html2canvas(card,{backgroundColor:"#fff",scale:3}).then(canvas=>{
+  
+  try {
+    const canvas = await html2canvas(card, {
+      backgroundColor: "#ffffff",
+      scale: 3,
+      useCORS: true
+    });
+    
+    document.body.classList.remove("export-mode");
+    
+    const dataUrl = canvas.toDataURL("image/png");
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], "comprovante_zentry.png", { type: "image/png" });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'Comprovante Zentry',
+        text: 'Segue meu comprovante de pagamento.'
+      });
+    } else {
+      baixarImagem(canvas); // Cai no download se o cel não suportar share de arquivo
+    }
+  } catch (err) {
+    console.error("Erro ao compartilhar:", err);
+    document.body.classList.remove("export-mode");
+  }
+}
+
+function baixar() { 
+  const card = document.getElementById("card");
+  document.body.classList.add("export-mode");
+  html2canvas(card, {backgroundColor: "#fff", scale: 3}).then(canvas => {
     document.body.classList.remove("export-mode");
     baixarImagem(canvas);
   });
 }
-function baixarImagem(canvas){ const link=document.createElement("a"); link.download="comprovante.png"; link.href=canvas.toDataURL(); link.click();}
-function copiar(){ navigator.clipboard.writeText(valor+" "+nome); toast("Copiado!"); }
-function toast(msg){ const t=document.getElementById("toast"); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2000);}
-function voltar(){ history.back();}
-if(navigator.vibrate){navigator.vibrate([100,50,100]);}
+
+function baixarImagem(canvas) { 
+  const link = document.createElement("a"); 
+  link.download = "comprovante_zentry.png"; 
+  link.href = canvas.toDataURL(); 
+  link.click();
+}
+
+function copiar() { 
+  const textoParaCopiar = `Comprovante Zentry\nValor: ${valor}\nPara: ${nome}\nData: ${data}\nID: ${id}`;
+  navigator.clipboard.writeText(textoParaCopiar); 
+  toast("Dados copiados!"); 
+}
+
+function toast(msg) { 
+  const t = document.getElementById("toast"); 
+  t.innerText = msg; 
+  t.style.opacity = 1; 
+  setTimeout(() => t.style.opacity = 0, 2000);
+}
+
+function voltar() { 
+    // Limpa a transação pendente para não dar erro ao voltar
+    localStorage.removeItem("transacao_pendente");
+    window.location.href = 'home.html';
+}
+
+if(navigator.vibrate) { navigator.vibrate([50]); }
 </script>
+  
 
 </body>
 </html>
+
+Atual
