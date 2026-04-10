@@ -1,446 +1,10 @@
-
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>ZENTRY- Home Premium</title>
-  <style>
-    
-   :root { 
-    --primary: #22c55e; 
-    --bg-card: #111827;
-    --border: rgba(255, 255, 255, 0.15); 
-    --text-secondary: #9CA3AF; 
-}
-
-body { 
-    margin:0; 
-    font-family:'Inter',sans-serif; 
-    background: radial-gradient(circle at 20% 0%, #0f172a, #000 60%); 
-    -webkit-tap-highlight-color: transparent; 
-    overflow-x: hidden; 
-    color: #fff; 
-}
-    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-top: 10px; }
-    .user-info h2 { font-size: 20px; margin: 2px 0 0 0; color: #FFF; font-weight: 700; }
-    .avatar { width:42px; height:42px; background: var(--bg-card); border-radius:50%; display:flex; align-items:center; justify-content:center; border: 1px solid var(--border); }
-    
-    .balance-circle { display: flex; justify-content: center; margin: 30px 0; cursor: pointer; }
-    .circle {
-        width: 190px; height: 190px; border-radius: 50%;
-        border: 4px solid var(--primary); display: flex; flex-direction: column; 
-        align-items: center; justify-content: center; background: radial-gradient(circle, #0a0a0a, #000);
-        box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
-    }
-    .circle span { font-size: 24px; font-weight: 800; }
-
-    .resumo-dia { display:flex; justify-content:space-between; background:var(--bg-card); border:1px solid var(--border); border-radius:20px; padding:15px; margin-bottom:20px; }
-    .resumo-dia div { display:flex; flex-direction:column; align-items:center; }
-    .resumo-dia span { font-size:10px; color:var(--text-secondary); }
-
-    .pix-card { display:flex; justify-content:space-between; align-items:center; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius:20px; padding:16px; margin-bottom:25px; }
-    .pix-info b { font-size:14px; color:#fff; }
-    .pix-btn { background:#fff; color:#16a34a; padding:8px 14px; border-radius:12px; font-size:12px; font-weight:700; text-decoration:none; }
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-bottom: 30px;
-}
-
-.action-item {
-  text-decoration: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.action-icon { 
-  width: 54px;
-  height: 54px;
-  background: var(--bg-card); 
-  border: 1px solid rgba(255, 255, 255, 0.12); /* mais suave */
-  border-radius: 16px; /* menos arredondado */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #FFF;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.25); /* sombra mais leve */
-}
-
-/* PADRÃO PRA TODOS SVG */
-.action-icon svg {
-  width: 22px;
-  height: 22px;
-  stroke: #fff;
-  stroke-width: 1.8;
-  fill: none;
-}
-
-.action-item span {
-  font-size: 11px;
-  font-weight: 500;
-  color: #FFF;
-  margin-top: 6px;
-  opacity: 0.85;
-}
-    .action-icon:hover {
-  transform: scale(1.05);
-  transition: 0.2s;
-    }
-  .action-icon:active {
-  transform: scale(0.95);
-  }  
-      .techtap-card {
-  background: linear-gradient(135deg, #ff5f1f, #ff8c00);
-  border-radius: 20px;
-  padding: 16px;
-  margin-bottom: 25px;
-  transition: 0.2s;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-      
-}
-
-.techtap-card:active {
-  transform: scale(0.98);
-  
-}
-
-.techtap-info b {
-  font-size: 14px;
-  color: #000;
-}
-
-.techtap-info span {
-  font-size: 11px;
-  color: rgba(0,0,0,0.7);
-}
-
-.techtap-btn {
-  background: #fff;
-  color: #000;
-  padding: 8px 14px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.techtap-btn:active {
-  transform: scale(0.95);
-}
-
-    /* ========================= */
-/* BANNER ROTATIVO PREMIUM */
-/* ========================= */
-
-.banner-wrapper { 
-  width: 100%; 
-  margin: 20px 0 30px 0;
-  position: relative; 
-  overflow: hidden; 
-}
-
-.banner-container { 
-  display: flex; 
-  transition: transform 0.5s ease-in-out; 
-  width: 100%; 
-}
-
-/* CARD DO BANNER */
-.smart-banner {
-  min-width: 100%;
-  background: linear-gradient(145deg, #111827, #0a0f1f);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px;
-  padding: 20px;
-  box-sizing: border-box;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-
-  min-height: 130px;
-  cursor: pointer;
-
-  box-shadow: 
-    0 10px 25px rgba(0,0,0,0.4),
-    inset 0 0 0.5px rgba(255,255,255,0.05);
-
-  transition: all 0.25s ease;
-}
-
-/* EFEITO AO TOCAR */
-.smart-banner:active {
-  transform: scale(0.98);
-}
-
-/* TÍTULO */
-.smart-banner b {
-  font-size: 15px;
-  font-weight: 700;
-  color: #fff;
-}
-
-/* TEXTO */
-.smart-banner p {
-  font-size: 12px;
-  color: #9CA3AF;
-  margin: 0;
-}
-
-/* BOTÃO */
-.smart-banner button {
-  align-self: flex-start;
-  border: none;
-  border-radius: 10px;
-  padding: 8px 14px;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-/* DOTS */
-.banner-dots { 
-  display: flex; 
-  justify-content: center; 
-  gap: 6px; 
-  margin-top: 12px; 
-}
-
-.dot { 
-  width: 6px; 
-  height: 6px; 
-  background: #374151; 
-  border-radius: 50%; 
-  transition: all 0.3s ease; 
-}
-
-.dot.active { 
-  background: var(--primary); 
-  width: 18px; 
-  border-radius: 10px; 
-}
-
-/* CORES DIFERENTES POR TIPO */
-.banner-green {
-  border-left: 4px solid #22c55e;
-}
-
-.banner-red {
-  border-left: 4px solid #ef4444;
-}
-
-.banner-yellow {
-  border-left: 4px solid #f59e0b;
-}
-
-.banner-blue {
-  border-left: 4px solid #3b82f6;
-}
-/* CARD PADRÃO */
-.smart-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 20px;
-}
-
-/* PROGRESSO */
-.progress-container {
-  height: 6px;
-  background: #1f2937;
-  border-radius: 10px;
-  margin: 10px 0;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  background: var(--primary);
-  border-radius: 10px;
-}
-
-/* NAV BAR */
-.nav-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(10, 10, 10, 0.95);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: space-around;
-  padding: 12px 0 25px;
-  z-index: 1000;
-}
-
-.nav-btn {
-  background: none;
-  border: none;
-  color: #9CA3AF;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  transition: 0.2s;
-}
-
-.nav-btn:active {
-  transform: scale(0.9);
-}
-
-/* SVG PADRÃO */
-svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  }
-    /* Adicione isso para dar espaço no final da tela por causa da nav-bar */
-.container { 
-    padding: 20px 20px 100px 20px; /* O 100px garante que o último card apareça */
-}
-
-/* Ajuste no card de atividade para não vazar */
-.smart-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 20px; /* Espaço entre ele e o próximo elemento */
-    box-sizing: border-box;
-}
-    
-    /* ========================= */
-/* EMPRÉSTIMO PREMIUM */
-/* ========================= */
-
-.premium-icon {
-  position: relative;
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  box-shadow: 
-    0 0 10px rgba(34, 197, 94, 0.25),
-    inset 0 0 5px rgba(34, 197, 94, 0.15);
-  animation: pulseGlow 2.5s infinite;
-}
-
-/* Glow animado */
-@keyframes pulseGlow {
-  0% {
-    box-shadow: 0 0 5px rgba(34, 197, 94, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 18px rgba(34, 197, 94, 0.5);
-  }
-  100% {
-    box-shadow: 0 0 5px rgba(34, 197, 94, 0.2);
-  }
-}
-
-/* Badge */
-.badge-premium {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #22c55e;
-  color: #000;
-  font-size: 8px;
-  font-weight: 900;
-  padding: 3px 6px;
-  border-radius: 6px;
-  animation: bounceBadge 1.8s infinite;
-}
-
-/* Animação do badge */
-@keyframes bounceBadge {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-/* Hover toque */
-.emprestimo-premium:active .premium-icon {
-  transform: scale(0.92);
-  transition: 0.15s;
-}
-
-  .resumo-footer-compacto {
-    display: flex;
-    justify-content: space-between; /* Espalha os itens: canto, meio e canto */
-    align-items: center;
-    border-top: 1px solid var(--border);
-    padding-top: 15px;
-    margin-top: 5px;
-  }
-
-  .status-item {
-    display: flex;
-    flex-direction: column; /* Coloca o texto em cima do valor */
-    gap: 4px;
-  }
-
-  .status-item small {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .status-item strong {
-    font-size: 14px;
-    font-weight: 700;
-  }
-
-  /* Removendo o badge antigo caso ele ainda esteja no seu CSS */
-  .badge-lucro { display: none; }
-
-  /* --- ADICIONE ISSO PARA O GRÁFICO APARECER --- */
-.resumo-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 20px;
-    margin-bottom: 25px;
-}
-
-.resumo-header small {
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 10px;
-    font-weight: 700;
-}
-
-.grafico-container { 
-    width: 100%; 
-    height: 100px; /* IMPORTANTE: Sem isso ele não aparece */
-    margin: 10px 0;
-    display: flex;
-    align-items: center;
-}
-
-.grafico-svg { 
-    width: 100%; 
-    height: 80px; 
-    overflow: visible; 
-}
-/* ------------------------------------------- */
-      
-  
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zentry - Home</title>
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
 
@@ -448,210 +12,71 @@ svg {
   <header class="header">
     <div class="user-info">
       <div class="greeting" id="greeting">Boa tarde,</div>
-      <h2>...</h2>
+      <h2 id="nome-usuario">...</h2>
     </div>
     <div style="display:flex; gap:12px; align-items:center;">
       <div onclick="toggleSaldoHome()" id="eye-btn" style="cursor:pointer; color: #FFF;">
-        <svg viewBox="0 0 24 24"><path d="M1 12s4-6 11-6 11 6 11 6-4 6-11 6S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-6 11-6 11 6 11 6-4 6-11 6S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
       </div>
       <div class="avatar" onclick="location.href='perfil.html'" style="cursor:pointer;">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
     </div>
   </header>
 
   <div class="balance-circle" onclick="location.href='extrato.html'">
     <div class="circle">
-        <span id="saldo-home">R$Carregando...</span>
+        <span id="saldo-home">...</span>
         <small>Saldo disponível</small>
     </div>
   </div>
 
-
-    <div class="resumo-card">
-  <div class="resumo-header">
-    <div>
-      <small>Visão Geral</small>
+  <div class="resumo-card">
+    <div class="resumo-header"><small>Visão Geral</small></div>
+    <div class="resumo-footer-compacto">
+      <div class="status-item">
+        <small>Entrou</small>
+        <strong id="resumo-entrada" style="color:#3B82F6">R$ 0,00</strong>
+      </div>
+      <div class="status-item">
+        <small>Saiu</small>
+        <strong id="resumo-saida" style="color:#FBBF24">R$ 0,00</strong>
+      </div>
+      <div class="status-item">
+        <small>Lucro</small>
+        <strong id="resumo-lucro" style="color:var(--primary)">R$ 0,00</strong>
+      </div>
     </div>
   </div>
-
-  <div class="grafico-container">
-    <svg viewBox="0 0 500 100" class="grafico-svg">
-      <path d="M0,80 Q125,75 250,78 T500,75" fill="none" stroke="var(--primary)" stroke-width="3" opacity="0.8" />
-      <path d="M0,90 L50,40 L100,60 L150,20 L200,45 L250,10 L300,50 L350,15 L400,40 L450,5 L500,30" fill="none" stroke="#3B82F6" stroke-width="2" />
-      <path d="M0,95 L60,85 L120,95 L180,75 L240,90 L300,80 L360,95 L420,85 L500,98" fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="5,5" />
-    </svg>
-  </div>
-
-  <div class="resumo-footer-compacto">
-    <div class="status-item" style="text-align: left;">
-      <small>Entrou</small>
-      <strong style="color:#3B82F6">R$ 1.200</strong>
-    </div>
-    <div class="status-item" style="text-align: center;">
-      <small>Saiu</small>
-      <strong style="color:#FBBF24">R$ 350,00</strong>
-    </div>
-    <div class="status-item" style="text-align: right;">
-      <small>Lucro</small>
-      <strong style="color:var(--primary)">R$ 850,00</strong>
-    </div>
-  </div>
-</div> 
-
-
 
   <div class="pix-card">
     <div class="pix-info"><b>Pix rápido ⚡</b><br><span style="font-size: 11px; opacity: 0.8;">Receba e envia dinheiro 24h</span></div>
     <a href="pix.html" class="pix-btn">Usar Pix</a>
   </div>
+
   <section class="actions-grid">
-
-  <a href="extrato.html" class="action-item">
-    <div class="action-icon">
-      <svg viewBox="0 0 24 24">
-        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9h6m-6 4h6"/>
-      </svg>
-    </div>
-    <span>Extrato</span>
-  </a>
-
-<a href="#" onclick="alert('Disponível em breve')" class="action-item credito-premium">
-  
-  <div class="action-icon premium-icon">
-
-    <div class="badge-premium">EM BREVE</div>
-
-    <svg viewBox="0 0 24 24">
-      <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-    </svg>
-
-  </div>
-
-  <span>Crédito</span>
-</a>
-  <a href="cobrar.html" class="action-item">
-    <div class="action-icon">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-      </svg>
-    </div>
-    <span>Cobrar por link</span>
-  </a>
-
-  <a href="contas.html" class="action-item">
-    <div class="action-icon">
-      <svg viewBox="0 0 24 24">
-        <path d="M20 12V8H4v4M2 4h20v16H2V4zm2 4h16v10H4V8z"/>
-      </svg>
-    </div>
-    <span>Minhas contas</span>
-  </a>
-
-  <a href="cartao.html" class="action-item">
-    <div class="action-icon">
-      <svg viewBox="0 0 24 24">
-        <rect x="1" y="4" width="22" height="16" rx="2"/>
-        <line x1="1" y1="10" x2="23" y2="10"/>
-      </svg>
-    </div>
-    <span>Cartão</span>
-  </a>
-
-  <a href="recarga.html" class="action-item">
-    <div class="action-icon">
-      <svg viewBox="0 0 24 24">
-        <rect x="5" y="2" width="14" height="20" rx="2"/>
-        <line x1="12" y1="18" x2="12" y2="18"/>
-      </svg>
-    </div>
-    <span>Recarga</span>
-  </a>
-
+    <a href="extrato.html" class="action-item"><span>Extrato</span></a>
+    <a href="cobrar.html" class="action-item"><span>Cobrar</span></a>
+    <a href="contas.html" class="action-item"><span>Contas</span></a>
+    <a href="cartao.html" class="action-item"><span>Cartão</span></a>
+    <a href="recarga.html" class="action-item"><span>Recarga</span></a>
   </section>
 
   <div class="techtap-card">
-  <div class="techtap-info">
-    <b>ZENTAP ⚡</b><br>
-    <span>Venda por aproximação</span>
+    <div class="techtap-info"><b>ZENTAP ⚡</b><br><span>Venda por aproximação</span></div>
+    <button onclick="abrirPDV()" class="techtap-btn">Cobrar</button>
   </div>
 
-  <button onclick="abrirPDV()" class="techtap-btn">
-    Cobrar
-  </button>
-  </div>
-  <div class="banner-wrapper">
-    <div class="banner-container" id="banner-slider"></div>
-    <div class="banner-dots" id="banner-dots"></div>
-  </div>
-  <div class="smart-card" style="padding: 22px; border-radius: 28px;">
-          
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <span style="font-weight: 800; font-size: 11px; color: var(--text-secondary); letter-spacing: 1.2px; text-transform: uppercase;">
-            Atividade Recente
-        </span>
-      <div style="background: rgba(34, 197, 94, 0.1); padding: 4px 10px; border-radius: 8px; cursor: pointer;" 
-     onclick="window.location.href='historico.html'">
-    <span style="font-size: 11px; color: var(--primary); font-weight: 700;">Ver tudo</span>
-      </div>
-      
-    </div>
-    
-    <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.03);">
-        <div style="width: 42px; height: 42px; background: rgba(255, 95, 31, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #ff5f1f;">
-            <i data-lucide="contactless" style="width: 20px;"></i>
-        </div>
-     
-        <div style="flex: 1;">
-            <div style="font-weight: 700; font-size: 14px; color: #fff;">Venda ZENTRY</div>
-            <div style="font-size: 11px; color: var(--text-secondary);">Hoje • 14:20</div>
-        </div>
-        <div style="text-align: right;">
-            <div style="font-weight: 800; color: var(--primary); font-size: 14px;">+ R$ 150,00</div>
-            <div style="font-size: 9px; color: #ff5f1f; font-weight: 700; letter-spacing: 0.5px;">CRÉDITO</div>
-        </div>
-    </div>
+  <nav class="nav-bar">
+    <button class="nav-btn active" onclick="location.href='home.html'">Início</button>
+    <button class="nav-btn" onclick="location.href='metas.html'">Metas</button>
+    <button class="nav-btn" onclick="logout()">Sair</button>
+  </nav>
+</div>
 
-    <div style="display: flex; align-items: center; gap: 14px;">
-        <div style="width: 42px; height: 42px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
-            <i data-lucide="zap" style="width: 20px;"></i>
-        </div>
-        <div style="flex: 1;">
-            <div style="font-weight: 700; font-size: 14px; color: #fff;">Recebimento Pix</div>
-            <div style="font-size: 11px; color: var(--text-secondary);">Hoje • 10:05</div>
-        </div>
-        <div style="text-align: right;">
-            <div style="font-weight: 800; color: var(--primary); font-size: 14px;">+ R$ 85,90</div>
-            <div style="font-size: 9px; color: var(--primary); font-weight: 700; letter-spacing: 0.5px;">PIX</div>
-        </div>
-    </div>
-  </div>
-  
-
-<nav class="nav-bar">
-  <button class="nav-btn active" onclick="location.href='home.html'">
-    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-    Início
-  </button>
-
-  <button class="nav-btn" onclick="location.href='metas.html'">
-    <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-    Metas
-  </button>
-
-  <button class="nav-btn" onclick="location.href='notificacoes.html'">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    Notificação 
-  </button>
-
-  <button class="nav-btn" onclick="logout()">
-    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-    Sair
-  </button>
-</nav>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -667,42 +92,44 @@ svg {
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    let saldoOculto = false;
+    window.currentSaldo = 0;
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Esse log é pra você ver no F12 se o ID bate com o do Firebase
-            console.log("Conectado com o UID:", user.uid);
-
-            const docRef = doc(db, "usuarios", user.uid);
-            
-            onSnapshot(docRef, (docSnap) => {
+            onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
                 if (docSnap.exists()) {
-                    const dados = docSnap.data();
+                    const d = docSnap.data();
                     
-                    // ATUALIZA O NOME (Forçando a barra)
-                    const elNome = document.getElementById("nome-usuario");
-                    if(elNome) elNome.innerText = (dados.nome.split(' ')[0] || "Usuário") + "!";
-
-                    // ATUALIZA O SALDO (Convertendo qualquer coisa pra número)
-                    let valor = dados.saldo !== undefined ? dados.saldo : 0;
-                    window.currentSaldo = parseFloat(valor);
+                    // Atualiza Nome e Saldo
+                    document.getElementById("nome-usuario").innerText = (d.nome || "Usuário") + "!";
+                    window.currentSaldo = parseFloat(d.saldo || 0);
                     
-                    const elSaldo = document.getElementById("saldo-home");
-                    if(elSaldo) {
-                        elSaldo.innerText = window.currentSaldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    }
+                    // Atualiza Resumo (Entrada/Saída/Lucro)
+                    const format = (v) => parseFloat(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    document.getElementById("resumo-entrada").innerText = format(d.entrada);
+                    document.getElementById("resumo-saida").innerText = format(d.saida);
+                    document.getElementById("resumo-lucro").innerText = format(d.lucro);
+                    
+                    renderSaldo();
                 } else {
-                    // Se cair aqui, o seu documento no Firestore está com o nome errado!
-                    document.getElementById("nome-usuario").innerText = "Erro: Criar doc com UID";
-                    console.error("ID não encontrado no banco:", user.uid);
+                    document.getElementById("nome-usuario").innerText = "ID não configurado!";
                 }
             });
         } else {
             window.location.href = "login.html";
         }
     });
-    
-    // Mantenha suas outras funções (banners, etc) abaixo...
+
+    function renderSaldo() {
+        const el = document.getElementById("saldo-home");
+        if(el) el.innerText = saldoOculto ? "••••••••" : window.currentSaldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    window.toggleSaldoHome = () => { saldoOculto = !saldoOculto; renderSaldo(); };
+    window.logout = () => { signOut(auth).then(() => { window.location.href = 'login.html'; }); };
+    window.abrirPDV = () => { window.location.href = 'pdv.html'; };
 </script>
-  
-</body>  
+
+</body>
 </html>
