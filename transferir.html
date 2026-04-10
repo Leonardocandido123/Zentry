@@ -139,8 +139,7 @@
 <div class="footer-action">
     <button class="confirm-btn" id="btnProsseguir" onclick="irParaRevisao()" disabled>Continuar</button>
 </div>
-  
-<script type="module">
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -167,6 +166,7 @@
   let saldoDisponivel = 0;
   let destinoEncontrado = null;
 
+  // 1. CARREGAR SALDO
   onAuthStateChanged(auth, (user) => {
     if (user) {
       onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
@@ -175,61 +175,35 @@
           saldoElement.innerText = saldoDisponivel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
       });
-    } else {
-      setTimeout(() => { if(!auth.currentUser) window.location.href = "login.html"; }, 3000);
     }
   });
 
-  // BUSCA REFORÇADA (Tenta achar de qualquer jeito)
-  async function buscarDestinatario(valorOriginal) {
-    const limpa = valorOriginal.replace(/\D/g, "");
-    if (limpa.length < 11) return;
-
-    try {
-      const colRef = collection(db, "usuarios");
-      // Tenta buscar pela chave limpa (só números)
-      let q = query(colRef, where("chavePix", "==", limpa));
-      let snap = await getDocs(q);
-
-      // Se não achar, tenta buscar pela chave formatada (com pontos/traços)
-      if (snap.empty) {
-        q = query(colRef, where("chavePix", "==", valorOriginal));
-        snap = await getDocs(q);
-      }
+  // 2. BUSCA ULTRA SIMPLIFICADA (SEM MÁSCARA PARA TESTE)
+  chaveInput.addEventListener("input", async (e) => {
+    const limpa = e.target.value.replace(/\D/g, ""); // Pega só números
+    
+    if (limpa.length >= 11) {
+      console.log("Buscando por:", limpa);
+      const q = query(collection(db, "usuarios"), where("chavePix", "==", limpa));
+      const snap = await getDocs(q);
 
       if (!snap.empty) {
-        const userDoc = snap.docs[0];
-        destinoEncontrado = { id: userDoc.id, ...userDoc.data() };
+        destinoEncontrado = { id: snap.docs[0].id, ...snap.docs[0].data() };
         document.querySelector(".dest-name").innerText = destinoEncontrado.nome;
         feedback.style.display = "block";
-        console.log("Destinatário encontrado!");
+        console.log("ACHOU!");
       } else {
         destinoEncontrado = null;
         feedback.style.display = "none";
       }
-      validar();
-    } catch (e) { console.error(e); }
-  }
-
-  // MÁSCARA SIMPLIFICADA PARA NÃO TRAVAR O CPF
-  chaveInput.addEventListener("input", (e) => {
-    let v = e.target.value.replace(/\D/g, "");
-    
-    if (v.length <= 11) {
-      // Se começar com 0 ou o 3º dígito for 9, trata como Celular, senão CPF
-      if (v.length === 11 && v[2] === "9") {
-        v = v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-      } else {
-        v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-      }
     } else {
-      v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+      destinoEncontrado = null;
+      feedback.style.display = "none";
     }
-    
-    e.target.value = v;
-    if (v.replace(/\D/g, "").length >= 11) buscarDestinatario(e.target.value);
+    validar();
   });
 
+  // 3. MÁSCARA DE VALOR
   valorInput.addEventListener("input", (e) => {
     let v = e.target.value.replace(/\D/g,'');
     v = (v/100).toFixed(2) + '';
@@ -239,27 +213,26 @@
     validar();
   });
 
+  // 4. VALIDAÇÃO TOTAL
   function validar() {
-    const valorNum = parseFloat(valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".")) || 0;
-    
-    // FORÇAR ATIVAÇÃO DO BOTÃO
+    const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
+    const valorNum = parseFloat(valorLimpo) || 0;
+
+    // Se achou o destino E tem valor E tem saldo
     if (destinoEncontrado && valorNum > 0 && valorNum <= saldoDisponivel) {
       btn.disabled = false;
-      btn.style.backgroundColor = "#22C55E";
+      btn.style.backgroundColor = "#22C55E"; // Verde
       btn.style.color = "#000";
       btn.style.opacity = "1";
-      btn.style.cursor = "pointer";
     } else {
       btn.disabled = true;
-      btn.style.backgroundColor = "#27272a";
+      btn.style.backgroundColor = "#27272a"; // Cinza
       btn.style.color = "#71717a";
       btn.style.opacity = "0.5";
     }
   }
 
   window.irParaRevisao = function() {
-    if(!destinoEncontrado) return alert("Busque um destino válido primeiro");
-    
     const info = {
         valor: valorInput.value,
         valorNumerico: parseFloat(valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".")),
@@ -271,7 +244,9 @@
     localStorage.setItem("transacao_pendente", JSON.stringify(info));
     window.location.href = 'revisao.html';
   };
-</script>
+  </script>
+  
+
   
   
 </body>
