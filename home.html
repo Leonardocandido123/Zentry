@@ -649,168 +649,124 @@ svg {
     Sair
   </button>
 </nav>
-<script>
-let saldoOculto = false;
-let currentSlide = 0;
-let slideInterval = null;
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// =======================
-// ATUALIZA SALDO NA HOME
-// =======================
-function atualizarHome() {  
-    const saldoSalvo = parseFloat(localStorage.getItem("saldo") || "0");  
-    const el = document.getElementById("saldo-home");  
-    
-    if(el) {
-        el.innerText = saldoOculto
-            ? "••••••••"
-            : saldoSalvo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
-}
+    const firebaseConfig = {
+        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
+        authDomain: "zentry-app-74275.firebaseapp.com",
+        projectId: "zentry-app-74275",
+        storageBucket: "zentry-app-74275.appspot.com",
+        messagingSenderId: "571422826071",
+        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+    };
 
-function toggleSaldoHome() {
-    saldoOculto = !saldoOculto;
-    atualizarHome();
-}
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-// =======================
-// SAUDAÇÃO AUTOMÁTICA
-// =======================
-function atualizarSaudacao() {
-    const hora = new Date().getHours();
-    let saudacao = "Olá,";
+    let saldoOculto = false;
+    let currentSlide = 0;
+    let slideInterval = null;
 
-    if (hora >= 5 && hora < 12) saudacao = "Bom dia,";
-    else if (hora >= 12 && hora < 18) saudacao = "Boa tarde,";
-    else saudacao = "Boa noite,";
-
-    const el = document.getElementById("greeting");
-    if(el) el.innerText = saudacao;
-}
-setInterval(atualizarSaudacao, 60000);
-
-// =======================
-// RESUMO DO DIA
-// =======================
-function atualizarResumo() {
-    const historico = JSON.parse(localStorage.getItem("transacoes") || "[]");
-    let entrada = 0, saida = 0;
-
-    historico.forEach(tx => {
-        let v = typeof tx.valor === 'string' 
-            ? parseFloat(tx.valor.replace("R$ ", "").replace(/\./g, "").replace(",", ".")) 
-            : tx.valor;
-        if (tx.tipo === "entrada") entrada += v;
-        if (tx.tipo === "saida" || tx.tipo === "enviado") saida += v;
+    // --- CONEXÃO COM DADOS DO USUÁRIO ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Escuta o banco de dados em tempo real
+            onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    const dados = docSnap.data();
+                    
+                    // Atualiza o Nome dinamicamente
+                    const nomeH2 = document.querySelector(".user-info h2");
+                    if(nomeH2) nomeH2.innerText = dados.nome.split(' ')[0] + "!";
+                    
+                    // Salva saldo global e renderiza
+                    window.currentSaldo = dados.saldo || 0;
+                    renderSaldo();
+                }
+            });
+        } else {
+            window.location.href = "login.html";
+        }
     });
 
-    const entradaEl = document.getElementById("entrada-dia");
-    const saidaEl = document.getElementById("saida-dia");
-    const lucroEl = document.getElementById("lucro-dia");
+    function renderSaldo() {
+        const el = document.getElementById("saldo-home");
+        if(!el) return;
+        el.innerText = saldoOculto ? "••••••••" : window.currentSaldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
 
-    if(entradaEl) entradaEl.innerText = entrada.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    if(saidaEl) saidaEl.innerText = saida.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    if(lucroEl) lucroEl.innerText = (entrada - saida).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
+    // --- FUNÇÕES DE INTERAÇÃO (SEUS BOTÕES) ---
+    window.toggleSaldoHome = () => {
+        saldoOculto = !saldoOculto;
+        renderSaldo();
+    };
 
-// =======================
-// ABRIR PDV / TECHTAP
-// =======================
-function abrirPDV() {
-    window.location.href = 'pdv.html';
-}
+    window.logout = () => {
+        signOut(auth).then(() => { window.location.href = 'login.html'; });
+    };
 
-// =======================
-// BANNER ROTATIVO DINÂMICO
-// =======================
-  function carregarBanners() {
-    const bannerSlider = document.getElementById('banner-slider');
-    const bannerDots = document.getElementById('banner-dots');
+    window.abrirPDV = () => { window.location.href = 'pdv.html'; };
 
-    if (!bannerSlider || !bannerDots) return;
+    // --- LOGICA DOS BANNERS E SAUDAÇÃO (MANTIDA) ---
+    function atualizarSaudacao() {
+        const hora = new Date().getHours();
+        let saudacao = "Olá,";
+        if (hora >= 5 && hora < 12) saudacao = "Bom dia,";
+        else if (hora >= 12 && hora < 18) saudacao = "Boa tarde,";
+        else saudacao = "Boa noite,";
+        const el = document.getElementById("greeting");
+        if(el) el.innerText = saudacao;
+    }
 
-    console.log("BANNERS CARREGADOS");
+    function carregarBanners() {
+        const bannerSlider = document.getElementById('banner-slider');
+        const bannerDots = document.getElementById('banner-dots');
+        if (!bannerSlider || !bannerDots) return;
 
-    const listaSlides = [
-        `<div class="smart-banner" onclick="location.href='cartao.html'" style="border-left: 5px solid var(--primary);">
-            <b>Cartão Virtual TECH</b>
-            <p>Peça já o seu e faça compras online com segurança.</p>
-            <button style="background: var(--primary); color:#000;">Ativar Agora</button>
-        </div>`,
+        const listaSlides = [
+            `<div class="smart-banner" onclick="location.href='cartao.html'" style="border-left: 5px solid var(--primary);">
+                <b>Cartão Virtual TECH</b>
+                <p>Peça já o seu e faça compras online com segurança.</p>
+                <button style="background: var(--primary); color:#000;">Ativar Agora</button>
+            </div>`,
+            `<div class="smart-banner" onclick="location.href='cobrar.html'" style="border-left: 5px solid #ef4444;">
+                <b>Cobrar Clientes</b>
+                <p>Envie cobranças rápidas via Pix.</p>
+                <button style="background:#ef4444; color:#fff;">Cobrar</button>
+            </div>`,
+            `<div class="smart-banner" onclick="location.href='contas.html'" style="border-left: 5px solid #f59e0b;">
+                <b>Contas a pagar</b>
+                <p>Organize suas contas e evite atraso.</p>
+                <button style="background:#f59e0b; color:#000;">Ver contas</button>
+            </div>`
+        ];
+        bannerSlider.innerHTML = listaSlides.join('');
+        bannerDots.innerHTML = listaSlides.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('');
+        iniciarRotacao(listaSlides.length);
+    }
 
-        `<div class="smart-banner" onclick="location.href='cobrar.html'" style="border-left: 5px solid #ef4444;">
-            <b>Cobrar Clientes</b>
-            <p>Envie cobranças rápidas via Pix.</p>
-            <button style="background:#ef4444; color:#fff;">Cobrar</button>
-        </div>`,
+    function iniciarRotacao(total) {
+        if (total <= 1) return;
+        const slider = document.getElementById('banner-slider');
+        slideInterval = setInterval(() => {
+            currentSlide = (currentSlide + 1) % total;
+            if(slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+        }, 3000);
+    }
 
-        `<div class="smart-banner" onclick="location.href='contas.html'" style="border-left: 5px solid #f59e0b;">
-            <b>Contas a pagar</b>
-            <p>Organize suas contas e evite atraso.</p>
-            <button style="background:#f59e0b; color:#000;">Ver contas</button>
-        </div>`,
-
-        `<div class="smart-banner" onclick="location.href='recarga.html'" style="border-left: 5px solid #3b82f6;">
-            <b>Recarga</b>
-            <p>Recarregue seu celular em segundos.</p>
-            <button style="background:#3b82f6; color:#fff;">Recarregar</button>
-        </div>`
-    ];
-
-    bannerSlider.innerHTML = listaSlides.join('');
-
-    bannerDots.innerHTML = listaSlides.map((_, i) =>
-        `<div class="dot ${i === 0 ? 'active' : ''}"></div>`
-    ).join('');
-
-    currentSlide = 0;
-    iniciarRotacao(listaSlides.length);
-  }
-  function iniciarRotacao(total) {
-    if (total <= 1) return;
-
-    if (slideInterval) clearInterval(slideInterval);
-
-    const slider = document.getElementById('banner-slider');
-
-    slideInterval = setInterval(() => {
-        currentSlide++;
-
-        if (currentSlide >= total) {
-            currentSlide = 0;
-        }
-
-        slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-
-        // Atualiza bolinhas
-        const dots = document.querySelectorAll('.dot');
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentSlide);
-        });
-
-    }, 3000);
-  }
-
-
-// =======================
-// LOGOUT
-// =======================
-function logout() {
-    localStorage.setItem('techpay_user', 'false'); 
-    window.location.href = 'login.html'; 
-}
-
-// =======================
-// ONLOAD
-// =======================
-window.onload = () => { 
-    atualizarHome(); 
-    atualizarResumo(); 
-    carregarBanners(); 
-    atualizarSaudacao();
-};
-</script>
+    // Inicialização ao carregar a página
+    window.onload = () => {
+        atualizarSaudacao();
+        carregarBanners();
+    };
+   </script>
   
-
-
-</body>   </html>
+</body>  
+</html>
