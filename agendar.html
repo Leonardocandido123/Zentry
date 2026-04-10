@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <title>TECH Pay - Programar Pix</title>
+  <title>ZENTRY - Programar Pix</title>
   <style>
     :root { 
       --bg: #000000; 
@@ -18,7 +18,7 @@
 
     /* HEADER */
     .header { display: flex; align-items: center; gap: 15px; margin-bottom: 35px; }
-    .back-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; }
+    .back-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--card); display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); cursor: pointer; border: none; }
     .back-btn svg { stroke: var(--accent); width: 22px; fill: none; stroke-width: 2.5; }
 
     /* INPUTS */
@@ -52,25 +52,25 @@
 <body>
 
   <div class="header">
-    <div class="back-btn" onclick="location.href='pix.html'">
+    <button class="back-btn" onclick="location.href='pix.html'">
       <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-    </div>
-    <b style="font-size: 22px; letter-spacing: -0.5px;">Programar</b>
+    </button>
+    <b style="font-size: 22px; letter-spacing: -0.5px;">Programar Pix</b>
   </div>
 
   <div class="field-group">
     <span class="label">Nome ou Chave</span>
-    <input type="text" class="input-box" placeholder="Ex: leonardo@email.com">
+    <input type="text" id="destinoChave" class="input-box" placeholder="Ex: leonardo@email.com">
   </div>
 
   <div class="field-group">
     <span class="label">Valor do Pix</span>
-    <input type="text" class="input-box" placeholder="R$ 0,00" id="valor">
+    <input type="text" id="valor" class="input-box" placeholder="R$ 0,00" inputmode="decimal">
   </div>
 
   <div class="field-group">
     <span class="label">Data do agendamento</span>
-    <input type="date" class="input-box">
+    <input type="date" id="dataPgto" class="input-box">
   </div>
 
   <div class="info-card">
@@ -80,42 +80,93 @@
     </p>
   </div>
 
-<button class="confirm-btn" onclick="agendarPix()">
-  Agendar Transferência
-</button>
+  <button class="confirm-btn" id="btnAgendar">
+    Agendar Transferência
+  </button>
   
-  <script>
-    // Máscara simples para dinheiro
-    document.getElementById('valor').addEventListener('input', function(e) {
-      let v = e.target.value.replace(/\D/g,'');
-      v = (v/100).toFixed(2) + '';
-      v = v.replace(".", ",");
-      v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      e.target.value = "R$ " + v;
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
+        authDomain: "zentry-app-74275.firebaseapp.com",
+        projectId: "zentry-app-74275",
+        storageBucket: "zentry-app-74275.appspot.com",
+        messagingSenderId: "571422826071",
+        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let userLogado = null;
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            userLogado = user;
+        } else {
+            window.location.href = 'login.html';
+        }
     });
-    function agendarPix() {
-    const valor = document.getElementById('valor').value;
-    const destino = document.querySelector('input[placeholder="Ex: leonardo@email.com"]').value;
-    const dataAgendada = document.querySelector('input[type="date"]').value;
 
-    if(!valor || valor === "R$ 0,00" || !destino || !dataAgendada) {
-        return alert("Preencha todos os campos!");
+    // Máscara de Moeda (Igual ao Scanner)
+    const inputValor = document.getElementById('valor');
+    inputValor.addEventListener('input', (e) => {
+        let v = e.target.value.replace(/\D/g, '');
+        v = (v / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        e.target.value = v;
+    });
+
+    function limparParaNumero(valorStr) {
+        return parseFloat(valorStr.replace(/[^\d,]/g, '').replace(',', '.'));
     }
 
-    // Configura o comprovante dinâmico
-    localStorage.setItem("tipoTransacao", "pix"); // Usa o layout de Pix
-    localStorage.setItem("ultimoValor", valor);
-    localStorage.setItem("destinoNome", "Agendado para: " + destino);
-    localStorage.setItem("detalhesExtras", "Data: " + dataAgendada.split('-').reverse().join('/'));
-    localStorage.setItem("instDestino", "Pagamento Programado");
+    document.getElementById('btnAgendar').onclick = async () => {
+        const valorStr = inputValor.value;
+        const destino = document.getElementById('destinoChave').value;
+        const dataAgendada = document.getElementById('dataPgto').value;
 
-    // No agendamento, geralmente não desconta o saldo na hora, 
-    // mas se quiser descontar, adicione a lógica de saldo aqui.
+        if(!valorStr || valorStr === "R$ 0,00" || !destino || !dataAgendada) {
+            alert("Preencha todos os campos corretamente!");
+            return;
+        }
 
-    alert('Pix agendado com sucesso!');
-    window.location.href = 'comprovante.html';
-    }
-    
+        const valorNum = limparParaNumero(valorStr);
+
+        try {
+            // Salva na coleção de AGENDAMENTOS (não mexe no saldo agora)
+            await addDoc(collection(db, "agendamentos"), {
+                uid: userLogado.uid,
+                destino: destino,
+                valor: valorNum,
+                valorFormatado: valorStr,
+                dataProgramada: dataAgendada,
+                status: "Pendente",
+                dataCriacao: new Date().toLocaleString('pt-BR')
+            });
+
+            // Configura o LocalStorage para o comprovante
+            localStorage.setItem("transacao_pendente", JSON.stringify({
+                nomeDestino: destino,
+                valor: valorStr,
+                data: dataAgendada.split('-').reverse().join('/'),
+                bancoDestino: "Zentry Bank",
+                chavePix: destino,
+                id: "SCH" + Math.floor(100000 + Math.random() * 900000),
+                tipo: "AGENDAMENTO"
+            }));
+
+            alert('Pix agendado com sucesso!');
+            window.location.href = 'comprovante.html';
+
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao salvar agendamento.");
+        }
+    };
   </script>
 </body>
 </html>
