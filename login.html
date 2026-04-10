@@ -10,159 +10,163 @@
   :root { 
     --accent: #22c55e; 
     --bg: #05070A;
-    --card: #111827;
     --border: #2A3441;
   }
 
-/* RESET E FUNDO */
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+  /* RESET TOTAL PARA TRAVAR A TELA */
+  * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Inter', sans-serif; 
+  }
 
-body { 
-  min-height: 100vh; /* 🔥 corrigido */
-  background: radial-gradient(circle at top, #0f172a, #000); 
-  display: flex; 
-  flex-direction: column; 
-  justify-content: center; 
-  padding: 30px; 
-  color: #fff;
-  overflow: hidden;
-  transition: opacity 0.4s;
-}
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* Mata a rolagem vertical e horizontal */
+    position: fixed; /* Evita que o teclado do celular empurre tudo pra cima de forma errada */
+  }
 
-/* TEXTOS */
-.title {
-  font-size: 26px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  background: linear-gradient(to right, #fff, #9CA3AF);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+  body { 
+    background: radial-gradient(circle at top, #0f172a, #000); 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    padding: 30px; 
+    color: #fff;
+  }
 
-.subtitle {
-  font-size: 15px;
-  color: #9CA3AF;
-  margin-bottom: 30px; /* 🔥 ajuste fino */
-  line-height: 1.4;
-}
+  .title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(to right, #fff, #9CA3AF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 
-/* CAMPO DE SENHA */
-.password-field {
-  position: relative;
-  background: none;
-  border: none;
-  border-bottom: 1.5px solid var(--border);
-  padding: 10px 0;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  transition: 0.3s;
-  margin-bottom: 20px; /* 🔥 ESSENCIAL PRA NÃO QUEBRAR */
-}
+  .subtitle {
+    font-size: 15px;
+    color: #9CA3AF;
+    margin-bottom: 40px;
+    line-height: 1.4;
+  }
 
-/* Quando clica */
-.password-field:focus-within {
-  border-bottom-color: var(--accent);
-}
+  .field-wrapper {
+    width: 100%;
+    max-width: 100%; /* Garante que não ultrapasse a largura do celular */
+  }
 
-/* INPUT */
-.password-field input {
-  flex: 1;
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 20px;
-  outline: none;
-  letter-spacing: 4px;
-  width: 100%;
-  padding-right: 85px;
-}
+  .password-container {
+    position: relative;
+    border-bottom: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    height: 60px;
+    transition: 0.3s;
+  }
 
-/* BOTÃO ENTRAR */
-.enter-btn {
-  position: absolute;
-  right: 8px;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: scale(0.7);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
-}
+  .password-container:focus-within {
+    border-bottom-color: var(--accent);
+  }
 
-.enter-btn.active {
-  opacity: 1;
-  transform: scale(1);
-}
+  input {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    outline: none;
+    padding-right: 100px;
+    letter-spacing: 2px;
+    width: 100%; /* Ocupa apenas o espaço disponível */
+  }
 
-/* OLHO */
-.eye {
-  position: absolute;
-  right: 60px;
-  width: 24px;
-  height: 24px;
-  opacity: 0.4;
-  cursor: pointer;
-  transition: 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
+  .actions {
+    position: absolute;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 
-.eye.active { opacity: 1; }
+  .eye {
+    width: 24px;
+    height: 24px;
+    opacity: 0.4;
+    cursor: pointer;
+  }
 
-/* LINKS (CORREÇÃO FINAL) */
-.links {
-  display: flex;
-  justify-content: space-between;
-  width: 100%; /* 🔥 garante alinhamento */
-  margin-top: 10px; /* 🔥 evita subir */
-  font-size: 14px;
-}
+  .enter-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
 
-.links a {
-  color: #9CA3AF;
-  text-decoration: none;
-  transition: 0.2s;
-}
+  .enter-btn.active {
+    opacity: 1;
+    transform: scale(1);
+  }
 
-.links a:last-child {
-  color: var(--accent);
-  font-weight: 600;
-}
+  .links {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 15px;
+  }
 
-.links a:active { opacity: 0.5; }
+  .links a {
+    color: #9CA3AF;
+    text-decoration: none;
+    font-size: 13px;
+    white-space: nowrap; /* Evita que o texto quebre em duas linhas */
+  }
+
+  .links .create-acc {
+    color: var(--accent);
+    font-weight: 700;
+  }
 </style>
-</head>
 
+</head>
 <body>
 
   <div class="title">Acesse sua conta</div>
-  <div class="subtitle">Digite sua senha TechPay para acessar sua conta com segurança</div>
+  <div class="subtitle">Digite sua senha ZENTRY para acessar sua conta com segurança</div>
 
-  <div class="password-field">
-    <input type="password" id="senha" placeholder="Sua senha" autocomplete="off">
+  <div class="field-wrapper">
+    <div class="password-container">
+      <input type="password" id="senha" placeholder="Sua senha" autocomplete="off">
+      
+      <div class="actions">
+        <svg class="eye" id="eyeIcon" onclick="window.toggleSenha()" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+          <path d="M1 12s4-6 11-6 11 6 11 6-4 6-11 6S1 12 1 12z"/>
+          <circle cx="12" cy="12" r="3"/>
+          <line id="eyeSlash" x1="3" y1="3" x2="21" y2="21" stroke="white" stroke-width="2" style="opacity:1; transition: 0.2s;"/>
+        </svg>
 
-<svg class="eye" id="eyeIcon" onclick="window.toggleSenha()" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-  <path d="M1 12s4-6 11-6 11 6 11 6-4 6-11 6S1 12 1 12z"/>
-  <circle cx="12" cy="12" r="3"/>
-  <line id="eyeSlash" x1="3" y1="3" x2="21" y2="21" stroke="white" stroke-width="2" style="opacity:1; transition: 0.2s;"/>
-</svg>
+        <div class="enter-btn" id="btnEntrar" onclick="window.entrar()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
+      </div>
+    </div>
 
-<div class="enter-btn" id="btnEntrar" onclick="window.entrar()">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3">
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-    <polyline points="12 5 19 12 12 19"></polyline>
-  </svg>
-</div>
-  <div class="links">
-    <a href="reset.html">Esqueci a senha</a>
-    <a href="cadastro_nome.html" style="color: var(--accent); font-weight: 600;">Criar conta </a>
+    <div class="links">
+      <a href="reset.html">Esqueci a senha</a>
+      <a href="cadastro_nome.html" class="create-acc">Criar conta</a>
+    </div>
   </div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -180,62 +184,47 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 window.addEventListener("DOMContentLoaded", () => {
-
   const input = document.getElementById("senha");
   const btn = document.getElementById("btnEntrar");
   const eye = document.getElementById("eyeIcon");
 
-  // MOSTRAR BOTÃO
   input.addEventListener("input", () => {
-    if(input.value.length >= 6){
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
+    if(input.value.length >= 6) btn.classList.add("active");
+    else btn.classList.remove("active");
   });
 
-  // 👁️ TOGGLE SENHA
   window.toggleSenha = function(){
     const slash = document.getElementById("eyeSlash");
     if(input.type === "password"){
       input.type = "text";
       slash.style.opacity = "0";
-      eye.classList.add("active");
     } else {
       input.type = "password";
       slash.style.opacity = "1";
-      eye.classList.remove("active");
     }
   };
 
-  // 🔐 LOGIN
   window.entrar = function(){
     if(input.value.length < 6) return;
-
     const email = localStorage.getItem("usuarioEmail");
-
     if(!email){
-      alert("Email não encontrado. Faça login novamente.");
+      alert("Email não encontrado.");
       return;
     }
 
     signInWithEmailAndPassword(auth, email, input.value)
       .then(() => {
         document.body.style.opacity = "0";
-        setTimeout(() => {
-          window.location.href = "home.html";
-        }, 400);
+        setTimeout(() => { window.location.href = "home.html"; }, 400);
       })
       .catch(() => {
         alert("Senha incorreta ou usuário não existe");
       });
   };
 
-  // ENTER
   input.addEventListener("keypress", (e) => {
     if (e.key === "Enter") window.entrar();
   });
-
 });
 </script>
 </body>
