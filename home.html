@@ -270,13 +270,24 @@ body {
                     renderSaldo();
                     
                     // ATUALIZAÇÃO DA VISÃO GERAL (Onde estavam os campos vazios)
-                    const elEntrada = document.getElementById("resumo-entrada");
-                    const elSaida = document.getElementById("resumo-saida");
-                    const elLucro = document.getElementById("resumo-lucro");
+                    // ATUALIZAÇÃO DA VISÃO GERAL
+const elEntrada = document.getElementById("resumo-entrada");
+const elSaida = document.getElementById("resumo-saida");
+const elLucro = document.getElementById("resumo-lucro");
 
-                    if(elEntrada) elEntrada.innerText = format(d.entrada);
-                    if(elSaida) elSaida.innerText = format(d.saida);
-                    if(elLucro) elLucro.innerText = format(d.lucro);
+// Pegamos os valores do banco (se não existirem, assume 0)
+const entrada = parseFloat(d.entrada || 0);
+const saida = parseFloat(d.saida || 0);
+const lucro = entrada - saida; // Cálculo automático
+
+if(elEntrada) elEntrada.innerText = format(entrada);
+if(elSaida) elSaida.innerText = format(saida);
+if(elLucro) {
+    elLucro.innerText = format(lucro);
+    // Fica verde se for lucro, vermelho se for prejuízo
+    elLucro.style.color = lucro >= 0 ? "var(--primary)" : "#ef4444";
+}
+                  
                     
                     // Dispara funções auxiliares
                     atualizarSaudacao();
