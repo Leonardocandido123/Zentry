@@ -74,31 +74,87 @@
     Continuar para o pagamento
   </button>
 
-  <script>
+<script type="module">
+    // Importações necessárias
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
+        authDomain: "zentry-app-74275.firebaseapp.com",
+        projectId: "zentry-app-74275",
+        storageBucket: "zentry-app-74275.appspot.com",
+        messagingSenderId: "571422826071",
+        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     const input = document.getElementById('pixCode');
     const btn = document.getElementById('btnPagar');
 
     input.addEventListener('input', () => {
-      btn.disabled = input.value.trim().length < 10;
+        btn.disabled = input.value.trim().length < 20;
     });
 
-function processarPagamento() {
-    const codigo = document.getElementById('pixCode').value;
-    
-    // Configura o comprovante
-    localStorage.setItem("tipoTransacao", "qrcode"); // Usa o layout de QR Code/Copia e Cola
-    localStorage.setItem("ultimoValor", "R$ 150,00"); // Aqui você pode pedir o valor ou fixar
-    localStorage.setItem("destinoNome", "Estabelecimento Parceiro");
-    localStorage.setItem("detalhesExtras", "Copia e Cola: " + codigo.substring(0, 15) + "...");
-    localStorage.setItem("instDestino", "TechPay Gateway");
+    // Função que "desmonta" o código Pix
+    function extrairDadosPix(codigo) {
+        try {
+            let valor = "0.00";
+            if (codigo.includes("5405")) valor = codigo.split('5405')[1].substring(0, codigo.split('5405')[1].indexOf('5802'));
+            else if (codigo.includes("5404")) valor = codigo.split('5404')[1].substring(0, codigo.split('5404')[1].indexOf('5802'));
 
-    // Lógica de Saldo
-    let saldo = parseFloat(localStorage.getItem("saldo")) || 1250;
-    localStorage.setItem("saldo", (saldo - 150));
+            let nome = "Recebedor";
+            if (codigo.includes("59")) {
+                const parteNome = codigo.split('59')[1];
+                const tam = parseInt(parteNome.substring(0, 2));
+                nome = parteNome.substring(2, 2 + tam);
+            }
 
-    window.location.href = "comprovante.html";
+            return { valor: parseFloat(valor), nome: nome };
+        } catch (e) { return null; }
     }
-    
-  </script>
+
+    // A MÁGICA: Tenta achar o usuário no Firestore pelo nome que veio no QR Code
+    async function buscarUsuarioPorNome(nome) {
+        const q = query(collection(db, "usuarios"), where("nome", "==", nome));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const doc = querySnapshot.docs[0];
+            return { uid: doc.id, ...doc.data() };
+        }
+        return null;
+    }
+
+    window.processarPagamento = async () => {
+        const codigo = input.value.trim();
+        const dados = extrairDadosPix(codigo);
+
+        if (!dados || dados.valor <= 0) {
+            alert("Código Pix inválido.");
+            return;
+        }
+
+        btn.innerText = "Buscando recebedor...";
+        btn.disabled = true;
+
+        // Tenta encontrar se esse cara existe no seu Firebase
+        const usuarioNoBanco = await buscarUsuarioPorNome(dados.nome);
+
+        const transacaoPendente = {
+            nomeDestino: usuarioNoBanco ? usuarioNoBanco.nome : dados.nome,
+            valor: dados.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+            valorNumerico: dados.valor,
+            chavePix: "Copia e Cola",
+            bancoDestino: usuarioNoBanco ? "Zentry Bank" : "Banco Externo",
+            uidDestino: usuarioNoBanco ? usuarioNoBanco.uid : "fake_id_123" 
+        };
+
+        localStorage.setItem("transacao_pendente", JSON.stringify(transacaoPendente));
+        window.location.href = "revisao.html";
+    };
+</script>
+  
 </body>
 </html>
