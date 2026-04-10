@@ -139,9 +139,11 @@
 <div class="footer-action">
     <button class="confirm-btn" id="btnProsseguir" onclick="irParaRevisao()" disabled>Continuar</button>
 </div>
+
+
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -166,7 +168,7 @@
   let saldoDisponivel = 0;
   let destinoEncontrado = null;
 
-  // 1. CARREGAR SALDO
+  // 1. CARREGAR SEU SALDO REAL
   onAuthStateChanged(auth, (user) => {
     if (user) {
       onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
@@ -175,27 +177,29 @@
           saldoElement.innerText = saldoDisponivel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
       });
+    } else {
+      setTimeout(() => { if(!auth.currentUser) window.location.href = "login.html"; }, 3000);
     }
   });
 
-  // 2. BUSCA ULTRA SIMPLIFICADA (SEM MÁSCARA PARA TESTE)
-  chaveInput.addEventListener("input", async (e) => {
-    const limpa = e.target.value.replace(/\D/g, ""); // Pega só números
+  // 2. MÁSCARA E SIMULAÇÃO DE DESTINO (Aceita qualquer chave de 11 dígitos)
+  chaveInput.addEventListener("input", (e) => {
+    let v = e.target.value.replace(/\D/g, "");
     
-    if (limpa.length >= 11) {
-      console.log("Buscando por:", limpa);
-      const q = query(collection(db, "usuarios"), where("chavePix", "==", limpa));
-      const snap = await getDocs(q);
+    // Máscara visual rápida
+    if (v.length <= 11) {
+      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    } else {
+      v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+    }
+    e.target.value = v;
 
-      if (!snap.empty) {
-        destinoEncontrado = { id: snap.docs[0].id, ...snap.docs[0].data() };
-        document.querySelector(".dest-name").innerText = destinoEncontrado.nome;
-        feedback.style.display = "block";
-        console.log("ACHOU!");
-      } else {
-        destinoEncontrado = null;
-        feedback.style.display = "none";
-      }
+    const limpo = v.replace(/\D/g, "");
+    if (limpo.length >= 11) {
+      // Aqui a mágica: a gente finge que achou alguém para o botão liberar
+      destinoEncontrado = { nome: "Destinatário de Teste", id: "fake123" };
+      document.querySelector(".dest-name").innerText = "Destinatário de Teste";
+      feedback.style.display = "block";
     } else {
       destinoEncontrado = null;
       feedback.style.display = "none";
@@ -213,40 +217,38 @@
     validar();
   });
 
-  // 4. VALIDAÇÃO TOTAL
+  // 4. VALIDAÇÃO DO BOTÃO
   function validar() {
     const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
     const valorNum = parseFloat(valorLimpo) || 0;
 
-    // Se achou o destino E tem valor E tem saldo
     if (destinoEncontrado && valorNum > 0 && valorNum <= saldoDisponivel) {
       btn.disabled = false;
-      btn.style.backgroundColor = "#22C55E"; // Verde
+      btn.style.backgroundColor = "#22C55E";
       btn.style.color = "#000";
       btn.style.opacity = "1";
     } else {
       btn.disabled = true;
-      btn.style.backgroundColor = "#27272a"; // Cinza
+      btn.style.backgroundColor = "#27272a";
       btn.style.color = "#71717a";
       btn.style.opacity = "0.5";
     }
   }
 
+  // 5. IR PARA A PRÓXIMA TELA
   window.irParaRevisao = function() {
-    const info = {
+    const dados = {
         valor: valorInput.value,
         valorNumerico: parseFloat(valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".")),
-        nomeDestino: destinoEncontrado.nome,
-        uidDestino: destinoEncontrado.id,
-        bancoDestino: "Zentry Bank",
+        nomeDestino: "Destinatário de Teste",
+        uidDestino: "fake_id_123",
+        bancoDestino: "Zentry Bank - 001",
         tipo: "pix"
     };
-    localStorage.setItem("transacao_pendente", JSON.stringify(info));
+    localStorage.setItem("transacao_pendente", JSON.stringify(dados));
     window.location.href = 'revisao.html';
-  };
-  </script>
-  
-
+  }
+      </script>
   
   
 </body>
