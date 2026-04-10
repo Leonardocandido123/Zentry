@@ -17,22 +17,12 @@
 
     .content { flex: 1; padding: 20px; display: flex; flex-direction: column; }
 
-    /* SCANNER REALISTA */
     .scanner-container {
-      width: 100%;
-      height: 300px;
-      background: #050505;
-      border-radius: 28px;
-      border: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 25px;
+      width: 100%; height: 300px; background: #050505; border-radius: 28px;
+      border: 1px solid var(--border); position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 25px;
     }
 
-    /* Ajuste para a câmera ocupar o espaço certo */
     #reader { width: 100% !important; height: 100% !important; }
     #reader video { object-fit: cover !important; }
 
@@ -43,25 +33,14 @@
     .bottom-right { bottom: 20px; right: 20px; border-left: 0; border-top: 0; border-radius: 0 0 12px 0; }
 
     .scanner-line {
-      position: absolute;
-      width: 85%;
-      height: 3px;
-      background: var(--primary);
-      box-shadow: 0 0 25px var(--primary);
-      top: 20px;
-      animation: scan 2s infinite ease-in-out;
-      z-index: 4;
-      pointer-events: none;
+      position: absolute; width: 85%; height: 3px; background: var(--primary);
+      box-shadow: 0 0 25px var(--primary); top: 20px;
+      animation: scan 2s infinite ease-in-out; z-index: 4; pointer-events: none;
     }
 
-    @keyframes scan {
-      0%, 100% { top: 30px; opacity: 0.5; }
-      50% { top: 260px; opacity: 1; }
-    }
+    @keyframes scan { 0%, 100% { top: 30px; opacity: 0.5; } 50% { top: 260px; opacity: 1; } }
 
     #status-msg { text-align: center; color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 20px; letter-spacing: 1px; }
-
-    .options-label { font-size: 11px; color: #4B5563; text-transform: uppercase; font-weight: 700; margin-bottom: 10px; display: block; }
 
     .pay-option {
       background: var(--card); border: 1px solid var(--border); border-radius: 22px;
@@ -73,9 +52,6 @@
       width: 44px; height: 44px; background: rgba(34, 197, 94, 0.1);
       border-radius: 14px; display: flex; align-items: center; justify-content: center; color: var(--primary);
     }
-
-    .info b { display: block; font-size: 15px; color: #FFF; }
-    .info span { font-size: 12px; color: #9CA3AF; }
 
     #loading-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -89,15 +65,28 @@
     }
 
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes popIn { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
     svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   </style>
 </head>
 <body>
 
+  <div id="zentryModalGlobal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(5px);">
+    <div style="background:#121826; border:1px solid #2A3441; border-radius:28px; width:100%; max-width:340px; padding:25px; text-align:center; animation: popIn 0.2s ease-out;">
+      <div id="zIcon" style="font-size:40px; margin-bottom:15px;">⚠️</div>
+      <h3 id="zTitle" style="margin:0 0 10px; font-size:18px; color:#fff; font-weight:700;">Aviso</h3>
+      <p id="zText" style="color:#9CA3AF; font-size:14px; margin-bottom:20px; line-height:1.5;"></p>
+      <input type="text" id="zInput" placeholder="0,00" style="display:none; width:100%; padding:15px; background:#050505; border:1px solid #2A3441; border-radius:12px; color:#22C55E; text-align:center; font-size:20px; font-weight:700; margin-bottom:20px; outline:none;">
+      <div style="display:flex; gap:10px;">
+          <button id="zBtnCancel" style="display:none; flex:1; padding:15px; border-radius:14px; background:transparent; border:1px solid #2A3441; color:#fff; font-weight:600;">Voltar</button>
+          <button id="zBtnOk" style="flex:1; padding:15px; border-radius:14px; background:#22C55E; border:none; color:#000; font-weight:700;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="loading-overlay">
     <span class="loader"></span>
-    <p id="loader-text" style="margin-top: 20px; font-weight: 600;">Processando Débito...</p>
+    <p id="loader-text" style="margin-top: 20px; font-weight: 600;">Processando...</p>
   </div>
 
   <div class="header">
@@ -110,36 +99,20 @@
   <div class="content">
     <div class="scanner-container">
       <div id="reader"></div>
-      
       <div class="corner top-left"></div>
       <div class="corner top-right"></div>
       <div class="corner bottom-left"></div>
       <div class="corner bottom-right"></div>
       <div class="scanner-line"></div>
     </div>
-
     <div id="status-msg">POSICIONE O CÓDIGO NA MOLDURA</div>
 
-    <span class="options-label">Opções Rápidas (Simulação)</span>
-
-    <div class="pay-option" onclick="simularLeitura('QR Code Pix', 'R$ 85,90', 'Supermercado Tech')">
+    <div class="pay-option" onclick="iniciarLeituraManual('QR Code Pix', 'R$ 85,90', 'Supermercado Tech')">
       <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 3l3.8 3.8L12 10.6 8.2 6.8 12 3zM21 12l-3.8 3.8L13.4 12l3.8-3.8L21 12zM12 21l-3.8-3.8L12 13.4l3.8 3.8L12 21zM3 12l3.8-3.8L10.6 12l-3.8 3.8L3 12z"/></svg></div>
-      <div class="info"><b>Escanear Manualmente</b><span>Se a câmera falhar, clique aqui</span></div>
+      <div class="info"><b>Escanear Manualmente</b><span>Simular leitura agora</span></div>
     </div>
   </div>
-  <div id="modalPagamento" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; align-items: flex-end;">
-  <div style="background: #121826; width: 100%; padding: 30px; border-radius: 30px 30px 0 0; border-top: 1px solid #2A3441; animation: slideUp 0.3s ease-out;">
-    <div style="width: 40px; height: 4px; background: #2A3441; margin: 0 auto 20px; border-radius: 10px;"></div>
-    <h3 style="margin: 0 0 5px; color: #22C55E; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Pagamento Identificado</h3>
-    <p id="modalNome" style="font-size: 20px; font-weight: 700; margin: 10px 0; color: white;"></p>
-    <p id="modalValor" style="font-size: 32px; font-weight: 800; margin: 10px 0; color: white;"></p>
-    
-    <div style="display: flex; gap: 12px; margin-top: 25px;">
-      <button onclick="location.reload()" style="flex: 1; padding: 18px; border-radius: 16px; border: 1px solid #2A3441; background: transparent; color: white; font-weight: 600;">Cancelar</button>
-      <button id="btnConfirmarModal" style="flex: 2; padding: 18px; border-radius: 16px; border: none; background: #22C55E; color: black; font-weight: 700;">Confirmar Pagamento</button>
-    </div>
-  </div>
-  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -170,7 +143,6 @@
         }
     });
 
-    // --- FUNÇÕES DO MODAL PROFISSIONAL (ZENTRY MODAL) ---
     window.zAlert = (titulo, msg, icon = "⚠️") => {
         return new Promise(res => {
             document.getElementById('zIcon').innerText = icon;
@@ -198,7 +170,6 @@
         });
     };
 
-    // --- MOTOR DA CÂMERA ---
     function iniciarScanner() {
         html5QrCode = new Html5Qrcode("reader");
         const config = { fps: 15, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
@@ -212,11 +183,9 @@
         });
     }
 
-    // --- LÓGICA DE PROCESSAMENTO ---
     async function processarDadosLidos(texto) {
         let valor = 0;
         let nome = "Recebedor Externo";
-
         try {
             if(texto.includes("59")) {
                 const parteNome = texto.split('59')[1];
@@ -226,83 +195,56 @@
             if(texto.includes("5405")) valor = parseFloat(texto.split('5405')[1].substring(0, 5));
         } catch(e) {}
 
-        // Se valor não for identificado no QR, usa o NOSSO PROMPT
         if (valor <= 0) {
             const digitado = await zPrompt("Valor pendente", `Digite o valor para pagar ${nome}:`);
             if (digitado) valor = parseFloat(digitado.replace(',', '.'));
             else { location.reload(); return; }
         }
-
-        const valorStr = valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        
-        // Abre o modal de confirmação final
-        abrirModalConfirmacao(nome, valorStr, valor);
+        abrirModalConfirmacao(nome, valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), valor);
     }
 
     function abrirModalConfirmacao(nome, valorStr, valorNum) {
-        // Reutilizamos o Modal Global para confirmar o pagamento
         document.getElementById('zIcon').innerText = "✅";
         document.getElementById('zTitle').innerText = "Confirmar Pagamento";
         document.getElementById('zText').innerHTML = `Destino: <b>${nome}</b><br>Valor: <b>${valorStr}</b>`;
         document.getElementById('zInput').style.display = 'none';
         document.getElementById('zBtnCancel').style.display = 'block';
         document.getElementById('zentryModalGlobal').style.display = 'flex';
-
         document.getElementById('zBtnOk').onclick = () => {
             document.getElementById('zentryModalGlobal').style.display = 'none';
             executarDebitoReal(valorNum, valorStr, nome);
         };
-        document.getElementById('zBtnCancel').onclick = () => {
-            location.reload();
-        };
+        document.getElementById('zBtnCancel').onclick = () => { location.reload(); };
     }
 
-    // Botão de Escanear Manualmente
-    window.iniciarLeitura = (tipo, valorStr, recebedor) => {
+    window.iniciarLeituraManual = (tipo, valorStr, recebedor) => {
         const valorNum = parseFloat(valorStr.replace('R$ ', '').replace('.', '').replace(',', '.'));
         abrirModalConfirmacao(recebedor, valorStr, valorNum);
     };
 
-    // --- DÉBITO FINAL NO FIREBASE ---
     async function executarDebitoReal(valorNum, valorStr, recebedor) {
         const overlay = document.getElementById('loading-overlay');
         overlay.style.display = 'flex';
-
         try {
             const userRef = doc(db, "usuarios", userLogado.uid);
             const snap = await getDoc(userRef);
-            const saldoAtual = snap.data().saldo || 0;
-
-            if (saldoAtual < valorNum) {
+            if ((snap.data().saldo || 0) < valorNum) {
                 overlay.style.display = 'none';
                 await zAlert("Saldo Insuficiente", "Você não tem saldo para realizar este pagamento.", "❌");
-                location.reload();
-                return;
+                location.reload(); return;
             }
-
-            await updateDoc(userRef, {
-                saldo: increment(-valorNum),
-                saida: increment(valorNum)
-            });
-
+            await updateDoc(userRef, { saldo: increment(-valorNum), saida: increment(valorNum) });
             localStorage.setItem("transacao_pendente", JSON.stringify({
-                nomeDestino: recebedor,
-                valor: valorStr,
-                valorNumerico: valorNum,
-                data: new Date().toLocaleString('pt-BR'),
-                bancoDestino: "Zentry Payments",
-                chavePix: "Leitura de Scanner",
-                id: "SCAN" + Math.floor(100000 + Math.random() * 900000)
+                nomeDestino: recebedor, valor: valorStr, valorNumerico: valorNum,
+                data: new Date().toLocaleString('pt-BR'), bancoDestino: "Zentry Payments",
+                chavePix: "Leitura de Scanner", id: "SCAN" + Math.floor(100000 + Math.random() * 900000)
             }));
-
             window.location.href = "comprovante.html";
         } catch (error) {
             overlay.style.display = 'none';
-            await zAlert("Erro no Sistema", "Ocorreu uma falha ao processar o débito.", "❌");
+            await zAlert("Erro no Sistema", "Falha ao processar o débito.", "❌");
         }
     }
   </script>
-  
-  
-  </body>
+</body>
 </html>
