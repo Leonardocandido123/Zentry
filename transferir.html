@@ -140,7 +140,7 @@
     <button class="confirm-btn" id="btnProsseguir" onclick="irParaRevisao()" disabled>Continuar</button>
 </div>
   
-  <script type="module">
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -167,11 +167,9 @@
   let saldoDisponivel = 0;
   let destinoEncontrado = null;
 
-  // 1. CARREGAR SALDO E MANTER LOGADO
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      const userRef = doc(db, "usuarios", user.uid);
-      onSnapshot(userRef, (docSnap) => {
+      onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
         if (docSnap.exists()) {
           saldoDisponivel = parseFloat(docSnap.data().saldo || 0);
           saldoElement.innerText = saldoDisponivel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -182,66 +180,58 @@
     }
   });
 
-  // 2. BUSCAR DESTINATÁRIO
-  async function buscarDestinatario(chaveLimpa) {
-    if (chaveLimpa.length < 11) return;
+  // BUSCA REFORÇADA (Tenta achar de qualquer jeito)
+  async function buscarDestinatario(valorOriginal) {
+    const limpa = valorOriginal.replace(/\D/g, "");
+    if (limpa.length < 11) return;
 
     try {
-      // Importante: a chave no banco DEVE estar apenas números para funcionar aqui
-      const q = query(collection(db, "usuarios"), where("chavePix", "==", chaveLimpa));
-      const snap = await getDocs(q);
+      const colRef = collection(db, "usuarios");
+      // Tenta buscar pela chave limpa (só números)
+      let q = query(colRef, where("chavePix", "==", limpa));
+      let snap = await getDocs(q);
+
+      // Se não achar, tenta buscar pela chave formatada (com pontos/traços)
+      if (snap.empty) {
+        q = query(colRef, where("chavePix", "==", valorOriginal));
+        snap = await getDocs(q);
+      }
 
       if (!snap.empty) {
         const userDoc = snap.docs[0];
         destinoEncontrado = { id: userDoc.id, ...userDoc.data() };
-        
         document.querySelector(".dest-name").innerText = destinoEncontrado.nome;
-        document.querySelector(".dest-bank").innerText = "Zentry Bank - 001";
         feedback.style.display = "block";
+        console.log("Destinatário encontrado!");
       } else {
         destinoEncontrado = null;
         feedback.style.display = "none";
       }
       validar();
-    } catch (e) { console.error("Erro na busca:", e); }
+    } catch (e) { console.error(e); }
   }
 
-  // MÁSCARA INTELIGENTE CORRIGIDA
+  // MÁSCARA SIMPLIFICADA PARA NÃO TRAVAR O CPF
   chaveInput.addEventListener("input", (e) => {
     let v = e.target.value.replace(/\D/g, "");
-    let mask = "";
-
-    if (v.length <= 11) {
-      // Se começar com DDD alto ou tiver cara de celular, usa máscara de celular
-      // Mas para CPF puro, vamos forçar a máscara de CPF
-      if (v.length === 11) {
-        // Lógica: se o terceiro dígito for diferente de ponto/formato CPF
-        // Aqui vamos testar se você quer CPF ou Celular. 
-        // DICA: Se for 11 dígitos, o ideal é tentar buscar o usuário primeiro.
-        mask = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4"); // Padrão CPF
-      } else {
-        mask = v;
-      }
-    } else if (v.length > 11 && v.length <= 14) {
-      mask = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5"); // CNPJ
-    }
-
-    // Se o usuário apagar e digitar de novo, vamos permitir celular manualmente
-    if (v.length === 11 && v.startsWith("0") === false && v[2] === "9") {
-       mask = v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3"); // Celular
-    }
-
-    e.target.value = mask || v;
     
-    if (v.length === 11 || v.length === 14) {
-      buscarDestinatario(v);
+    if (v.length <= 11) {
+      // Se começar com 0 ou o 3º dígito for 9, trata como Celular, senão CPF
+      if (v.length === 11 && v[2] === "9") {
+        v = v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+      } else {
+        v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+      }
+    } else {
+      v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
     }
+    
+    e.target.value = v;
+    if (v.replace(/\D/g, "").length >= 11) buscarDestinatario(e.target.value);
   });
 
-  // MÁSCARA VALOR
   valorInput.addEventListener("input", (e) => {
     let v = e.target.value.replace(/\D/g,'');
-    if (!v) v = "0";
     v = (v/100).toFixed(2) + '';
     v = v.replace(".", ",");
     v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -249,42 +239,40 @@
     validar();
   });
 
-  // VALIDAÇÃO DO BOTÃO (O segredo está aqui)
   function validar() {
-    const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
-    const valorNum = parseFloat(valorLimpo) || 0;
+    const valorNum = parseFloat(valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".")) || 0;
     
-    // DEBUG no console para você ver por que não ativa:
-    console.log("Destino:", destinoEncontrado);
-    console.log("Valor:", valorNum, "Saldo:", saldoDisponivel);
-
+    // FORÇAR ATIVAÇÃO DO BOTÃO
     if (destinoEncontrado && valorNum > 0 && valorNum <= saldoDisponivel) {
-      btn.style.background = "#22C55E";
-      btn.style.color = "#000";
       btn.disabled = false;
-      btn.classList.add("active");
+      btn.style.backgroundColor = "#22C55E";
+      btn.style.color = "#000";
+      btn.style.opacity = "1";
+      btn.style.cursor = "pointer";
     } else {
-      btn.style.background = "#27272a";
-      btn.style.color = "#71717a";
       btn.disabled = true;
-      btn.classList.remove("active");
+      btn.style.backgroundColor = "#27272a";
+      btn.style.color = "#71717a";
+      btn.style.opacity = "0.5";
     }
   }
 
   window.irParaRevisao = function() {
-    // Garante que os dados passem corretamente
-    const dados = {
+    if(!destinoEncontrado) return alert("Busque um destino válido primeiro");
+    
+    const info = {
         valor: valorInput.value,
         valorNumerico: parseFloat(valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".")),
         nomeDestino: destinoEncontrado.nome,
         uidDestino: destinoEncontrado.id,
-        bancoDestino: "Zentry Bank - 001",
+        bancoDestino: "Zentry Bank",
         tipo: "pix"
     };
-    localStorage.setItem("transacao_pendente", JSON.stringify(dados));
+    localStorage.setItem("transacao_pendente", JSON.stringify(info));
     window.location.href = 'revisao.html';
   };
-  </script>
+</script>
+  
   
 </body>
 </html>
