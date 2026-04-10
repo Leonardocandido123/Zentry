@@ -139,11 +139,9 @@
 <div class="footer-action">
     <button class="confirm-btn" id="btnProsseguir" onclick="irParaRevisao()" disabled>Continuar</button>
 </div>
-
-
-  <script type="module">
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
@@ -168,7 +166,7 @@
   let saldoDisponivel = 0;
   let destinoEncontrado = null;
 
-  // 1. CARREGAR SEU SALDO REAL
+  // 1. CARREGAR SEU SALDO
   onAuthStateChanged(auth, (user) => {
     if (user) {
       onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
@@ -182,32 +180,49 @@
     }
   });
 
-  // 2. MÁSCARA E SIMULAÇÃO DE DESTINO (Aceita qualquer chave de 11 dígitos)
+  // 2. BUSCA REAL NO BANCO (O QUE VOCÊ MANDOU)
+  async function buscarDestinatario(valorOriginal) {
+    const limpa = valorOriginal.replace(/\D/g, "");
+    if (limpa.length < 11) return;
+
+    try {
+      const colRef = collection(db, "usuarios");
+      const q = query(colRef, where("chavePix", "==", limpa));
+      const snap = await getDocs(q);
+
+      if (!snap.empty) {
+        const userDoc = snap.docs[0];
+        // Impede transferir para si mesmo
+        if (userDoc.id === auth.currentUser.uid) {
+           alert("Você não pode transferir para si mesmo");
+           return;
+        }
+
+        destinoEncontrado = { id: userDoc.id, ...userDoc.data() };
+        document.querySelector(".dest-name").innerText = destinoEncontrado.nome;
+        document.querySelector(".dest-bank").innerText = "Zentry Bank - 001";
+        feedback.style.display = "block";
+      } else {
+        destinoEncontrado = null;
+        feedback.style.display = "none";
+      }
+      validar();
+    } catch (e) { console.error("Erro na busca real:", e); }
+  }
+
+  // 3. MÁSCARA QUE DISPARA A BUSCA REAL
   chaveInput.addEventListener("input", (e) => {
     let v = e.target.value.replace(/\D/g, "");
+    if (v.length <= 11) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    else v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
     
-    // Máscara visual rápida
-    if (v.length <= 11) {
-      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    } else {
-      v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
-    }
     e.target.value = v;
-
     const limpo = v.replace(/\D/g, "");
-    if (limpo.length >= 11) {
-      // Aqui a mágica: a gente finge que achou alguém para o botão liberar
-      destinoEncontrado = { nome: "Destinatário de Teste", id: "fake123" };
-      document.querySelector(".dest-name").innerText = "Destinatário de Teste";
-      feedback.style.display = "block";
-    } else {
-      destinoEncontrado = null;
-      feedback.style.display = "none";
-    }
-    validar();
+    // Só busca se for CPF (11) ou CNPJ (14) completo
+    if (limpo.length === 11 || limpo.length === 14) buscarDestinatario(limpo);
   });
 
-  // 3. MÁSCARA DE VALOR
+  // 4. MÁSCARA DE VALOR
   valorInput.addEventListener("input", (e) => {
     let v = e.target.value.replace(/\D/g,'');
     v = (v/100).toFixed(2) + '';
@@ -217,39 +232,40 @@
     validar();
   });
 
-  // 4. VALIDAÇÃO DO BOTÃO
+  // 5. VALIDAÇÃO DO BOTÃO
   function validar() {
     const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
     const valorNum = parseFloat(valorLimpo) || 0;
 
     if (destinoEncontrado && valorNum > 0 && valorNum <= saldoDisponivel) {
       btn.disabled = false;
+      btn.classList.add("active"); // Usa sua classe CSS para ficar verde
       btn.style.backgroundColor = "#22C55E";
       btn.style.color = "#000";
-      btn.style.opacity = "1";
     } else {
       btn.disabled = true;
+      btn.classList.remove("active");
       btn.style.backgroundColor = "#27272a";
       btn.style.color = "#71717a";
-      btn.style.opacity = "0.5";
     }
   }
 
-  // 5. IR PARA A PRÓXIMA TELA
+  // 6. IR PARA REVISÃO
   window.irParaRevisao = function() {
     const dados = {
         valor: valorInput.value,
         valorNumerico: parseFloat(valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".")),
-        nomeDestino: "Destinatário de Teste",
-        uidDestino: "fake_id_123",
+        nomeDestino: destinoEncontrado.nome,
+        uidDestino: destinoEncontrado.id,
         bancoDestino: "Zentry Bank - 001",
         tipo: "pix"
     };
     localStorage.setItem("transacao_pendente", JSON.stringify(dados));
     window.location.href = 'revisao.html';
   }
-      </script>
+</script>
   
+
   
 </body>
 </html>
