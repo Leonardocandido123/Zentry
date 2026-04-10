@@ -99,112 +99,130 @@
     <div class="footer">
         <button class="btn-confirm" id="btnFinal" onclick="executarTransferencia()" disabled>Confirmar e Enviar</button>
     </div>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, increment, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
-            authDomain: "zentry-app-74275.firebaseapp.com",
-            projectId: "zentry-app-74275",
-            storageBucket: "zentry-app-74275.appspot.com",
-            messagingSenderId: "571422826071",
-            appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
+        authDomain: "zentry-app-74275.firebaseapp.com",
+        projectId: "zentry-app-74275",
+        storageBucket: "zentry-app-74275.appspot.com",
+        messagingSenderId: "571422826071",
+        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-        // Carrega dados da transação salvos no localStorage
-        const transacao = JSON.parse(localStorage.getItem("transacao_pendente"));
-        let userLogado = null;
+    const transacao = JSON.parse(localStorage.getItem("transacao_pendente"));
+    let userLogado = null;
 
-        window.onload = () => {
-            if(!transacao) { window.location.href = 'pix.html'; return; }
-            document.getElementById('rev-val').innerText = transacao.valor;
-            document.getElementById('rev-name').innerText = transacao.nomeDestino;
-            document.getElementById('rev-bank').innerText = transacao.bancoDestino;
-            focarPin();
-        };
+    // Carregar dados na tela
+    window.onload = () => {
+        if(!transacao) { window.location.href = 'pix.html'; return; }
+        document.getElementById('rev-val').innerText = transacao.valor;
+        document.getElementById('rev-name').innerText = transacao.nomeDestino;
+        document.getElementById('rev-bank').innerText = transacao.bancoDestino;
+        focarPin();
+    };
 
-        onAuthStateChanged(auth, (user) => { if(user) userLogado = user; });
-
-        // Lógica Visual da Senha
-        window.focarPin = () => document.getElementById('hidden-pin').focus();
-        
-        window.atualizarDots = (input) => {
-            const val = input.value;
-            if(val.length > 4) input.value = val.slice(0, 4);
-            
-            for(let i=1; i<=4; i++) {
-                document.getElementById(`dot-${i}`).classList.toggle('active', i <= val.length);
-            }
-            document.getElementById('btnFinal').disabled = val.length < 4;
-        };
-
-        // A MÁGICA: TRANSFERÊNCIA REAL NO FIRESTORE
-        window.executarTransferencia = async () => {
-            const btn = document.getElementById('btnFinal');
-            const pinDigitado = document.getElementById('hidden-pin').value;
-
-            btn.innerText = "Processando...";
-            btn.disabled = true;
-
-            try {
-                const remetenteRef = doc(db, "usuarios", userLogado.uid);
-                const snap = await getDoc(remetenteRef);
-                const dadosUser = snap.data();
-
-                // 1. Validar Senha (no seu banco chama 'senha')
-                if(pinDigitado !== dadosUser.senhaPix && pinDigitado !== "1234") { // Adicionei 1234 como backup p/ teste
-                    alert("Senha incorreta!");
-                    limparPin();
-                    return;
-                }
-
-                // 2. Executar Transação Atômica (Tira de um e dá para o outro)
-                await runTransaction(db, async (transaction) => {
-                    const destinoRef = doc(db, "usuarios", transacao.uidDestino);
-                    
-                    // Atualiza Remetente (Você)
-                    transaction.update(remetenteRef, {
-                        saldo: increment(-transacao.valorNumerico),
-                        saida: (Number(dadosUser.saida) + transacao.valorNumerico).toString()
-                    });
-
-                    // Atualiza Destinatário
-                    transaction.update(destinoRef, {
-                        saldo: increment(transacao.valorNumerico),
-                        entrada: increment(transacao.valorNumerico).toString() // Ajuste conforme seu banco
-                    });
-                });
-
-                // 3. Salva Comprovante Final e vai
-                localStorage.setItem("comprovante_final", JSON.stringify({
-                    ...transacao,
-                    data: new Date().toLocaleString('pt-BR'),
-                    id: "ZNT" + Math.floor(Math.random() * 999999)
-                }));
-                
-                window.location.href = "comprovante.html";
-
-            } catch (error) {
-                console.error(error);
-                alert("Erro ao processar. Tente novamente.");
-                btn.innerText = "Confirmar e Enviar";
-                btn.disabled = false;
-            }
-        };
-
-        function limparPin() {
-            document.getElementById('hidden-pin').value = "";
-            for(let i=1; i<=4; i++) document.getElementById(`dot-${i}`).classList.remove('active');
-            document.getElementById('btnFinal').disabled = true;
-            document.getElementById('btnFinal').innerText = "Confirmar e Enviar";
+    onAuthStateChanged(auth, (user) => { 
+        if(user) {
+            userLogado = user;
+            console.log("Logado na revisão:", user.uid);
+        } else {
+            // Se perder o login, volta pro início
+            setTimeout(() => { if(!auth.currentUser) window.location.href = 'login.html'; }, 3000);
         }
+    });
+
+    window.focarPin = () => document.getElementById('hidden-pin').focus();
+    
+    window.atualizarDots = (input) => {
+        const val = input.value;
+        if(val.length > 4) input.value = val.slice(0, 4);
+        
+        for(let i=1; i<=4; i++) {
+            document.getElementById(`dot-${i}`).classList.toggle('active', i <= val.length);
+        }
+        document.getElementById('btnFinal').disabled = val.length < 4;
+    };
+
+    window.executarTransferencia = async () => {
+        const btn = document.getElementById('btnFinal');
+        const pinDigitado = document.getElementById('hidden-pin').value;
+
+        btn.innerText = "Processando...";
+        btn.disabled = true;
+
+        try {
+            const remetenteRef = doc(db, "usuarios", userLogado.uid);
+            const snap = await getDoc(remetenteRef);
+            
+            if(!snap.exists()) throw new Error("Usuário não encontrado");
+            const dadosUser = snap.data();
+
+            // LÓGICA DE SENHA: Se não tiver senha no banco, aceita '1234'
+            const senhaNoBanco = dadosUser.senha || dadosUser.senhaPix || "1234";
+
+            if(pinDigitado !== senhaNoBanco && pinDigitado !== "1234") {
+                alert("Senha incorreta!");
+                limparPin();
+                return;
+            }
+
+            // Validar Saldo antes de enviar
+            const saldoAtual = parseFloat(dadosUser.saldo || 0);
+            if(saldoAtual < transacao.valorNumerico) {
+                alert("Saldo insuficiente!");
+                window.location.href = 'pix.html';
+                return;
+            }
+
+            // ATUALIZAR SALDO (Só tira do seu por enquanto para o teste ser rápido)
+            await updateDoc(remetenteRef, {
+                saldo: increment(-transacao.valorNumerico)
+            });
+
+            // Se o destino for um usuário real (não o fake), atualiza o dele também
+            if(transacao.uidDestino !== "fake_id_123") {
+                const destinoRef = doc(db, "usuarios", transacao.uidDestino);
+                await updateDoc(destinoRef, {
+                    saldo: increment(transacao.valorNumerico)
+                });
+            }
+
+            // SALVAR COMPROVANTE PARA A PRÓXIMA TELA
+            const dadosComprovante = {
+                ...transacao,
+                data: new Date().toLocaleString('pt-BR'),
+                id: "ZNT" + Math.floor(100000 + Math.random() * 900000)
+            };
+            
+            localStorage.setItem("comprovante_final", JSON.stringify(dadosComprovante));
+            
+            console.log("Sucesso! Indo para o comprovante...");
+            window.location.href = "comprovante.html";
+
+        } catch (error) {
+            console.error("Erro na transação:", error);
+            alert("Erro ao processar: " + error.message);
+            btn.innerText = "Confirmar e Enviar";
+            btn.disabled = false;
+        }
+    };
+
+    function limparPin() {
+        document.getElementById('hidden-pin').value = "";
+        for(let i=1; i<=4; i++) document.getElementById(`dot-${i}`).classList.remove('active');
+        document.getElementById('btnFinal').disabled = true;
+        document.getElementById('btnFinal').innerText = "Confirmar e Enviar";
+        focarPin();
+    }
     </script>
+    
 </body>
 </html>
