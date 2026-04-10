@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <title>ZENTRY - Pagar</title>
   <style>
     :root { --primary: #22C55E; --bg: #000000; --card: #121826; --border: #2A3441; }
@@ -31,7 +32,11 @@
       margin-bottom: 25px;
     }
 
-    .corner { position: absolute; width: 40px; height: 40px; border: 4px solid var(--primary); z-index: 5; }
+    /* Ajuste para a câmera ocupar o espaço certo */
+    #reader { width: 100% !important; height: 100% !important; }
+    #reader video { object-fit: cover !important; }
+
+    .corner { position: absolute; width: 40px; height: 40px; border: 4px solid var(--primary); z-index: 5; pointer-events: none; }
     .top-left { top: 20px; left: 20px; border-right: 0; border-bottom: 0; border-radius: 12px 0 0 0; }
     .top-right { top: 20px; right: 20px; border-left: 0; border-bottom: 0; border-radius: 0 12px 0 0; }
     .bottom-left { bottom: 20px; left: 20px; border-right: 0; border-top: 0; border-radius: 0 0 0 12px; }
@@ -46,6 +51,7 @@
       top: 20px;
       animation: scan 2s infinite ease-in-out;
       z-index: 4;
+      pointer-events: none;
     }
 
     @keyframes scan {
@@ -53,41 +59,24 @@
       50% { top: 260px; opacity: 1; }
     }
 
-    /* MENSAGEM DE STATUS */
     #status-msg { text-align: center; color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 20px; letter-spacing: 1px; }
 
-    /* OPÇÕES */
     .options-label { font-size: 11px; color: #4B5563; text-transform: uppercase; font-weight: 700; margin-bottom: 10px; display: block; }
 
     .pay-option {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      transition: 0.2s;
+      background: var(--card); border: 1px solid var(--border); border-radius: 22px;
+      padding: 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px;
+      cursor: pointer; transition: 0.2s;
     }
 
-    .pay-option:active { transform: scale(0.97); background: #1a2233; }
-
     .icon-box {
-      width: 44px; height: 44px;
-      background: rgba(34, 197, 94, 0.1);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary);
+      width: 44px; height: 44px; background: rgba(34, 197, 94, 0.1);
+      border-radius: 14px; display: flex; align-items: center; justify-content: center; color: var(--primary);
     }
 
     .info b { display: block; font-size: 15px; color: #FFF; }
     .info span { font-size: 12px; color: #9CA3AF; }
 
-    /* OVERLAY DE SUCESSO (SIMULAÇÃO) */
     #loading-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.9); display: none;
@@ -100,7 +89,6 @@
     }
 
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
     svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; }
   </style>
 </head>
@@ -108,7 +96,7 @@
 
   <div id="loading-overlay">
     <span class="loader"></span>
-    <p id="loader-text" style="margin-top: 20px; font-weight: 600;">Processando Leitura...</p>
+    <p id="loader-text" style="margin-top: 20px; font-weight: 600;">Processando Débito...</p>
   </div>
 
   <div class="header">
@@ -120,30 +108,26 @@
 
   <div class="content">
     <div class="scanner-container">
+      <div id="reader"></div>
+      
       <div class="corner top-left"></div>
       <div class="corner top-right"></div>
       <div class="corner bottom-left"></div>
       <div class="corner bottom-right"></div>
       <div class="scanner-line"></div>
-      <svg style="opacity: 0.1; width: 100px;" viewBox="0 0 24 24"><path d="M3 11V3h8v8H3zm0 10v-8h8v8H3zM13 3h8v8h-8V3zm0 10h8v8h-8v-8z"/></svg>
     </div>
 
-    <div id="status-msg">AGUARDANDO CÓDIGO...</div>
+    <div id="status-msg">POSICIONE O CÓDIGO NA MOLDURA</div>
 
-    <span class="options-label">Opções de Pagamento</span>
+    <span class="options-label">Opções Rápidas (Simulação)</span>
 
-    <div class="pay-option" onclick="iniciarLeitura('QR Code Pix', 'R$ 85,90', 'Supermercado Tech')">
+    <div class="pay-option" onclick="simularLeitura('QR Code Pix', 'R$ 85,90', 'Supermercado Tech')">
       <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 3l3.8 3.8L12 10.6 8.2 6.8 12 3zM21 12l-3.8 3.8L13.4 12l3.8-3.8L21 12zM12 21l-3.8-3.8L12 13.4l3.8 3.8L12 21zM3 12l3.8-3.8L10.6 12l-3.8 3.8L3 12z"/></svg></div>
-      <div class="info"><b>Escanear QR Code</b><span>Pagar via Pix Instantâneo</span></div>
-    </div>
-
-    <div class="pay-option" onclick="iniciarLeitura('Boleto Bancário', 'R$ 240,00', 'Energia Elétrica S.A.')">
-      <div class="icon-box" style="color: #6366F1;"><svg viewBox="0 0 24 24"><path d="M4 7V4a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v3m0 10v3a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-3M7 7h10v10H7z"/></svg></div>
-      <div class="info"><b>Boleto Bancário</b><span>Água, Luz, Telefone e outros</span></div>
+      <div class="info"><b>Escanear Manualmente</b><span>Se a câmera falhar, clique aqui</span></div>
     </div>
   </div>
+
 <script type="module">
-    // 1. IMPORTAÇÕES FIREBASE
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -163,85 +147,109 @@
 
     let userLogado = null;
 
-    // Monitora login
     onAuthStateChanged(auth, (user) => {
-        if (user) userLogado = user;
-        else window.location.href = 'login.html';
+        if (user) {
+            userLogado = user;
+            iniciarScanner(); // Liga a câmera assim que o user loga
+        } else {
+            window.location.href = 'login.html';
+        }
     });
 
-    // 2. FUNÇÃO DE LEITURA (SIMULADA MAS COM DADOS REAIS)
-    window.iniciarLeitura = (tipo, valorStr, recebedor) => {
-        const overlay = document.getElementById('loading-overlay');
-        const loaderText = document.getElementById('loader-text');
-        
-        overlay.style.display = 'flex';
-        loaderText.innerText = "Escaneando " + tipo + "...";
+    // --- CONFIGURAÇÃO DO SCANNER REAL ---
+    function iniciarScanner() {
+        const html5QrCode = new Html5Qrcode("reader");
+        const config = { 
+            fps: 10, 
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+        };
 
-        // Simula o tempo da câmera focando
-        setTimeout(() => {
-            loaderText.innerText = "Consultando Banco Central...";
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                confirmarPagamento(tipo, valorStr, recebedor);
-            }, 1200);
-        }, 1500);
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            config, 
+            (decodedText) => {
+                // SUCESSO NA LEITURA
+                if (navigator.vibrate) navigator.vibrate(100);
+                html5QrCode.stop(); // Para a câmera
+                
+                // Extrai dados (Se for Pix) ou trata como Boleto
+                processarDadosLidos(decodedText);
+            }
+        ).catch(err => {
+            console.error("Erro na câmera", err);
+            document.getElementById('status-msg').innerText = "ERRO: PERMISSÃO DE CÂMERA NEGADA";
+        });
     }
 
-    async function confirmarPagamento(tipo, valorStr, recebedor) {
-        const valorNum = parseFloat(valorStr.replace('R$ ', '').replace('.', '').replace(',', '.'));
+    // Função para tratar o que a câmera leu
+    async function processarDadosLidos(texto) {
+        // Lógica simples de extração (pode ser melhorada com o Parser que fizemos)
+        let valor = 10.00; 
+        let nome = "Pagamento via Scanner";
+
+        // Se for um Pix real, tenta achar o valor no código
+        if(texto.includes("5405")) {
+             valor = parseFloat(texto.split('5405')[1].substring(0, 5));
+        }
+
+        const valorFormatado = valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         
-        const confirmacao = confirm(`PAGAMENTO IDENTIFICADO\n\nDestino: ${recebedor}\nValor: ${valorStr}\n\nDeseja confirmar o débito?`);
-        
-        if (confirmacao) {
-            processarPagamentoReal(valorNum, valorStr, recebedor, tipo);
+        if (confirm(`Pagar ${valorFormatado} para ${nome}?`)) {
+            executarDebitoReal(valor, valorFormatado, nome);
+        } else {
+            location.reload();
         }
     }
 
-    async function processarPagamentoReal(valorNum, valorStr, recebedor, tipo) {
+    // Botão de simulação caso a pessoa queira testar sem QR Code físico
+    window.simularLeitura = (tipo, valorStr, recebedor) => {
+        const valorNum = parseFloat(valorStr.replace('R$ ', '').replace('.', '').replace(',', '.'));
+        if (confirm(`Deseja simular pagamento de ${valorStr} para ${recebedor}?`)) {
+            executarDebitoReal(valorNum, valorStr, recebedor);
+        }
+    };
+
+    async function executarDebitoReal(valorNum, valorStr, recebedor) {
         const overlay = document.getElementById('loading-overlay');
         overlay.style.display = 'flex';
-        document.getElementById('loader-text').innerText = "Finalizando Débito...";
 
         try {
             const userRef = doc(db, "usuarios", userLogado.uid);
             const snap = await getDoc(userRef);
-            const saldoAtual = snap.data().saldo || 0;
-
-            if (saldoAtual < valorNum) {
-                alert("Saldo Insuficiente no Firestore!");
-                overlay.style.display = 'none';
+            
+            if (snap.data().saldo < valorNum) {
+                alert("Saldo Insuficiente!");
+                location.reload();
                 return;
             }
 
-            // 3. ATUALIZAÇÃO NO FIREBASE (SAÍDA REAL)
+            // ATUALIZA NO FIREBASE
             await updateDoc(userRef, {
                 saldo: increment(-valorNum),
                 saida: increment(valorNum)
             });
 
-            // 4. PREPARA DADOS PARA O COMPROVANTE
-            const transacaoPendente = {
+            // SALVA PARA O COMPROVANTE
+            const dadosTransacao = {
                 nomeDestino: recebedor,
                 valor: valorStr,
                 valorNumerico: valorNum,
-                chavePix: "QR Code / Boleto",
-                bancoDestino: "Liquidado via Zentry",
-                uidDestino: "externo_qrcode",
-                data: new Date().toLocaleString('pt-BR')
+                data: new Date().toLocaleString('pt-BR'),
+                bancoDestino: "Zentry Bank",
+                chavePix: "Leitura de Código",
+                id: "SCAN" + Math.floor(100000 + Math.random() * 900000)
             };
 
-            localStorage.setItem("transacao_pendente", JSON.stringify(transacaoPendente));
-            
-            // Redireciona
+            localStorage.setItem("transacao_pendente", JSON.stringify(dadosTransacao));
             window.location.href = "comprovante.html";
 
         } catch (error) {
             console.error(error);
-            alert("Erro ao processar pagamento no servidor.");
+            alert("Erro na transação.");
             overlay.style.display = 'none';
         }
     }
 </script>
-  
 </body>
 </html>
