@@ -6,37 +6,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-  /* 1. REGRA DE OURO: Impede que qualquer elemento ultrapasse a largura da tela */
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
+  :root { --primary: #22C55E; --bg: #000000; --border-input: #2A3441; --card: #121826; }
 
-  :root { 
-    --primary: #22C55E; 
-    --bg: #000000; 
-    --border-input: #2A3441;
-  }
-
-  html, body {
-    height: 100%;
-    margin: 0;
-    background: var(--bg);
-    overflow-x: hidden; /* 2. Mata qualquer chance de o botão dançar para o lado */
-  }
-
-  body { 
-    font-family:'Inter', sans-serif; 
-    color:#FFF; 
-    padding: 20px; 
-    display: flex;
-    flex-direction: column; 
-  }
+  html, body { height: 100%; margin: 0; background: var(--bg); overflow-x: hidden; }
+  body { font-family:'Inter', sans-serif; color:#FFF; padding: 20px; display: flex; flex-direction: column; }
   
-  .main-content {
-    flex: 1;
-    width: 100%;
-  }
-
   .header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
   .back-btn { background: none; border: none; color: white; cursor: pointer; padding: 0; display: flex; align-items: center; }
   
@@ -51,66 +26,58 @@
   .label-input { color: #9CA3AF; font-size: 14px; display: block; margin-bottom: 8px; }
   
   input {
-    background: transparent !important;
-    border: none;
+    background: transparent !important; border: none;
     border-bottom: 2px solid var(--border-input);
-    color: #FFFFFF !important;
-    font-size: 20px;
-    font-weight: 500;
-    padding: 12px 0;
-    width: 100%;
-    outline: none;
-    border-radius: 0;
-    -webkit-appearance: none;
+    color: #FFFFFF !important; font-size: 20px;
+    font-weight: 500; padding: 12px 0; width: 100%;
+    outline: none; border-radius: 0; -webkit-appearance: none;
   }
   input:focus { border-bottom-color: var(--primary); }
   
   #feedbackDestino { 
     display: none; background: #111827; padding: 15px; 
     border-radius: 12px; margin-top: -15px; margin-bottom: 25px; 
-    border: 1px solid #1F2937; 
+    border: 1px solid #1F2937; animation: slideIn 0.3s ease-out;
   }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
   .dest-name { display: block; font-weight: 700; color: #FFF; font-size: 15px; }
   .dest-bank { font-size: 11px; color: #6B7280; text-transform: uppercase; margin-top: 2px; }
-
   .valor-input { font-size: 42px !important; font-weight: 800 !important; color: var(--primary) !important; }
 
-  /* 3. Ajustado para o botão ficar alinhado com os inputs */
-  .footer-action { 
-    padding: 20px 0; /* Removemos o padding lateral aqui */
-    margin-top: auto; 
-    width: 100%;
-    background: var(--bg);
-  }
+  .footer-action { padding: 20px 0; margin-top: auto; width: 100%; background: var(--bg); }
 
   .confirm-btn { 
-    width: 100%; /* Agora ele obedece o padding de 20px do body */
-    background: #27272a; 
-    color: #71717a; 
-    border: none; 
-    padding: 18px; 
-    border-radius: 15px; 
-    font-weight: 700; 
-    font-size: 16px;
-    transition: 0.3s;
-    display: block; /* Garante que se comporte como bloco */
-    cursor: pointer;
+    width: 100%; background: #27272a; color: #71717a; border: none; 
+    padding: 18px; border-radius: 15px; font-weight: 700; font-size: 16px;
+    transition: 0.3s; cursor: pointer;
   }
+  .confirm-btn.active { background: var(--primary); color: #000; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2); }
 
-  .confirm-btn.active { 
-    background: var(--primary); 
-    color: #000; 
-    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
+  /* MODAL BLINDADO */
+  #zModalGlobal { 
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); 
+    z-index:9999; align-items:center; justify-content:center; padding:20px; 
+    backdrop-filter: blur(5px); 
   }
-
-  .confirm-btn:active {
-    transform: scale(0.98);
+  .modal-content { 
+    background:var(--card); border:1px solid var(--border-input); border-radius:28px; 
+    width:100%; max-width:340px; padding:25px; text-align:center; 
+    animation: popIn 0.2s ease-out; 
   }
+  @keyframes popIn { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
 </style>
-  
-  
 </head>
 <body>
+
+<div id="zModalGlobal">
+  <div class="modal-content">
+    <div id="zIcon" style="font-size:40px; margin-bottom:15px;">⚠️</div>
+    <h3 id="zTitle" style="margin:0 0 10px; font-size:18px; color:#fff; font-weight:700;">Aviso</h3>
+    <p id="zText" style="color:#9CA3AF; font-size:14px; margin-bottom:20px; line-height:1.5;"></p>
+    <button id="zBtnClose" style="width:100%; padding:15px; border-radius:14px; background:#22C55E; border:none; color:#000; font-weight:700; cursor:pointer;">Entendido</button>
+  </div>
+</div>
 
 <div class="header">
   <button class="back-btn" onclick="location.href='pix.html'">
@@ -127,8 +94,8 @@
 </div>
 
 <div id="feedbackDestino">
-    <span class="dest-name">Leonardo Candido</span>
-    <span class="dest-bank">Nu Pagamentos - 001</span>
+    <span class="dest-name">---</span>
+    <span class="dest-bank">Zentry Bank - 001</span>
 </div>
 
 <div class="input-group">
@@ -137,8 +104,9 @@
 </div>
 
 <div class="footer-action">
-    <button class="confirm-btn" id="btnProsseguir" onclick="irParaRevisao()" disabled>Continuar</button>
+    <button class="confirm-btn" id="btnProsseguir" disabled>Continuar</button>
 </div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -166,7 +134,18 @@
   let saldoDisponivel = 0;
   let destinoEncontrado = null;
 
-  // 1. CARREGAR SEU SALDO
+  // Gerenciador do Modal Blindado
+  function showZModal(titulo, texto, icon) {
+    document.getElementById('zModalGlobal').style.display = 'flex';
+    document.getElementById('zTitle').innerText = titulo;
+    document.getElementById('zText').innerText = texto;
+    document.getElementById('zIcon').innerText = icon;
+  }
+
+  document.getElementById('zBtnClose').onclick = () => {
+    document.getElementById('zModalGlobal').style.display = 'none';
+  };
+
   onAuthStateChanged(auth, (user) => {
     if (user) {
       onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
@@ -176,11 +155,10 @@
         }
       });
     } else {
-      setTimeout(() => { if(!auth.currentUser) window.location.href = "login.html"; }, 3000);
+      window.location.href = "login.html";
     }
   });
 
-  // 2. BUSCA REAL NO BANCO (O QUE VOCÊ MANDOU)
   async function buscarDestinatario(valorOriginal) {
     const limpa = valorOriginal.replace(/\D/g, "");
     if (limpa.length < 11) return;
@@ -192,9 +170,12 @@
 
       if (!snap.empty) {
         const userDoc = snap.docs[0];
-        // Impede transferir para si mesmo
+        
+        // BLINDAGEM: Verifica se é o próprio usuário
         if (userDoc.id === auth.currentUser.uid) {
-           alert("Você não pode transferir para si mesmo");
+           showZModal("Ops!", "Você não pode transferir para si mesmo.", "👤");
+           chaveInput.value = "";
+           feedback.style.display = "none";
            return;
         }
 
@@ -207,10 +188,12 @@
         feedback.style.display = "none";
       }
       validar();
-    } catch (e) { console.error("Erro na busca real:", e); }
+    } catch (e) { 
+      console.error(e);
+      showZModal("Erro", "Falha ao buscar chave Pix.", "⚠️");
+    }
   }
 
-  // 3. MÁSCARA QUE DISPARA A BUSCA REAL
   chaveInput.addEventListener("input", (e) => {
     let v = e.target.value.replace(/\D/g, "");
     if (v.length <= 11) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
@@ -218,11 +201,9 @@
     
     e.target.value = v;
     const limpo = v.replace(/\D/g, "");
-    // Só busca se for CPF (11) ou CNPJ (14) completo
     if (limpo.length === 11 || limpo.length === 14) buscarDestinatario(limpo);
   });
 
-  // 4. MÁSCARA DE VALOR
   valorInput.addEventListener("input", (e) => {
     let v = e.target.value.replace(/\D/g,'');
     v = (v/100).toFixed(2) + '';
@@ -232,40 +213,33 @@
     validar();
   });
 
-  // 5. VALIDAÇÃO DO BOTÃO
   function validar() {
     const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
     const valorNum = parseFloat(valorLimpo) || 0;
 
     if (destinoEncontrado && valorNum > 0 && valorNum <= saldoDisponivel) {
       btn.disabled = false;
-      btn.classList.add("active"); // Usa sua classe CSS para ficar verde
-      btn.style.backgroundColor = "#22C55E";
-      btn.style.color = "#000";
+      btn.classList.add("active");
     } else {
       btn.disabled = true;
       btn.classList.remove("active");
-      btn.style.backgroundColor = "#27272a";
-      btn.style.color = "#71717a";
     }
   }
 
-  // 6. IR PARA REVISÃO
-  window.irParaRevisao = function() {
+  btn.onclick = () => {
+    const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
     const dados = {
         valor: valorInput.value,
-        valorNumerico: parseFloat(valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".")),
+        valorNumerico: parseFloat(valorLimpo),
         nomeDestino: destinoEncontrado.nome,
         uidDestino: destinoEncontrado.id,
         bancoDestino: "Zentry Bank - 001",
-        tipo: "pix"
+        chavePix: chaveInput.value,
+        tipo: "transferencia"
     };
     localStorage.setItem("transacao_pendente", JSON.stringify(dados));
     window.location.href = 'revisao.html';
   }
 </script>
-  
-
-  
 </body>
 </html>
