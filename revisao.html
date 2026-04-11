@@ -6,16 +6,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Revisão - ZENTRY</title>
     <style>
-        :root { --accent: #22c55e; --bg: radial-gradient(circle at 20% 0%, #0f172a, #000 65%); }
+        :root { --accent: #22c55e; --bg: #000; --card: #111; --border: #2A3441; }
         
         body { 
-            margin: 0; 
-            font-family: 'Inter', sans-serif; 
-            background: #000; 
-            color: #fff; 
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
+            margin: 0; font-family: 'Inter', sans-serif; 
+            background: #000; color: #fff; height: 100vh;
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
         .header { padding: 30px 20px 15px; display: flex; align-items: center; gap: 15px; }
@@ -24,10 +20,8 @@
         p { color: #9CA3AF; font-size: 14px; margin-top: 5px; }
 
         .review-card {
-            background: #111;
-            border-radius: 24px;
-            padding: 25px;
-            margin-top: 20px;
+            background: var(--card); border-radius: 24px;
+            padding: 25px; margin-top: 20px;
             border: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -40,14 +34,11 @@
         .password-section { margin-top: 30px; text-align: center; }
         .pin-container { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
         .pin-dot {
-            width: 15px; height: 15px;
-            border-radius: 50%;
-            border: 2px solid #333;
-            transition: 0.2s;
+            width: 15px; height: 15px; border-radius: 50%;
+            border: 2px solid #333; transition: 0.2s;
         }
         .pin-dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
         
-        /* Teclado Invisível para capturar o toque */
         #hidden-pin { position: absolute; opacity: 0; pointer-events: none; }
 
         .footer { padding: 20px; background: #000; border-top: 1px solid #111; }
@@ -57,9 +48,31 @@
             cursor: pointer; transition: 0.3s;
         }
         .btn-confirm:disabled { background: #27272a; color: #71717a; }
+
+        /* MODAL ZENTRY (O SEGREDO DA BLINDAGEM) */
+        #zModalGlobal { 
+            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); 
+            z-index:9999; align-items:center; justify-content:center; padding:20px; 
+            backdrop-filter: blur(5px); 
+        }
+        .modal-content { 
+            background:#121826; border:1px solid #2A3441; border-radius:28px; 
+            width:100%; max-width:340px; padding:25px; text-align:center; 
+            animation: popIn 0.2s ease-out; 
+        }
+        @keyframes popIn { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
     </style>
 </head>
 <body>
+
+    <div id="zModalGlobal">
+        <div class="modal-content">
+            <div id="zIcon" style="font-size:40px; margin-bottom:15px;">⚠️</div>
+            <h3 id="zTitle" style="margin:0 0 10px; font-size:18px; color:#fff;">Aviso</h3>
+            <p id="zText" style="color:#9CA3AF; font-size:14px; margin-bottom:20px; line-height:1.5;"></p>
+            <button id="zBtnClose" style="width:100%; padding:15px; border-radius:14px; background:#22C55E; border:none; color:#000; font-weight:700;">Entendido</button>
+        </div>
+    </div>
 
     <div class="header">
         <svg onclick="window.history.back()" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -121,6 +134,19 @@
     const transacao = JSON.parse(localStorage.getItem("transacao_pendente"));
     let userLogado = null;
 
+    // Funções do Modal Blindado
+    function showZModal(titulo, texto, icon) {
+        document.getElementById('zModalGlobal').style.display = 'flex';
+        document.getElementById('zTitle').innerText = titulo;
+        document.getElementById('zText').innerText = texto;
+        document.getElementById('zIcon').innerText = icon;
+    }
+
+    document.getElementById('zBtnClose').onclick = () => {
+        document.getElementById('zModalGlobal').style.display = 'none';
+        focarPin();
+    };
+
     window.onload = () => {
         if(!transacao) { window.location.href = 'pix.html'; return; }
         document.getElementById('rev-val').innerText = transacao.valor;
@@ -131,7 +157,7 @@
 
     onAuthStateChanged(auth, (user) => { 
         if(user) { userLogado = user; } 
-        else { setTimeout(() => { if(!auth.currentUser) window.location.href = 'login.html'; }, 3000); }
+        else { window.location.href = 'login.html'; }
     });
 
     window.focarPin = () => document.getElementById('hidden-pin').focus();
@@ -144,6 +170,13 @@
         }
         document.getElementById('btnFinal').disabled = val.length < 4;
     };
+
+    function limparPin() {
+        document.getElementById('hidden-pin').value = "";
+        for(let i=1; i<=4; i++) document.getElementById(`dot-${i}`).classList.remove('active');
+        document.getElementById('btnFinal').disabled = true;
+        document.getElementById('btnFinal').innerText = "Confirmar e Enviar";
+    }
 
     window.executarTransferencia = async () => {
         const btn = document.getElementById('btnFinal');
@@ -159,42 +192,34 @@
             if(!snap.exists()) throw new Error("Usuário não encontrado");
             const dadosUser = snap.data();
 
-            // ==========================================
-            // NOVA LÓGICA DE SENHA INTELIGENTE
-            // ==========================================
+            // 1. VALIDAÇÃO DE SENHA (BLINDADA)
             let senhaNoBanco = dadosUser.senha;
-
             if (!senhaNoBanco) {
-                // Se não existe senha no Firebase, salva a que o usuário digitou agora
-                console.log("Nenhuma senha encontrada. Cadastrando nova senha...");
                 await updateDoc(remetenteRef, { senha: pinDigitado });
                 senhaNoBanco = pinDigitado;
             }
 
-            // Agora valida se a digitada bate com a que está (ou acabou de ser salva)
             if(pinDigitado !== senhaNoBanco) {
-                alert("Senha incorreta!");
+                showZModal("Senha Incorreta", "A senha de 4 dígitos não confere. Tente novamente.", "🔒");
                 limparPin();
                 return;
             }
-            // ==========================================
 
-            // 2. VALIDAÇÃO DE SALDO
+            // 2. VALIDAÇÃO DE SALDO (BLINDADA)
             const saldoAtual = parseFloat(dadosUser.saldo || 0);
             if(saldoAtual < transacao.valorNumerico) {
-                alert("Saldo insuficiente!");
-                window.location.href = 'pix.html';
+                showZModal("Saldo Insuficiente", "Você não possui saldo suficiente para esta transação.", "💸");
+                setTimeout(() => { window.location.href = 'pix.html'; }, 3000);
                 return;
             }
 
-            // 3. ATUALIZA QUEM ENVIA (VOCÊ): Tira do Saldo e Soma na Saída
+            // 3. EXECUÇÃO
             await updateDoc(remetenteRef, {
                 saldo: increment(-transacao.valorNumerico),
                 saida: increment(transacao.valorNumerico)
             });
 
-            // 4. ATUALIZA QUEM RECEBE (DESTINO): Soma no Saldo e Soma na Entrada
-            if(transacao.uidDestino && transacao.uidDestino !== "fake_id_123") {
+            if(transacao.uidDestino && transacao.uidDestino !== "externo" && transacao.uidDestino !== "fake_id_123") {
                 const destinoRef = doc(db, "usuarios", transacao.uidDestino);
                 await updateDoc(destinoRef, {
                     saldo: increment(transacao.valorNumerico),
@@ -202,7 +227,7 @@
                 });
             }
 
-            // 5. FINALIZAÇÃO E COMPROVANTE
+            // 4. COMPROVANTE
             const dadosComprovante = {
                 ...transacao,
                 data: new Date().toLocaleString('pt-BR'),
@@ -213,22 +238,12 @@
             window.location.href = "comprovante.html";
 
         } catch (error) {
-            console.error("Erro na transação:", error);
-            alert("Erro ao processar: " + error.message);
+            console.error(error);
+            showZModal("Erro no Sistema", "Não foi possível completar a operação. Tente mais tarde.", "⚠️");
             btn.innerText = "Confirmar e Enviar";
             btn.disabled = false;
         }
     };
-
-    function limparPin() {
-        document.getElementById('hidden-pin').value = "";
-        for(let i=1; i<=4; i++) document.getElementById(`dot-${i}`).classList.remove('active');
-        document.getElementById('btnFinal').disabled = true;
-        document.getElementById('btnFinal').innerText = "Confirmar e Enviar";
-        focarPin();
-    }
 </script>
-    
-    
 </body>
 </html>
