@@ -190,42 +190,62 @@
         document.getElementById('customValue').value = "";
         valorFinal = val;
     };
-
     window.processar = async () => {
-        const phone = document.getElementById('phone').value;
-        const btn = document.getElementById('btnMain');
+    const phone = document.getElementById('phone').value;
+    const btn = document.getElementById('btnMain');
 
-        if(phone.length < 14) return alert("Número inválido!");
-        if(!operadora) return alert("Selecione uma operadora!");
-        if(valorFinal > saldoAtual) return alert("Saldo insuficiente!");
+    if(phone.length < 14) return alert("Número inválido!");
+    if(!operadora) return alert("Selecione uma operadora!");
+    if(valorFinal > saldoAtual) return alert("Saldo insuficiente!");
 
-        btn.innerText = "REGISTRANDO...";
-        btn.disabled = true;
+    btn.innerText = "PROCESSANDO...";
+    btn.disabled = true;
 
-        try {
-            // Salva o pedido de recarga para processamento futuro (Asaas/API)
-            const recargaId = "REC" + Math.floor(Math.random() * 999999);
-            await setDoc(doc(db, "recargas", recargaId), {
-                userId: userUid,
-                telefone: phone,
-                operadora: operadora,
-                valor: valorFinal,
-                status: "Aguardando",
-                data: new Date().toISOString()
-            });
+    try {
+        const transacaoId = "TX" + Math.floor(Math.random() * 999999);
+        const dataAgora = new Date().toISOString();
 
-            // Salva dados locais para a tela de revisão
-            localStorage.setItem("tipoOperacao", "Recarga");
-            localStorage.setItem("ultimoValor", valorFinal);
-            localStorage.setItem("operadora", operadora);
-            localStorage.setItem("telefone", phone);
-            
-            window.location.href = 'revisao.html';
-        } catch (e) {
-            alert("Erro ao conectar ao servidor.");
-            btn.disabled = false;
-        }
-    };
+        // 1. REGISTRA A RECARGA (Para o seu controle/Asaas)
+        await setDoc(doc(db, "recargas", transacaoId), {
+            userId: userUid,
+            telefone: phone,
+            operadora: operadora,
+            valor: valorFinal,
+            status: "Concluído", // Simulando concluído para teste
+            data: dataAgora
+        });
+
+        // 2. REGISTRA A TRANSAÇÃO (O que alimenta o gráfico e o resumo)
+        await setDoc(doc(db, "transacoes", transacaoId), {
+            userId: userUid,
+            tipo: "saida", // Faz a linha amarela subir e o "Saiu" aumentar
+            valor: valorFinal,
+            descricao: `Recarga ${operadora}`,
+            detalhe: phone,
+            data: dataAgora
+        });
+
+        // 3. ATUALIZA O SALDO DO USUÁRIO (Débito real)
+        const novoSaldo = saldoAtual - valorFinal;
+        await setDoc(doc(db, "usuarios", userUid), { 
+            saldo: novoSaldo,
+            saida: (window.totalSaidaAtual || 0) + valorFinal // Atualiza o contador de saídas
+        }, { merge: true });
+
+        // Salva dados locais para a revisão
+        localStorage.setItem("tipoOperacao", "Recarga");
+        localStorage.setItem("ultimoValor", valorFinal);
+        localStorage.setItem("operadora", operadora);
+        localStorage.setItem("telefone", phone);
+        
+        window.location.href = 'revisao.html';
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao processar. Tente novamente.");
+        btn.disabled = false;
+    }
+};
+    
 </script>
 </body>
 </html>
