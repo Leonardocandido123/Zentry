@@ -18,25 +18,57 @@
             background: radial-gradient(circle at 20% 0%, #0f172a, #000 70%) no-repeat fixed;
             color: #fff; overflow: hidden; position: fixed; width: 100%; height: 100%;
         }
-        .container { padding: 20px; max-width: 450px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; overflow-y: auto; padding-bottom: 40px; }
-        .app-header { padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(15px); z-index: 100; border-bottom: 1px solid var(--border); }
-        .back-btn { width: 42px; height: 42px; border-radius: 14px; background: var(--bg-card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
-        .balance-chip { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); padding: 10px 18px; border-radius: 100px; text-align: right; }
+        .container { 
+            padding: 20px; max-width: 450px; margin: 0 auto; 
+            height: 100%; display: flex; flex-direction: column;
+            overflow-y: auto; padding-bottom: 40px;
+        }
+        .app-header { 
+            padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; 
+            background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 100; border-bottom: 1px solid var(--border); 
+        }
+        .back-btn { 
+            width: 42px; height: 42px; border-radius: 14px; 
+            background: var(--bg-card); border: 1px solid var(--border); 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        .balance-chip { 
+            background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); 
+            padding: 10px 18px; border-radius: 100px; text-align: right;
+        }
         .balance-chip span { color: var(--primary); font-weight: 800; font-size: 15px; }
         .section-label { font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1.2px; margin: 25px 0 12px 5px; display: block; }
-        .input-group { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 15px 20px; margin-bottom: 15px; }
+        .input-group { 
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; 
+            padding: 15px 20px; margin-bottom: 15px;
+        }
         .input-group label { font-size: 11px; color: var(--text-secondary); font-weight: 700; display: block; margin-bottom: 5px; }
-        .input-group input { background: transparent; border: none; color: white; font-size: 18px; font-weight: 600; width: 100%; outline: none; }
+        .input-group input { 
+            background: transparent; border: none; color: white; 
+            font-size: 18px; font-weight: 600; width: 100%; outline: none; 
+        }
         .operator-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .op-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
-        .op-card img { width: 35px; height: 35px; border-radius: 8px; filter: grayscale(1); opacity: 0.6; pointer-events: none; }
+        .op-card { 
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; 
+            padding: 12px; text-align: center; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .op-card img { width: 32px; height: 32px; object-fit: contain; filter: brightness(0.8); }
         .op-card.selected { border-color: var(--primary); background: rgba(34, 197, 94, 0.15); }
-        .op-card.selected img { filter: grayscale(0); opacity: 1; }
+        .op-card.selected img { filter: brightness(1); }
+
         .value-chips { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
-        .chip { padding: 14px 24px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 100px; font-size: 14px; font-weight: 700; white-space: nowrap; cursor: pointer; }
-        .chip.active { background: var(--primary); color: #000; font-weight: 800; }
-        .btn-confirm { width: 100%; padding: 20px; border-radius: 22px; border: none; background: var(--primary); color: #052e16; font-weight: 800; font-size: 16px; margin-top: 30px; cursor: pointer; }
-        .btn-confirm:disabled { opacity: 0.5; }
+        .chip { 
+            padding: 14px 24px; background: var(--bg-card); border: 1px solid var(--border); 
+            border-radius: 100px; font-size: 14px; font-weight: 700; white-space: nowrap;
+        }
+        .chip.active { background: var(--primary); color: #000; }
+        .btn-confirm { 
+            width: 100%; padding: 20px; border-radius: 22px; border: none; 
+            background: var(--primary); color: #052e16; font-weight: 800; font-size: 16px; 
+            margin-top: 30px;
+        }
     </style>
 </head>
 <body>
@@ -51,8 +83,6 @@
 
     <div class="container">
         <h1 style="font-size: 24px; margin: 15px 0 5px; font-weight: 800;">Recarga Celular</h1>
-        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 25px;">Insira os dados para recarregar.</p>
-
         <div class="input-group">
             <label>NÚMERO COM DDD</label>
             <input type="tel" id="phone" placeholder="(00) 00000-0000" maxlength="15">
@@ -60,10 +90,10 @@
 
         <span class="section-label">Operadora</span>
         <div class="operator-grid">
-            <div class="op-card" onclick="selectOp(this, 'Vivo')"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Vivo_logo.svg/1200px-Vivo_logo.svg.png"></div>
-            <div class="op-card" onclick="selectOp(this, 'Tim')"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/TIM_logo.svg/1200px-TIM_logo.svg.png"></div>
-            <div class="op-card" onclick="selectOp(this, 'Claro')"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Claro_Logo.svg/1024px-Claro_Logo.svg.png"></div>
-            <div class="op-card" onclick="selectOp(this, 'Oi')"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Oi_logo.svg/1200px-Oi_logo.svg.png"></div>
+            <div class="op-card" onclick="selectOp(this, 'Vivo')"><img src="https://img.icons8.com/color/96/vivo.png"></div>
+            <div class="op-card" onclick="selectOp(this, 'Tim')"><img src="https://img.icons8.com/color/96/tim.png"></div>
+            <div class="op-card" onclick="selectOp(this, 'Claro')"><img src="https://img.icons8.com/color/96/claro.png"></div>
+            <div class="op-card" onclick="selectOp(this, 'Oi')"><img src="https://img.icons8.com/color/96/oi.png"></div>
         </div>
 
         <span class="section-label">Valores</span>
@@ -74,14 +104,10 @@
             <div class="chip" onclick="setVal(this, 50)">R$ 50</div>
         </div>
 
-        <div class="input-group" style="margin-top: 20px;">
-            <label>VALOR PERSONALIZADO</label>
-            <input type="number" id="customValue" placeholder="Ex: 35">
-        </div>
-
         <button class="btn-confirm" id="btnMain" onclick="processar()">Confirmar Recarga</button>
     </div>
-    <script type="module">
+
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -105,101 +131,68 @@
     let operadora = "";
     let valorFinal = 20;
 
-    // --- CARREGAR DADOS REAIS ---
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             userUid = user.uid;
-            const docRef = doc(db, "usuarios", user.uid);
-            const snap = await getDoc(docRef);
+            const snap = await getDoc(doc(db, "usuarios", user.uid));
             if(snap.exists()){
-                const data = snap.data();
-                saldoAtual = Number(data.saldo) || 0;
-                totalSaidaAcumulada = Number(data.saida) || 0;
+                const d = snap.data();
+                saldoAtual = Number(d.saldo || 0);
+                totalSaidaAcumulada = Number(d.saida || 0);
                 document.getElementById('txtSaldo').innerText = saldoAtual.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             }
-        } else {
-            window.location.href='login.html';
-        }
+        } else { window.location.href='login.html'; }
     });
 
-    // --- MÁSCARA TELEFONE ---
-    document.getElementById('phone').addEventListener('input', (e) => {
-        let v = e.target.value.replace(/\D/g,'');
-        v = v.replace(/^(\d{2})(\d)/g,"($1) $2");
-        v = v.replace(/(\d)(\d{4})$/,"$1-$2");
-        e.target.value = v;
-    });
-
-    // --- FUNÇÕES GLOBAIS (Expostas para o HTML) ---
+    // Funções Globais
     window.selectOp = (el, name) => {
         document.querySelectorAll('.op-card').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
         operadora = name;
     };
-
     window.setVal = (el, val) => {
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
-        document.getElementById('customValue').value = "";
         valorFinal = val;
     };
 
     window.processar = async () => {
         const phone = document.getElementById('phone').value;
         const btn = document.getElementById('btnMain');
-
-        if(phone.length < 14) return alert("Número inválido!");
-        if(!operadora) return alert("Selecione uma operadora!");
-        if(valorFinal > saldoAtual) return alert("Saldo insuficiente!");
+        if(phone.length < 14 || !operadora || valorFinal > saldoAtual) return alert("Verifique os dados ou saldo!");
 
         btn.innerText = "PROCESSANDO...";
         btn.disabled = true;
 
         try {
-            const transacaoId = "TX" + Math.floor(Math.random() * 999999);
+            const transacaoId = "TX" + Date.now();
             const agora = new Date();
-            const dataISO = agora.toISOString();
+            // Data formatada YYYY-MM-DD para o dashboard.js (ApexCharts)
+            const dataGrafico = agora.toISOString().split('T')[0];
 
-            // 1. SALVA EM 'TRANSACOES' (Para o Gráfico e Extrato)
+            // 1. REGISTRA TRANSAÇÃO (O GRÁFICO USA ISSO)
             await setDoc(doc(db, "transacoes", transacaoId), {
                 userId: userUid,
                 tipo: "saida",
                 valor: valorFinal,
                 descricao: `Recarga ${operadora}`,
-                categoria: "Celular",
-                data: dataISO,
+                data: dataGrafico, 
                 timestamp: agora
             });
 
-            // 2. SALVA EM 'RECARGAS' (Histórico detalhado)
-            await setDoc(doc(db, "recargas", transacaoId), {
-                userId: userUid,
-                telefone: phone,
-                operadora: operadora,
-                valor: valorFinal,
-                status: "Concluído",
-                data: dataISO
-            });
-
-            // 3. ATUALIZA SALDO DO USUÁRIO
-            const novoSaldo = saldoAtual - valorFinal;
-            const novaSaida = totalSaidaAcumulada + valorFinal;
+            // 2. ATUALIZA SALDO
             await updateDoc(doc(db, "usuarios", userUid), { 
-                saldo: novoSaldo,
-                saida: novaSaida 
+                saldo: saldoAtual - valorFinal,
+                saida: totalSaidaAcumulada + valorFinal 
             });
 
             btn.innerText = "SUCESSO!";
             setTimeout(() => { window.location.href = 'home.html'; }, 1000);
-
         } catch (e) {
-            console.error(e);
-            alert("Erro ao processar.");
+            alert("Erro!");
             btn.disabled = false;
-            btn.innerText = "Confirmar Recarga";
         }
     };
-    </script>
-    
+</script>
 </body>
 </html>
