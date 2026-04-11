@@ -112,26 +112,77 @@
             <button class="btn-finish" onclick="finalizar()">Confirmar e Ativar</button>
         </div>
     </div>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    <script>
-        // Pega o nome do usuário para mostrar na tela
-        window.onload = function() {
-            const nome = localStorage.getItem('nomeUsuario') || 'LEONARDO S.';
-            document.getElementById('displayNome').innerText = nome.toUpperCase();
+    const firebaseConfig = {
+        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
+        authDomain: "zentry-app-74275.firebaseapp.com",
+        projectId: "zentry-app-74275",
+        storageBucket: "zentry-app-74275.appspot.com",
+        messagingSenderId: "571422826071",
+        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let userUid = "";
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            userUid = user.uid;
+            // Busca o nome real do Firebase para exibir no cartão
+            const docSnap = await getDoc(doc(db, "usuarios", userUid));
+            if (docSnap.exists()) {
+                document.getElementById('displayNome').innerText = docSnap.data().nome.toUpperCase();
+            }
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    window.finalizar = async () => {
+        const btn = document.querySelector('.btn-finish');
+        
+        // Captura o estado dos switches
+        const switches = document.querySelectorAll('input[type="checkbox"]');
+        const config = {
+            online: switches[0].checked,
+            nfc: switches[1].checked,
+            sms: switches[2].checked,
+            status: "Ativo",
+            dataAtivacao: new Date().toISOString()
         };
 
-        function finalizar() {
-            const btn = document.querySelector('.btn-finish');
-            btn.innerHTML = "CARTÃO ATIVADO!";
+        btn.innerHTML = "<div class='spinner' style='width:20px; height:20px; margin:0 auto; border-top-color:#000'></div>";
+        btn.disabled = true;
+
+        try {
+            // Atualiza o documento do cartão no Firebase
+            await updateDoc(doc(db, "cartoes", userUid), config);
+
+            // Estilo de Sucesso
+            btn.innerHTML = "CARTÃO ATIVADO! 🛡️";
             btn.style.background = "#22c55e";
             btn.style.color = "#fff";
 
-            localStorage.setItem('cartaoStatus', 'ativo');
-            
+            // Feedback tátil/visual antes de voltar
             setTimeout(() => {
                 location.href = 'home.html';
-            }, 1800);
+            }, 1500);
+            
+        } catch (e) {
+            console.error("Erro ao ativar:", e);
+            alert("Erro ao ativar cartão. Verifique sua conexão.");
+            btn.innerHTML = "Confirmar e Ativar";
+            btn.disabled = false;
         }
-    </script>
+    };
+        </script>
+    
 </body>
 </html>
