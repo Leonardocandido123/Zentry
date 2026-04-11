@@ -204,39 +204,48 @@
         btn.innerText = "PROCESSANDO...";
         btn.disabled = true;
 
-        try {
-            const transacaoId = "TX" + Math.floor(Math.random() * 999999);
-            const dataAgora = new Date().toISOString();
+    try {
+        const transacaoId = "TX" + Math.floor(Math.random() * 999999);
+        const agora = new Date();
+        const dataISO = agora.toISOString();
 
-            // 1. REGISTRA A RECARGA (Controle Asaas)
-            await setDoc(doc(db, "recargas", transacaoId), {
-                userId: userUid,
-                telefone: phone,
-                operadora: operadora,
-                valor: valorFinal,
-                status: "Concluído",
-                data: dataAgora
-            });
+        // 1. SALVA NA COLEÇÃO 'TRANSACOES' (Para o Gráfico e Extrato verem)
+        await setDoc(doc(db, "transacoes", transacaoId), {
+            userId: userUid,
+            tipo: "saida",
+            valor: valorFinal,
+            descricao: `Recarga ${operadora}`,
+            categoria: "Celular",
+            data: dataISO,        // O dashboard.js usa isso
+            timestamp: agora      // O extrato usa isso para ordenar
+        });
 
-            // 2. REGISTRA A TRANSAÇÃO (O QUE O GRAFICO LÊ)
-            // IMPORTANTE: Aqui garantimos que o userId e os campos batem com o dashboard.js
-            await setDoc(doc(db, "transacoes", transacaoId), {
-                userId: userUid,
-                tipo: "saida",
-                valor: valorFinal,
-                descricao: `Recarga ${operadora}`,
-                data: dataAgora // dashboard.js usa esse campo para o eixo X
-            });
+        // 2. SALVA NA COLEÇÃO 'RECARGAS' (O que você já tem no print)
+        await setDoc(doc(db, "recargas", transacaoId), {
+            userId: userUid,
+            telefone: phone,
+            operadora: operadora,
+            valor: valorFinal,
+            status: "Concluído",
+            data: dataISO
+        });
 
-            // 3. ATUALIZA O SALDO E O CONTADOR DE SAÍDA NO PERFIL
-            const novoSaldo = saldoAtual - valorFinal;
-            const novaSaidaTotal = totalSaidaAcumulada + valorFinal;
+        // 3. ATUALIZA O SALDO REAL
+        const novoSaldo = saldoAtual - valorFinal;
+        await updateDoc(doc(db, "usuarios", userUid), { 
+            saldo: novoSaldo,
+            saida: (totalSaidaAcumulada || 0) + valorFinal 
+        });
 
-            await updateDoc(doc(db, "usuarios", userUid), { 
-                saldo: novoSaldo,
-                saida: novaSaidaTotal
-            });
+        btn.innerText = "SUCESSO!";
+        setTimeout(() => { window.location.href = 'home.html'; }, 1000);
 
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao processar. Tente novamente.");
+        btn.disabled = false;
+    }
+        
             // Salva dados locais para a revisão
             localStorage.setItem("tipoOperacao", "Recarga");
             localStorage.setItem("ultimoValor", valorFinal);
