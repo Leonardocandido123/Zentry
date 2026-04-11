@@ -24,11 +24,25 @@ export async function inicializarDashboard(db, userUid) {
         let saidas = [];
         let totalEntrou = 0;
         let totalSaiu = 0;
-
         querySnapshot.forEach((doc) => {
             const dados = doc.data();
             const valor = parseFloat(dados.valor) || 0;
-            const timestamp = new Date(dados.data).getTime();
+            
+            // Tratamento blindado para a data
+            let dataRaw = dados.data;
+            let timestamp;
+            
+            if (dataRaw) {
+                // Se for string YYYY-MM-DD, adiciona o horário para não dar erro
+                if (typeof dataRaw === 'string' && dataRaw.length === 10) {
+                    timestamp = new Date(dataRaw + "T12:00:00").getTime();
+                } else {
+                    timestamp = new Date(dataRaw).getTime();
+                }
+            } else {
+                timestamp = Date.now();
+            }
+
             const info = dados.descricao || (dados.tipo === 'entrada' ? 'Pix Recebido' : 'Pagamento');
 
             if (dados.tipo === 'entrada') {
@@ -39,6 +53,7 @@ export async function inicializarDashboard(db, userUid) {
                 saidas.push({ x: timestamp, y: valor, info: info });
             }
         });
+        
 
         // 2. ATUALIZAR OS TEXTOS DE VALORES (RESUMO)
         const lucro = totalEntrou - totalSaiu;
