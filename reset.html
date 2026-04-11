@@ -6,8 +6,8 @@
     <title>ZENTRY - Redefinir Senha</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #22C55E; --bg: #000000; --text-muted: #6B7280; --border: #2A3441; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        :root { --primary: #22C55E; --bg: #000000; --text-muted: #6B7280; --border: #2A3441; --card: #121826; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--bg);
@@ -22,7 +22,7 @@
         }
 
         .progress-container { width: 100%; height: 4px; background: #1F2937; border-radius: 10px; margin-top: 10px; margin-bottom: 20px; }
-        .progress-bar { width: 50%; height: 100%; background: var(--primary); border-radius: 10px; transition: 0.5s; }
+        .progress-bar { width: 50%; height: 100%; background: var(--primary); border-radius: 10px; transition: 0.5s; box-shadow: 0 0 10px var(--primary); }
 
         .header { display: flex; align-items: center; margin-bottom: 30px; }
         .back-btn { background: none; border: none; cursor: pointer; color: white; margin-right: 15px; display: flex; align-items: center; }
@@ -32,8 +32,8 @@
         .question-area { flex-grow: 1; }
         .question-area h2 { font-size: 26px; font-weight: 500; line-height: 1.3; margin-bottom: 40px; }
 
-        .input-group { position: relative; border-bottom: 1px solid var(--border); margin-bottom: 35px; transition: 0.3s; }
-        .input-group.valid { border-bottom-color: var(--primary); }
+        .input-group { position: relative; border-bottom: 1.5px solid var(--border); margin-bottom: 35px; transition: 0.3s; }
+        .input-group:focus-within { border-bottom-color: var(--primary); }
         
         .input-line {
             width: 100%; background: transparent; border: none;
@@ -50,24 +50,36 @@
             top: -15px; font-size: 12px; color: var(--primary);
         }
 
-        .eye { position: absolute; right: 0; top: 15px; cursor: pointer; z-index: 10; }
-        .eye svg { width: 22px; height: 22px; stroke: #6B7280; fill: none; stroke-width: 2; }
-
         .footer { display: flex; justify-content: flex-end; padding: 20px 0 40px 0; margin-top: auto; }
 
         .next-btn {
             width: 65px; height: 65px; background: #1F2937; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; border: none; transition: 0.4s;
+            opacity: 0.3; pointer-events: none;
         }
 
         .next-btn svg { width: 30px; height: 30px; stroke: #4B5563; stroke-width: 2.5; fill: none; }
-        .next-btn.active { background: var(--primary); box-shadow: 0 0 25px rgba(34, 197, 94, 0.4); cursor: pointer; }
+        .next-btn.active { background: var(--primary); box-shadow: 0 0 25px rgba(34, 197, 94, 0.4); cursor: pointer; opacity: 1; pointer-events: all; }
         .next-btn.active svg { stroke: #000000; }
+
+        /* MODAL ZENTRY (BLINDAGEM) */
+        #zModalGlobal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(8px); }
+        .z-content { background:#121826; border:1px solid #2A3441; border-radius:30px; width:100%; max-width:340px; padding:30px; text-align:center; animation: pop 0.3s ease; }
+        @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
         #senhaSection { display: none; }
     </style>
 </head>
 <body>
+
+    <div id="zModalGlobal">
+        <div class="z-content">
+            <div id="zIcon" style="font-size:45px; margin-bottom:15px;">📧</div>
+            <h3 id="zTitle" style="margin-bottom:10px; font-size:18px;">Verifique seu E-mail</h3>
+            <p id="zText" style="color:#9CA3AF; font-size:14px; margin-bottom:25px; line-height:1.5;"></p>
+            <button id="zBtnClose" style="width:100%; padding:16px; border-radius:14px; background:var(--primary); border:none; color:#000; font-weight:700;">Entendido</button>
+        </div>
+    </div>
 
     <div class="progress-container">
         <div class="progress-bar" id="progressBar"></div>
@@ -82,24 +94,18 @@
 
     <div class="question-area" id="cpfSection">
         <h2 id="mainTitle">Para continuar, digite seu CPF</h2>
-        <div class="input-group" id="groupCpf">
-            <input type="tel" id="cpf" class="input-line" placeholder=" " maxlength="14">
-            <label class="input-label">CPF</label>
+        <div class="input-group">
+            <input type="tel" id="cpf" class="input-line" placeholder=" " maxlength="14" autocomplete="off">
+            <label class="input-label">CPF cadastrado</label>
         </div>
     </div>
 
     <div class="question-area" id="senhaSection">
-        <h2>Crie sua nova senha de 6 dígitos</h2>
-        <div class="input-group" id="groupP1">
-            <input type="password" id="novaSenha" class="input-line" placeholder=" " maxlength="6" inputmode="numeric">
-            <label class="input-label">Nova senha</label>
-            <span class="eye" onclick="togglePass('novaSenha')">
-                <svg viewBox="0 0 24 24"><path d="M1 12s4-6 11-6 11 6 11 6-4 6-11 6S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
-            </span>
-        </div>
-        <div class="input-group" id="groupP2">
-            <input type="password" id="confirmaSenha" class="input-line" placeholder=" " maxlength="6" inputmode="numeric">
-            <label class="input-label">Confirmar nova senha</label>
+        <h2>Confirme seus dados</h2>
+        <p style="color: #9CA3AF; font-size: 14px; margin-top: -30px; margin-bottom: 30px;">Um link de recuperação foi enviado para o e-mail vinculado a este CPF.</p>
+        <div class="input-group">
+            <input type="email" id="emailRecovery" class="input-line" placeholder=" " autocomplete="off" spellcheck="false">
+            <label class="input-label">Confirme seu e-mail</label>
         </div>
     </div>
 
@@ -110,7 +116,6 @@
     </div>
 
    <script type="module">
-    // Importando Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -127,65 +132,53 @@
     const auth = getAuth(app);
 
     const cpfInput = document.getElementById('cpf');
-    const novaSenha = document.getElementById('novaSenha');
-    const confirmaSenha = document.getElementById('confirmaSenha');
+    const emailInput = document.getElementById('emailRecovery');
     const nextBtn = document.getElementById('nextBtn');
     const progressBar = document.getElementById('progressBar');
     
     let etapa = 1;
 
+    // Blindagem Modal
+    function showZModal(titulo, texto, icon) {
+        document.getElementById('zModalGlobal').style.display = 'flex';
+        document.getElementById('zTitle').innerText = titulo;
+        document.getElementById('zText').innerText = texto;
+        document.getElementById('zIcon').innerText = icon;
+    }
+    document.getElementById('zBtnClose').onclick = () => document.getElementById('zModalGlobal').style.display = 'none';
+
     // Máscara de CPF
     cpfInput.addEventListener('input', (e) => {
         let v = e.target.value.replace(/\D/g, "");
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
         e.target.value = v;
-        const isValid = v.length === 14;
-        nextBtn.classList.toggle('active', isValid);
+        nextBtn.classList.toggle('active', v.length === 14);
     });
 
-    // Validação de Senhas (Local)
-    function validarSenhas() {
-        const p1 = novaSenha.value;
-        const p2 = confirmaSenha.value;
-        const isMatch = p1 === p2 && p1.length === 6;
-        nextBtn.classList.toggle('active', isMatch);
-    }
+    emailInput.addEventListener('input', () => {
+        nextBtn.classList.toggle('active', emailInput.value.length > 5);
+    });
 
-    novaSenha.addEventListener('input', validarSenhas);
-    confirmaSenha.addEventListener('input', validarSenhas);
-
-    // FUNÇÃO PRINCIPAL
+    // AÇÃO PRINCIPAL
     nextBtn.addEventListener('click', async () => {
-        if (!nextBtn.classList.contains('active')) return;
-
         if (etapa === 1) {
-            // No fluxo real, aqui você buscaria o e-mail vinculado a este CPF no seu banco
-            // Para este exemplo, vamos usar o e-mail salvo no localStorage ou pedir o envio
-            const emailUsuario = localStorage.getItem("usuarioEmail");
-
-            if (emailUsuario) {
-                try {
-                    await sendPasswordResetEmail(auth, emailUsuario);
-                    alert("Enviamos um link de redefinição para o seu e-mail cadastrado!");
-                    // Avança para a tela de confirmação visual
-                    etapa = 2;
-                    document.getElementById('cpfSection').style.display = 'none';
-                    document.getElementById('senhaSection').style.display = 'block';
-                    progressBar.style.width = '100%';
-                    nextBtn.classList.remove('active');
-                } catch (error) {
-                    alert("Erro ao enviar e-mail: " + error.message);
-                }
-            } else {
-                alert("E-mail não encontrado. Tente fazer o cadastro primeiro.");
-            }
+            // Avança para confirmação de e-mail
+            etapa = 2;
+            document.getElementById('cpfSection').style.display = 'none';
+            document.getElementById('senhaSection').style.display = 'block';
+            progressBar.style.width = '100%';
+            nextBtn.classList.remove('active');
         } else {
-            // Finalização visual
-            nextBtn.innerHTML = "✅";
-            nextBtn.style.background = "#22C55E";
-            setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+            // Envia o reset real do Firebase
+            try {
+                await sendPasswordResetEmail(auth, emailInput.value);
+                showZModal("Link Enviado", "Enviamos as instruções de redefinição para " + emailInput.value + ". Verifique sua caixa de entrada e spam.", "✅");
+                setTimeout(() => { window.location.href = 'login.html'; }, 4000);
+            } catch (error) {
+                let msg = "Não foi possível enviar o link.";
+                if(error.code === 'auth/user-not-found') msg = "Este e-mail não está cadastrado no sistema.";
+                showZModal("Erro", msg, "❌");
+            }
         }
     });
 
