@@ -15,29 +15,30 @@
         .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 10px; }
         .input-box input { background: transparent; border: none; color: #fff; font-size: 18px; width: 100%; }
         
-        /* Grid Operadoras */
         .op-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .op-item { background: var(--card); border: 2px solid transparent; border-radius: 16px; padding: 12px 5px; text-align: center; }
+        .op-item { background: var(--card); border: 2px solid transparent; border-radius: 16px; padding: 12px 5px; text-align: center; cursor: pointer; }
         .op-item img { width: 30px; height: 30px; object-fit: contain; }
+        .op-item span { display: block; font-size: 9px; font-weight: 700; color: #9CA3AF; margin-top: 5px; }
         .op-item.active { border-color: var(--primary); background: rgba(34, 197, 94, 0.1); }
+        .op-item.active span { color: #fff; }
         
         .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .v-chip { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: center; font-weight: 800; }
-        .v-chip.active { background: var(--primary); color: #000; }
+        .v-chip { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: center; font-weight: 800; cursor: pointer; }
+        .v-chip.active { background: var(--primary); color: #000; border-color: var(--primary); }
         
-        .footer-action { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: #000; }
-        .btn-pay { width: 100%; padding: 18px; border-radius: 16px; border: none; background: var(--primary); color: #052e16; font-weight: 800; font-size: 16px; }
+        .footer-action { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, #000 30%); }
+        .btn-pay { width: 100%; padding: 18px; border-radius: 16px; border: none; background: var(--primary); color: #052e16; font-weight: 800; font-size: 16px; box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2); }
     </style>
 </head>
 <body>
 
     <div class="app-bar">
-        <div onclick="window.location.href='home.html'" style="padding: 10px; background: var(--card); border-radius: 10px;">Voltar</div>
-        <div id="displaySaldo" style="color: var(--primary); font-weight: 800;">R$ ---</div>
+        <div onclick="window.location.href='home.html'" style="padding: 10px; background: var(--card); border-radius: 10px; cursor: pointer;">Voltar</div>
+        <div id="displaySaldo" style="color: var(--primary); font-weight: 800;">R$ 0,00</div>
     </div>
 
     <div class="content">
-        <h2 style="margin: 0;">Recarga Celular</h2>
+        <h2 style="margin: 0; font-weight: 800;">Recarga Celular</h2>
         
         <div class="section-title">Número</div>
         <div class="input-box">
@@ -46,10 +47,10 @@
 
         <div class="section-title">Operadora</div>
         <div class="op-grid">
-            <div class="op-item" onclick="escolherOp(this, 'Vivo')"><img src="https://img.icons8.com/color/96/vivo.png"><br><small>VIVO</small></div>
-            <div class="op-item" onclick="escolherOp(this, 'Tim')"><img src="https://img.icons8.com/color/96/tim.png"><br><small>TIM</small></div>
-            <div class="op-item" onclick="escolherOp(this, 'Claro')"><img src="https://img.icons8.com/color/96/claro.png"><br><small>CLARO</small></div>
-            <div class="op-item" onclick="escolherOp(this, 'Oi')"><img src="https://img.icons8.com/color/96/oi.png"><br><small>OI</small></div>
+            <div class="op-item" onclick="escolherOp(this, 'Vivo')"><img src="https://logodownload.org/wp-content/uploads/2014/04/vivo-logo-1.png"><span>VIVO</span></div>
+            <div class="op-item" onclick="escolherOp(this, 'Tim')"><img src="https://logodownload.org/wp-content/uploads/2014/05/tim-logo-1.png"><span>TIM</span></div>
+            <div class="op-item" onclick="escolherOp(this, 'Claro')"><img src="https://logodownload.org/wp-content/uploads/2014/02/claro-logo-1.png"><span>CLARO</span></div>
+            <div class="op-item" onclick="escolherOp(this, 'Oi')"><img src="https://logodownload.org/wp-content/uploads/2014/05/oi-logo-1.png"><span>OI</span></div>
         </div>
 
         <div class="section-title">Valor</div>
@@ -92,10 +93,10 @@
             userUid = user.uid;
             const snap = await getDoc(doc(db, "usuarios", user.uid));
             if(snap.exists()){
-                saldoAtual = snap.data().saldo || 0;
-                document.getElementById('displaySaldo').innerText = "R$ " + saldoAtual.toFixed(2);
+                saldoAtual = Number(snap.data().saldo || 0);
+                document.getElementById('displaySaldo').innerText = saldoAtual.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
             }
-        }
+        } else { window.location.href = 'login.html'; }
     });
 
     window.escolherOp = (el, nome) => {
@@ -112,32 +113,53 @@
 
     window.finalizarAgora = async () => {
         const tel = document.getElementById('numTel').value;
-        if(tel.length < 5 || !operadora) return alert("Preencha tudo!");
-        
-        document.getElementById('btnFinish').innerText = "Processando...";
+        const btn = document.getElementById('btnFinish');
+
+        if(tel.length < 5) return alert("Digite o número!");
+        if(!operadora) return alert("Selecione a operadora!");
+        if(valor > saldoAtual) return alert("Saldo insuficiente!");
+
+        btn.disabled = true;
+        btn.innerText = "Processando...";
         
         try {
-            const id = "TX" + Date.now();
-            const data = new Date().toISOString().split('T')[0];
+            const txId = "TX" + Date.now();
+            const agora = new Date();
+            const dataSimples = agora.toISOString().split('T')[0];
 
-            // Grava transação (pro gráfico)
-            await setDoc(doc(db, "transacoes", id), {
+            // 1. GRAVA PARA O GRÁFICO (O ÍNDICE QUE VOCÊ CRIOU É PRA ISSO)
+            await setDoc(doc(db, "transacoes", txId), {
                 userId: userUid,
                 tipo: "saida",
                 valor: valor,
-                data: data,
+                data: dataSimples,
+                timestamp: agora,
                 descricao: "Recarga " + operadora
             });
 
-            // Atualiza saldo
+            // 2. ATUALIZA O SALDO DO USUÁRIO
             await updateDoc(doc(db, "usuarios", userUid), {
                 saldo: saldoAtual - valor
             });
 
-            alert("Sucesso!");
-            window.location.href = "home.html";
-        } catch(e) { alert("Erro!"); }
+            btn.innerText = "SUCESSO!";
+            setTimeout(() => { window.location.href = "home.html"; }, 1500);
+
+        } catch(e) {
+            console.error(e);
+            alert("Erro ao processar recarga.");
+            btn.disabled = false;
+            btn.innerText = "Confirmar";
+        }
     };
+
+    // Máscara de telefone
+    document.getElementById('numTel').addEventListener('input', (e) => {
+        let v = e.target.value.replace(/\D/g,'');
+        v = v.replace(/^(\d{2})(\d)/g,"($1) $2");
+        v = v.replace(/(\d)(\d{4})$/,"$1-$2");
+        e.target.value = v;
+    });
 </script>
 </body>
 </html>
