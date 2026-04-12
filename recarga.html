@@ -77,26 +77,25 @@
             <label>NÚMERO DO TELEFONE</label>
             <input type="tel" id="numTel" placeholder="(00) 00000-0000">
         </div>
-
-        <div class="section-title">Selecione a Operadora</div>
-        <div class="op-grid">
-            <div class="op-item" onclick="selOp(this, 'Vivo')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_Vivo.svg/256px-Logo_Vivo.svg.png">
-                <span>VIVO</span>
-            </div>
-            <div class="op-item" onclick="selOp(this, 'Tim')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/TIM_logo.svg/256px-TIM_logo.svg.png">
-                <span>TIM</span>
-            </div>
-            <div class="op-item" onclick="selOp(this, 'Claro')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Logo_Claro.svg/256px-Logo_Claro.svg.png">
-                <span>CLARO</span>
-            </div>
-            <div class="op-item" onclick="selOp(this, 'Oi')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Logo_Oi.svg/256px-Logo_Oi.svg.png">
-                <span>OI</span>
-            </div>
-        </div>
+<div class="op-grid">
+    <div class="op-item" onclick="selOp(this, 'Vivo')">
+        <img src="https://logodownload.org/wp-content/uploads/2014/04/vivo-logo-1.png">
+        <span>VIVO</span>
+    </div>
+    <div class="op-item" onclick="selOp(this, 'Tim')">
+        <img src="https://logodownload.org/wp-content/uploads/2014/05/tim-logo-1.png">
+        <span>TIM</span>
+    </div>
+    <div class="op-item" onclick="selOp(this, 'Claro')">
+        <img src="https://logodownload.org/wp-content/uploads/2014/02/claro-logo-1.png">
+        <span>CLARO</span>
+    </div>
+    <div class="op-item" onclick="selOp(this, 'Oi')">
+        <img src="https://logodownload.org/wp-content/uploads/2014/05/oi-logo-1.png">
+        <span>OI</span>
+    </div>
+</div>
+        
 
         <div class="section-title">Valor da Recarga</div>
         <div class="value-grid">
@@ -206,6 +205,21 @@
 
             btn.innerText = "SUCESSO!";
             setTimeout(() => { location.href = 'home.html'; }, 1500);
+            // Dentro do seu try { ... }
+const txId = "REC" + Date.now();
+const hoje = new Date();
+const dataSimples = hoje.toISOString().split('T')[0]; // Ex: 2026-04-11
+
+// --- ESSE BLOCO FAZ O GRÁFICO APARECER ---
+await setDoc(doc(db, "transacoes", txId), {
+    userId: userUid,
+    tipo: "saida",        // O gráfico procura por 'saida'
+    valor: valorSelecionado,
+    descricao: "Recarga " + opSelecionada,
+    data: dataSimples,    // dashboard.js usa isso para o eixo X
+    timestamp: hoje       // extrato usa isso para ordenar
+});
+            
 
         } catch (e) {
             console.error(e);
