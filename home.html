@@ -57,52 +57,38 @@ body {
 .action-icon { width: 54px; height: 54px; background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #FFF; box-shadow: 0 4px 8px rgba(0,0,0,0.25); }
 .action-icon svg { width: 22px; height: 22px; stroke: #fff; stroke-width: 1.8; fill: none; }
 .action-item span { font-size: 11px; font-weight: 500; color: #FFF; margin-top: 6px; opacity: 0.85; }
-/* RESUMO & GRÁFICO - ATUALIZADO PARA GRÁFICO REAL */
-.resumo-card { 
-    background: var(--bg-card); 
-    border: 1px solid var(--border); 
-    border-radius: 24px; 
-    padding: 20px; 
-    margin-bottom: 25px; 
+
+    .resumo-financeiro {
+    display: flex;
+    justify-content: space-between;
+    background: #1a1a1a; /* Fundo escuro igual ao do gráfico anterior */
+    padding: 15px;
+    border-radius: 12px;
+    margin: 10px 0;
 }
 
-/* Aumentamos para 200px para o gráfico ter "respiro" e o dedo alcançar as linhas */
-.grafico-container { 
-    width: 100%; 
-    min-height: 200px; 
-    margin: 15px 0; 
-    display: block; /* Mudamos de flex para block para o ApexCharts renderizar certo */
+.card-resumo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
 }
 
-/* Como não usamos mais o SVG fixo, essa classe pode ficar guardada ou removida */
-.grafico-svg { width: 100%; height: 80px; display: none; } 
-
-.resumo-footer-compacto { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    border-top: 1px solid var(--border); 
-    padding-top: 15px; 
-    margin-top: 10px; 
+.label {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 5px;
+    text-transform: uppercase;
 }
 
-.status-item { display: flex; flex-direction: column; gap: 4px; }
-.status-item small { 
-    font-size: 10px; 
-    color: var(--text-secondary); 
-    text-transform: uppercase; 
-    letter-spacing: 0.5px;
-    font-weight: 700;
+.valor {
+    font-size: 16px;
+    font-weight: bold;
 }
-.status-item strong { font-size: 15px; font-weight: 800; }
 
-/* Ajuste para o Balão que aparece quando encosta o dedo (Tooltip) */
-.apexcharts-tooltip {
-    background: #111827 !important;
-    border: 1px solid var(--border) !important;
-    color: #fff !important;
-    box-shadow: 0 10px 15px rgba(0,0,0,0.5) !important;
-}
+.azul { color: #007bff; }
+.amarelo { color: #ffc107; }
+.verde { color: #28a745; }
     
 
 /* BANNERS ROTATIVOS */
@@ -194,33 +180,21 @@ body {
         <small>Saldo disponível</small>
     </div>
   </div>
-<div class="resumo-card">
-    <div class="resumo-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <small>Visão Geral (7 dias)</small>
-        <span id="label-periodo" style="font-size: 10px; color: var(--primary); font-weight: 700;">AO VIVO</span>
+<div class="resumo-financeiro">
+    <div class="card-resumo">
+        <span class="label">Entrada</span>
+        <span class="valor azul" id="totalEntrada">R$ 0,00</span>
     </div>
-
-    <div class="grafico-container" style="min-height: 180px; padding: 10px 0;">
-        <div id="mainChart"></div>
+    <div class="card-resumo">
+        <span class="label">Saída</span>
+        <span class="valor amarelo" id="totalSaida">R$ 0,00</span>
     </div>
-
-    <div class="resumo-footer-compacto">
-      <div class="status-item">
-        <small>Entrou</small>
-        <strong id="resumo-entrada" style="color:#3B82F6">R$ 0,00</strong>
-      </div>
-      <div class="status-item">
-        <small>Saiu</small>
-        <strong id="resumo-saida" style="color:#FBBF24">R$ 0,00</strong>
-      </div>
-      <div class="status-item">
-        <small>Lucro</small>
-        <strong id="resumo-lucro" style="color:var(--primary)">R$ 0,00</strong>
-      </div>
+    <div class="card-resumo">
+        <span class="label">Lucro</span>
+        <span class="valor verde" id="totalLucro">R$ 0,00</span>
     </div>
 </div>
   
-
   <div class="pix-card">
     <div class="pix-info"><b>Pix rápido ⚡</b><br><span style="font-size: 11px; opacity: 0.8;">Receba e envia dinheiro 24h</span></div>
     <a href="pix.html" class="pix-btn">Usar Pix</a>
