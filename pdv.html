@@ -255,11 +255,12 @@
     </div>
     : 600;">${i}x de <b style="color: var(--primary);">R$ ${pVal}</b></span></div>
                     <i data-lucide="chevron-right" style="color: #444;"></i>
-                </div>`;
-        <script type="module">
+                </div>
+    
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
@@ -277,37 +278,77 @@
     let valorRaw = "";
     let metodoGlobal = "";
 
-    // --- BLOQUEIO NATIVO ANDROID (WEBVIEW) ---
-    // Bloqueia seleção de texto e menu de contexto (clique direito)
+    // Bloqueio de clique direito e seleção
     document.addEventListener('contextmenu', e => e.preventDefault());
-    document.styleSheets[0].insertRule('* { user-select: none; -webkit-user-select: none; }', 0);
 
-    function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+    // --- FUNÇÕES TORNADAS GLOBAIS PARA FUNCIONAR O ONCLICK ---
 
-    window.goStep = function(stepId) {
-        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active-screen'));
-        const next = document.getElementById(stepId);
-        if (next) {
-            next.classList.add('active-screen');
-            next.style.display = 'flex';
+    window.typeNum = function(n) {
+        if(valorRaw.length < 9) {
+            valorRaw += n;
+            if (navigator.vibrate) navigator.vibrate(15);
+            updateDisplay();
         }
-        if(stepId === 'step-parcelas') gerarParcelas();
-        lucide.createIcons();
     }
 
-    window.typeNum = function(n) { if(valorRaw.length < 9) valorRaw += n; vibrate(15); updateDisplay(); }
-    window.backspace = function() { valorRaw = valorRaw.slice(0, -1); vibrate(10); updateDisplay(); }
+    window.backspace = function() {
+        valorRaw = valorRaw.slice(0, -1);
+        if (navigator.vibrate) navigator.vibrate(10);
+        updateDisplay();
+    }
 
     function updateDisplay() {
         let v = valorRaw.padStart(3, '0');
         let num = (parseInt(v)/100).toFixed(2);
         let formatado = "R$ " + num.replace(".",",").replace(/\B(?=(\d{3})+(?!\d))/g,".");
-        document.getElementById('val-display').innerText = formatado;
         
+        const display = document.getElementById('val-display');
         const btn = document.getElementById('btn-next-1');
-        btn.style.background = parseInt(valorRaw) > 0 ? "#22c55e" : "#111";
-        btn.style.color = parseInt(valorRaw) > 0 ? "#000" : "#444";
-        btn.style.pointerEvents = parseInt(valorRaw) > 0 ? "all" : "none";
+        
+        display.innerText = formatado;
+        
+        if(parseInt(valorRaw) > 0) {
+            display.classList.add('has-content');
+            btn.style.background = "#22c55e"; 
+            btn.style.color = "#000"; 
+            btn.style.pointerEvents = "all";
+        } else {
+            display.classList.remove('has-content');
+            btn.style.background = "#111"; 
+            btn.style.color = "#444"; 
+            btn.style.pointerEvents = "none";
+        }
+    }
+
+    window.goStep = function(stepId) {
+        document.querySelectorAll('.screen').forEach(el => {
+            el.classList.remove('active-screen');
+            el.style.display = 'none'; 
+        });
+        
+        const nextScreen = document.getElementById(stepId);
+        if (nextScreen) {
+            nextScreen.classList.add('active-screen');
+            nextScreen.style.display = 'flex';
+        }
+        if(stepId === 'step-parcelas') gerarParcelas();
+        lucide.createIcons();
+    }
+
+    function gerarParcelas() {
+        const container = document.getElementById('lista-parcelas');
+        if (!container) return;
+        container.innerHTML = "";
+        let valorNum = parseInt(valorRaw) / 100;
+        for(let i=1; i<=12; i++) {
+            let pVal = (valorNum / i).toFixed(2).replace(".",",");
+            container.innerHTML += `
+                <div class="mode-card" style="padding: 18px; margin-bottom: 10px;" onclick="iniciarNFC('Crédito ${i}x')">
+                    <div style="flex: 1;"><span style="font-size: 16px; font-weight: 600;">${i}x de <b style="color: #22c55e;">R$ ${pVal}</b></span></div>
+                    <i data-lucide="chevron-right" style="color: #444;"></i>
+                </div>`;
+        }
+        lucide.createIcons();
     }
 
     window.iniciarNFC = function(metodo) {
@@ -319,53 +360,49 @@
 
     window.simularPagamento = async function(metodo) {
         goStep('step-wait');
-        
         const valorFinal = document.getElementById('val-display').innerText;
         const transacaoID = "ZNT" + Math.floor(Math.random() * 999999);
         const dataAtual = new Date().toLocaleString('pt-BR');
 
-        // DADOS PARA O COMPROVANTE BRANCO (Campos que seu HTML já lê)
-        const dadosComprovante = {
-            valor: valorFinal,
-            nome: "Venda Zentap", 
-            banco: "Zentry Bank - POS",
-            tipo: "pagamento", 
-            metodo: metodo,
-            data: dataAtual,
-            id: transacaoID
-        };
-
         try {
-            // SALVA NO FIREBASE (Para aparecer no extrato)
             if (auth.currentUser) {
                 await addDoc(collection(db, "transacoes"), {
                     userId: auth.currentUser.uid,
                     valor: valorFinal,
                     nomeDestino: "Venda Zentap: " + metodo,
-                    tipo: "entrada", // Zentap é crédito (verde)
+                    tipo: "entrada",
                     timestamp: serverTimestamp(),
                     data: dataAtual,
                     id: transacaoID
                 });
             }
 
-            // SALVA LOCAL E REDIRECIONA
+            const dadosComprovante = {
+                valor: valorFinal,
+                nome: "Venda Zentap",
+                banco: "Zentry Bank - POS",
+                tipo: "pagamento",
+                metodo: metodo,
+                data: dataAtual,
+                id: transacaoID
+            };
+
             localStorage.setItem("comprovante_final", JSON.stringify(dadosComprovante));
             localStorage.setItem("comprovante", JSON.stringify(dadosComprovante));
-            
-            setTimeout(() => {
-                vibrate([100, 50, 100]);
-                window.location.href = "comprovante.html"; 
-            }, 1500);
 
+            setTimeout(() => { window.location.href = "comprovante.html"; }, 1500);
         } catch (e) {
-            alert("Erro ao processar. Tente novamente.");
+            alert("Erro na rede. Tente novamente.");
             goStep('step-1');
         }
     }
 
-    window.onload = () => { lucide.createIcons(); updateDisplay(); };
-            </script>
+    window.onload = () => { 
+        lucide.createIcons(); 
+        updateDisplay(); 
+    };
+    </script>
+    
     
 </body>
   </html>
