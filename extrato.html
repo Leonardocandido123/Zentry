@@ -134,7 +134,12 @@
 
         filtradas.forEach(t => {
             const souEuRecebendo = t.uidDestino === me;
-            const valorFormatado = t.valor || "0,00";
+            // Exemplo de como formatar o valor
+const valorFormatado = parseFloat(valor).toLocaleString('pt-BR', {
+  style: 'currency',
+  currency: 'BRL'
+});
+            
             const icone = souEuRecebendo ? '💰' : '💸';
             const classeIcone = souEuRecebendo ? 'icon-in' : 'icon-out';
 
@@ -157,25 +162,40 @@
             lista.innerHTML += itemHtml;
         });
     }
+window.verComprovante = (id) => {
+    // 1. Acha a transação no cache do extrato
+    const t = transacoesCache.find(x => x.id === id);
+    
+    if (t) {
+        const me = auth.currentUser.uid;
+        const souEuRecebendo = t.uidDestino === me;
 
-    // Função global para abrir o comprovante universal
-    window.verComprovante = (id) => {
-        const t = transacoesCache.find(x => x.id === id);
-        if (t) {
-            // Salva no padrão do seu novo comprovante
-            localStorage.setItem("comprovante_final", JSON.stringify(t));
-            window.location.href = "comprovante.html";
-        }
-    };
-
-    // Eventos de Filtro
-    document.querySelectorAll('.filter').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
-            btn.classList.add('active');
-            renderizar(btn.dataset.type);
+        // 2. Criamos um objeto "traduzido" com TODOS os campos que o comprovante gosta
+        const dadosParaComprovante = {
+            ...t, // Mantém tudo que já tem
+            // Garante que o nome apareça, seja de quem enviou ou de quem recebeu
+            nome: souEuRecebendo ? (t.nomeRemetente || "Recebido") : (t.nomeDestino || "Enviado"),
+            // Garante que o banco apareça (se não tiver no banco, põe o padrão)
+            banco: t.bancoDestino || t.banco || "Zentry Bank - 001",
+            // Força o valor a ter o R$ e estar completo
+            valor: t.valor.includes("R$") ? t.valor : "R$ " + t.valor,
+            // Garante a data e hora
+            data: t.data || new Date().toLocaleString('pt-BR'),
+            // Informa o tipo para o título do comprovante não bugar
+            tipo: t.tipo || (souEuRecebendo ? "entrada" : "pix")
         };
-    });
+
+        // 3. Salva no local que o seu comprovante.html já lê hoje
+        // Tentei manter os dois nomes de chave que você usa para garantir
+        localStorage.setItem("comprovante_final", JSON.stringify(dadosParaComprovante));
+        localStorage.setItem("comprovante", JSON.stringify(dadosParaComprovante));
+
+        // 4. Vai para a tela de comprovante
+        window.location.href = "comprovante.html";
+    }
+};
+            
+    
         </script>
     
 </body>
