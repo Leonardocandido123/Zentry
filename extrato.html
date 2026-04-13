@@ -141,13 +141,12 @@ onAuthStateChanged(auth, (user) => {
                 document.getElementById('txt-saldo').innerText = saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             }
         });
-
-        // 2. Monitorar Transações Reais
-        const q = query(
-            collection(db, "transacoes"), 
-            where("userId", "==", user.uid),
-            orderBy("dataRaw", "desc")
-        );
+const q = query(
+    collection(db, "transacoes"), 
+    where("userId", "==", user.uid),
+    orderBy("timestamp", "desc") // Mudei de dataRaw para timestamp
+);
+  
 
         onSnapshot(q, (snapshot) => {
             allTransacoes = [];
