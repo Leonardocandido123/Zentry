@@ -3,90 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <title>ZENTRY - Movimentações</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>ZENTRY - Extrato V2</title>
     <style>
-        :root { 
-            --grad-black-green: linear-gradient(180deg, #000000 0%, #15803D 60%, #22C55E 100%);
-            --grad-text: linear-gradient(135deg, #000000 0%, #15803D 100%);
-            --bg-light: #F8FAFC; 
-            --card-white: #FFFFFF; 
-            --text-main: #1E293B; 
-            --text-sec: #64748B; 
-            --green-vibrant: #22C55E; 
-            --red-danger: #EF4444; 
-        }
-
+        :root { --primary: #22C55E; --bg: #000; --card: #121826; --border: #2A3441; --text-sec: #9CA3AF; --danger: #EF4444; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); padding: 15px; }
-
-        /* HEADER */
-        .header { display: flex; align-items: center; margin-bottom: 20px; padding-top: 5px; }
-        .back-btn { 
-            background: var(--card-white); border: 1px solid #E2E8F0; 
-            border-radius: 50%; width: 40px; height: 40px; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-
-        /* CARD SALDO (BLACK-TO-GREEN) */
-        .balance-card { 
-            background: var(--grad-black-green); 
-            border-radius: 24px; padding: 25px; margin-bottom: 20px; 
-            color: white; box-shadow: 0 10px 20px rgba(21, 128, 61, 0.2);
-            position: relative; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .balance-card small { opacity: 0.7; font-size: 11px; text-transform: uppercase; font-weight: 600; }
-        .balance-card h1 { margin: 5px 0 0; font-size: 32px; font-weight: 800; letter-spacing: -1px; }
-
-        /* FILTROS iOS STYLE */
-        .filters { display: flex; gap: 8px; margin-bottom: 20px; background: #E2E8F0; padding: 4px; border-radius: 14px; }
-        .filter { 
-            flex: 1; padding: 10px; border-radius: 11px; border: none; 
-            background: transparent; color: var(--text-sec); font-size: 13px; font-weight: 700; cursor: pointer;
-        }
-        .filter.active { background: var(--card-white); color: #15803D; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-        /* ITEM DA LISTA COM ÍCONE DE DINHEIRO */
-        .item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: var(--card-white); padding: 14px 16px; border-radius: 18px; margin-bottom: 12px;
-            
-            /* BORDA GRADIENTE FINA */
-            border: 1.5px solid transparent;
-            background-image: linear-gradient(white, white), var(--grad-black-green);
-            background-origin: border-box;
-            background-clip: padding-box, border-box;
-            
-            transition: 0.2s;
-        }
-        .item:active { transform: scale(0.97); }
-
-        .left { display: flex; align-items: center; gap: 12px; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; padding: 20px; }
         
-        /* NOVO CONTAINER DO ÍCONE (SEM SETA) */
-        .icon-money { 
-            width: 44px; height: 44px; border-radius: 14px; 
-            display: flex; align-items: center; justify-content: center; 
-            background: #F1F5F9; font-size: 22px; /* Aumentei o emoji */
-            position: relative;
-        }
-        /* Cor de fundo sutil para diferenciar entrada/saída no ícone */
-        .icon-money.in { background: #DCFCE7; } /* Verde claro para entrada */
-        .icon-money.out { background: #FEE2E2; } /* Vermelho claro para saída */
+        /* HEADER */
+        .header { display: flex; align-items: center; margin-bottom: 25px; }
+        .back-btn { background: var(--card); border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-right: 15px; }
 
-        /* TEXTO COM GRADIENTE */
-        .info b { 
-            display: block; font-size: 14px; font-weight: 700;
-            background: var(--grad-text);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        /* SALDO */
+        .balance-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
+        .balance-card small { color: var(--text-sec); font-size: 12px; text-transform: uppercase; }
+        .balance-card h1 { margin: 5px 0 0; font-size: 28px; color: #fff; }
+
+        /* FILTROS */
+        .filters { display: flex; gap: 10px; margin-bottom: 20px; }
+        .filter { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text-sec); font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; }
+        .filter.active { background: var(--primary); color: #000; border-color: var(--primary); }
+
+        /* LISTA */
+        .item { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 16px; border-radius: 18px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .left { display: flex; align-items: center; gap: 12px; }
+        .icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .info b { display: block; font-size: 14px; }
         .info span { font-size: 11px; color: var(--text-sec); }
-
-        /* VALORES COLORIDOS */
-        .val { font-weight: 800; font-size: 15px; }
-        .val.neg { color: var(--red-danger); } /* SAÍDA VERMELHO */
-        .val.pos { color: var(--green-vibrant); } /* ENTRADA VERDE */
+        .right { text-align: right; }
+        .val { font-weight: 700; font-size: 15px; }
+        .val.pos { color: var(--primary); }
+        .val.neg { color: var(--danger); }
 
         .empty { text-align: center; color: var(--text-sec); margin-top: 50px; font-size: 14px; }
     </style>
@@ -94,30 +41,30 @@
 <body>
 
     <div class="header">
-        <div class="back-btn" onclick="window.location.href='home.html'">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><path d="M15 18l-6-6 6-6"/></svg>
+        <div class="back-btn" onclick="history.back()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
         </div>
-        <b style="flex:1; text-align:center; margin-right:40px; font-size:18px;">Movimentações</b>
+        <b style="font-size: 18px;">Movimentações</b>
     </div>
 
     <div class="balance-card">
-        <small>Saldo disponível</small>
+        <small>Saldo Disponível</small>
         <h1 id="txtSaldo">R$ 0,00</h1>
     </div>
 
     <div class="filters">
-        <button class="filter active" data-type="todos">Tudo</button>
-        <button class="filter" data-type="entrada">Entradas</button>
-        <button class="filter" data-type="saida">Saídas</button>
+        <div class="filter active" data-type="todos">Tudo</div>
+        <div class="filter" data-type="entrada">Entradas</div>
+        <div class="filter" data-type="saida">Saídas</div>
     </div>
 
     <div id="listaExtrato">
-        <div class="empty">Buscando histórico...</div>
+        <div class="empty">Carregando...</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -137,7 +84,7 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Monitorar Saldo
+                // 1. Monitorar Saldo
                 onSnapshot(doc(db, "usuarios", user.uid), (ds) => {
                     if(ds.exists()) {
                         const s = ds.data().saldo || 0;
@@ -145,7 +92,8 @@
                     }
                 });
 
-                // Monitorar Transações (Lógica Manual para evitar erro de índice)
+                // 2. Buscar Transações (Onde sou remetente OU destinatário)
+                // Usamos onSnapshot na coleção toda e filtramos no JS para evitar erro de Index do Firebase
                 onSnapshot(collection(db, "transacoes"), (snap) => {
                     transacoesCache = [];
                     snap.forEach(d => {
@@ -154,6 +102,8 @@
                             transacoesCache.push({ id: d.id, ...t });
                         }
                     });
+
+                    // Ordenar por data
                     transacoesCache.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                     renderizar("todos");
                 });
@@ -174,7 +124,7 @@
             });
 
             if (filtradas.length === 0) {
-                lista.innerHTML = `<div class="empty">Nenhuma movimentação para este filtro.</div>`;
+                lista.innerHTML = `<div class="empty">Nenhuma transação encontrada.</div>`;
                 return;
             }
 
@@ -182,39 +132,26 @@
                 const souEuRecebendo = t.uidDestino === me;
                 const valorFormatado = t.valor || "R$ 0,00";
                 
-                // DEFINE ÍCONE E COR BASEADO NO FLUXO
-                let emojiDinheiro = '💸'; // Padrão Saída (dinheiro voando)
-                let classeIcone = 'out';
-                if (souEuRecebendo) {
-                    emojiDinheiro = '💰'; // Entrada (saco de dinheiro)
-                    classeIcone = 'in';
-                }
-
-                const itemHtml = `
-                    <div class="item" onclick="verComprovante('${t.id}')">
+                const html = `
+                    <div class="item">
                         <div class="left">
-                            <div class="icon-money ${classeIcone}">${emojiDinheiro}</div>
+                            <div class="icon">${souEuRecebendo ? '➕' : '➖'}</div>
                             <div class="info">
-                                <b>${souEuRecebendo ? (t.nomeRemetente || "Pix Recebido") : (t.nomeDestino || t.nome || "Pix Enviado")}</b>
-                                <span>${t.data || 'Hoje'} • PIX</span>
+                                <b>${souEuRecebendo ? (t.nomeRemetente || "Recebido") : (t.nomeDestino || "Enviado")}</b>
+                                <span>${t.data || 'Recentemente'}</span>
                             </div>
                         </div>
-                        <div class="right" style="text-align:right">
+                        <div class="right">
                             <div class="val ${souEuRecebendo ? 'pos' : 'neg'}">
                                 ${souEuRecebendo ? '+' : '-'} ${valorFormatado}
                             </div>
+                            <span style="font-size:10px; color:#9CA3AF;">PIX</span>
                         </div>
                     </div>
                 `;
-                lista.innerHTML += itemHtml;
+                lista.innerHTML += html;
             });
         }
-
-        window.verComprovante = (id) => {
-            const t = transacoesCache.find(x => x.id === id);
-            localStorage.setItem("comprovante_atual", JSON.stringify(t));
-            window.location.href = "comprovante.html";
-        };
 
         // Eventos de Filtro
         document.querySelectorAll('.filter').forEach(btn => {
