@@ -184,21 +184,18 @@
       console.error(e);
     }
   }
-
   chaveInput.addEventListener("input", (e) => {
     let v = e.target.value.replace(/\D/g, "");
     
-    // Lógica de Máscara Inteligente
     if (v.length <= 11) {
-      // Se começar com DDD (ex: 11 a 99) e tiver 11 dígitos, é Celular
-      if (v.length === 11 && parseInt(v.substring(0,2)) > 10) {
+      // REGRA: Se tiver 11 dígitos e o TERCEIRO dígito for '9', tratamos como Celular.
+      // Se não for '9', tratamos como CPF.
+      if (v.length === 11 && v.charAt(2) === "9") {
         v = v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
       } else {
-        // Caso contrário, trata como CPF
         v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
       }
     } else {
-      // CNPJ
       v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
     }
     
@@ -212,6 +209,7 @@
       validar();
     }
   });
+ 
 
   valorInput.addEventListener("input", (e) => {
     let v = e.target.value.replace(/\D/g,'');
