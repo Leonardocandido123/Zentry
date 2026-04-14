@@ -4,31 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zentry - Perfil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <style>
         :root { 
             --primary: #22c55e; 
             --bg-card: rgba(255, 255, 255, 0.05); 
             --border: rgba(255, 255, 255, 0.08); 
-            --text-secondary: #94a3b8;
+            --text-sec: #94a3b8;
             --danger: #ef4444;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-
         body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
+            margin: 0; font-family: 'Inter', sans-serif;
             background: radial-gradient(circle at 20% 0%, #0f172a, #000 60%);
-            color: #fff;
-            min-height: 100vh;
-            overflow-x: hidden;
+            color: #fff; min-height: 100vh;
         }
-
         .container { padding: 25px; max-width: 450px; margin: auto; animation: fadeIn 0.5s ease; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .back-nav {
@@ -39,126 +31,79 @@
         }
 
         .profile-header { text-align: center; margin-bottom: 35px; }
-
-        .avatar-wrapper {
-            position: relative; width: 115px; height: 115px; margin: 0 auto 15px; cursor: pointer;
-        }
-
+        .avatar-wrapper { position: relative; width: 110px; height: 110px; margin: 0 auto 15px; }
         .avatar {
             width: 100%; height: 100%; border-radius: 50%;
             background: #1e293b; border: 3px solid var(--primary);
             display: flex; align-items: center; justify-content: center;
-            color: var(--primary); overflow: hidden;
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+            overflow: hidden; box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
         }
-
         .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-header h2 { font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -1px; }
 
-        .edit-badge {
-            position: absolute; right: 2px; bottom: 2px;
-            width: 34px; height: 34px; background: var(--primary);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: #000; border: 4px solid #000;
-        }
-
-        .profile-header h2 { font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -1px; }
-
-        .menu-group { display: flex; flex-direction: column; gap: 14px; margin-bottom: 30px; }
-
+        .menu-group { display: flex; flex-direction: column; gap: 12px; }
         .menu-item {
-            background: var(--bg-card);
-            backdrop-filter: blur(15px);
-            border-radius: 22px;
-            border: 1px solid var(--border);
-            padding: 20px;
-            display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: #fff; transition: all 0.2s;
+            background: var(--bg-card); backdrop-filter: blur(15px);
+            border-radius: 20px; border: 1px solid var(--border);
+            padding: 18px; display: flex; align-items: center; gap: 15px;
+            text-decoration: none; color: #fff; transition: 0.2s;
         }
-
-        .menu-item:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.08); }
-
+        .menu-item:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.08); }
         .icon-box {
-            width: 44px; height: 44px; background: rgba(255, 255, 255, 0.03);
-            border-radius: 14px; display: flex; align-items: center; justify-content: center;
-            color: var(--text-secondary);
+            width: 42px; height: 42px; background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            color: var(--text-sec);
         }
-
         .item-info { flex: 1; }
-        .item-info b { display: block; font-size: 15px; margin-bottom: 2px; }
-        .item-info span { font-size: 12px; color: var(--text-secondary); }
-
-        /* MODAL STYLE */
-        .modal-overlay {
-            display: none; position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); 
-            z-index: 2000; align-items: center; justify-content: center; padding: 25px;
-        }
-        .modal-card {
-            background: #111; width: 100%; max-width: 340px; 
-            border-radius: 30px; padding: 35px; border: 1px solid var(--border); text-align: center;
-        }
+        .item-info b { display: block; font-size: 15px; }
+        .item-info span { font-size: 12px; color: var(--text-sec); }
     </style>
 </head>
-<body onload="carregarDados()">
+<body>
 
 <div class="container">
     <a href="home.html" class="back-nav"><i data-lucide="chevron-left"></i></a>
 
     <div class="profile-header">
-        <input type="file" id="photo-input" style="display: none;" accept="image/*" onchange="previewFoto(this)">
-        <div class="avatar-wrapper" onclick="document.getElementById('photo-input').click()">
-            <div class="avatar" id="avatar-image">
-                <i data-lucide="user" style="width: 50px; height: 50px;"></i>
-            </div>
-            <div class="edit-badge"><i data-lucide="pencil" style="width: 14px; height: 14px; stroke-width: 3;"></i></div>
+        <div class="avatar-wrapper">
+            <div class="avatar" id="avatar-image"><i data-lucide="user" size="40"></i></div>
         </div>
-        <h2 id="nomeUser">Leonardo</h2>
+        <h2 id="nomeUser">Carregando...</h2>
     </div>
 
     <div class="menu-group">
         <a href="meus-dados.html" class="menu-item">
-            <div class="icon-box"><i data-lucide="info"></i></div>
-            <div class="item-info"><b>Meus Dados</b><span>Nome, CPF e telefone</span></div>
-            <i data-lucide="chevron-right" style="opacity:0.2"></i>
+            <div class="icon-box"><i data-lucide="user-cog"></i></div>
+            <div class="item-info"><b>Meus Dados</b><span>CPF, e-mail e telefone</span></div>
+            <i data-lucide="chevron-right" size="18" style="opacity:0.3"></i>
         </a>
 
-        <a href="chaves-pix.html" class="menu-item">
-            <div class="icon-box"><i data-lucide="qr-code"></i></div>
-            <div class="item-info"><b>Chaves Pix</b><span>Gerenciar recebimentos</span></div>
-            <i data-lucide="chevron-right" style="opacity:0.2"></i>
+        <a href="configuracoes.html" class="menu-item">
+            <div class="icon-box"><i data-lucide="settings"></i></div>
+            <div class="item-info"><b>Configurações</b><span>Segurança e notificações</span></div>
+            <i data-lucide="chevron-right" size="18" style="opacity:0.3"></i>
         </a>
 
-        <div class="menu-item" onclick="abrirAjuda()">
+        <a href="ajuda.html" class="menu-item">
             <div class="icon-box"><i data-lucide="help-circle"></i></div>
-            <div class="item-info"><b>Ajuda</b><span>Suporte e chat ao vivo</span></div>
-            <i data-lucide="chevron-right" style="opacity:0.2"></i>
-        </div>
+            <div class="item-info"><b>Ajuda</b><span>Suporte e dúvidas</span></div>
+            <i data-lucide="chevron-right" size="18" style="opacity:0.3"></i>
+        </a>
 
-        <div class="menu-item" onclick="confirmarSair()" style="border-color: rgba(239, 68, 68, 0.15);">
-            <div class="icon-box" style="color: var(--danger); background: rgba(239, 68, 68, 0.05);"><i data-lucide="log-out"></i></div>
-            <div class="item-info"><b style="color: var(--danger);">Sair da conta</b><span>Encerrar sessão</span></div>
+        <div class="menu-item" onclick="confirmarSair()" style="margin-top: 10px; border-color: rgba(239, 68, 68, 0.2);">
+            <div class="icon-box" style="color: var(--danger);"><i data-lucide="log-out"></i></div>
+            <div class="item-info"><b style="color: var(--danger);">Sair da conta</b></div>
         </div>
     </div>
 </div>
 
-<div id="modal-sair" class="modal-overlay">
-    <div class="modal-card">
-        <div style="background: rgba(239, 68, 68, 0.1); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-            <i data-lucide="log-out" style="color: var(--danger); width: 30px; height: 30px;"></i>
-        </div>
-        <h2 style="margin-bottom: 10px;">Deseja sair?</h2>
-        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 25px;">Sua sessão será encerrada com segurança.</p>
-        <button onclick="executarSaida()" style="width:100%; background:var(--danger); color:#fff; border:none; padding:18px; border-radius:18px; font-weight:800; margin-bottom:10px;">Sair da Conta</button>
-        <button onclick="fecharModais()" style="width:100%; background:transparent; color:#fff; border:none; font-weight:600; cursor:pointer;">Cancelar</button>
-    </div>
-</div>
 <script type="module">
-    // Importando Firebase para pegar dados reais do banco
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    const firebaseConfig = {
+    // Suas configs aqui
+    const firebaseConfig = { 
         apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
         authDomain: "zentry-app-74275.firebaseapp.com",
         projectId: "zentry-app-74275",
@@ -171,52 +116,25 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Carregar ícones
     lucide.createIcons();
 
-    // ESCUTA O LOGIN E BUSCA O NOME NO BACKEND
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            // Busca o documento do usuário no Firestore (coleção 'usuarios')
             const userDoc = await getDoc(doc(db, "usuarios", user.uid));
             if (userDoc.exists()) {
                 document.getElementById("nomeUser").innerText = userDoc.data().nome;
             }
         } else {
-            // Se não tiver logado, volta pro login
             window.location.replace("login.html");
         }
     });
 
-    // Foto de Perfil (Mantive no LocalStorage para carregar instantâneo)
-    const fotoSalva = localStorage.getItem('perfil_foto');
-    if (fotoSalva) {
-        document.getElementById('avatar-image').innerHTML = `<img src="${fotoSalva}">`;
-    }
-
-    // Funções Globais (Window)
-    window.previewFoto = (input) => {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('avatar-image').innerHTML = `<img src="${e.target.result}">`;
-                localStorage.setItem('perfil_foto', e.target.result);
-                // DICA: No futuro, você pode subir essa foto pro Firebase Storage aqui
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
-    };
-
-    window.abrirAjuda = () => { window.location.href = "ajuda.html"; };
-    window.confirmarSair = () => { document.getElementById('modal-sair').style.display = 'flex'; };
-    window.fecharModais = () => { document.getElementById('modal-sair').style.display = 'none'; };
-    window.executarSaida = () => {
+    window.confirmarSair = () => {
         auth.signOut().then(() => {
             localStorage.clear();
             window.location.replace("login.html");
         });
     };
 </script>
-    
 </body>
 </html>
