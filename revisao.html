@@ -72,7 +72,7 @@
     <div class="footer">
         <button class="btn-confirm" id="btnFinal" disabled>Confirmar e Enviar</button>
     </div>
-    <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -96,39 +96,18 @@
     const pinInput = document.getElementById('hidden-pin');
     const btnFinal = document.getElementById('btnFinal');
 
-    window.onload = () => {
-        if(!transacao) { window.location.href = 'pix.html'; return; }
-        document.getElementById('rev-val').innerText = transacao.valor;
-        document.getElementById('rev-name').innerText = transacao.nomeDestino;
-        pinInput.focus();
-    };
-
     onAuthStateChanged(auth, (user) => { userLogado = user; });
 
-    pinInput.addEventListener('input', () => {
-        if(pinInput.value.length > 4) pinInput.value = pinInput.value.slice(0,4);
-        for(let i=1; i<=4; i++) {
-            document.getElementById(`dot-${i}`).classList.toggle('active', i <= pinInput.value.length);
-        }
-        btnFinal.disabled = pinInput.value.length < 4;
-    });
-
-    function showModal(titulo, texto, icon) {
-        document.getElementById('zModalGlobal').style.display = 'flex';
-        document.getElementById('zTitle').innerText = titulo;
-        document.getElementById('zText').innerText = texto;
-        document.getElementById('zIcon').innerText = icon;
+    // Garante que o valor seja um NÚMERO puro
+    function limparValor(v) {
+        if (typeof v === 'number') return v;
+        return parseFloat(v.replace(/[^\d,.-]/g, '').replace(',', '.'));
     }
-
-    document.getElementById('zBtnClose').onclick = () => {
-        document.getElementById('zModalGlobal').style.display = 'none';
-        pinInput.focus();
-    };
 
     btnFinal.onclick = async () => {
         if(!userLogado || !transacao) return;
         
-        btnFinal.innerText = "Processando...";
+        btnFinal.innerText = "Enviando...";
         btnFinal.disabled = true;
 
         try {
@@ -138,68 +117,66 @@
 
             // 1. Validar Senha
             if(pinInput.value !== userData.senha) {
-                showModal("Senha Incorreta", "Tente novamente.", "🔒");
-                pinInput.value = "";
-                for(let i=1; i<=4; i++) document.getElementById(`dot-${i}`).classList.remove('active');
+                alert("Senha incorreta!");
                 btnFinal.innerText = "Confirmar e Enviar";
-                btnFinal.disabled = true;
+                btnFinal.disabled = false;
                 return;
             }
 
+            const valorFinal = limparValor(transacao.valor);
             const transId = 'ZNT' + Math.random().toString(36).substr(2, 9).toUpperCase();
-            const agora = new Date();
-            const dataFormatada = agora.toLocaleDateString('pt-BR') + ", " + agora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-
-            // 2. Salvar LocalStorage (Comprovante)
-            const dadosComprovante = { 
-                ...transacao, 
-                id: transId, 
-                data: dataFormatada,
-                nomeRemetente: userData.nome // Pega o nome de quem está enviando
-            };
-            localStorage.setItem("comprovante_final", JSON.stringify(dadosComprovante));
-
-            // 3. Processar no Firebase
-            const valorNumerico = parseFloat(transacao.valorNumerico);
             
-            // Diminuir saldo de quem envia
+            // 2. GRAVAR NO FIREBASE (Tentativa direta)
+            const payload = {
+                userId: userLogado.uid,
+                uidDestino: transacao.uidDestino || "externo",
+                nomeDestino: transacao.nomeDestino || "Destinatário Desconhecido",
+                nomeRemetente: userData.nome || "Usuário Zentry",
+                valor: valorFinal,
+                tipo: "saida",
+                id: transId,
+                data: new Date().toLocaleString('pt-BR'),
+                timestamp: serverTimestamp()
+            };
+
+            // AGORA VAI: Grava a transação antes de tudo
+            console.log("Tentando salvar:", payload);
+            await addDoc(collection(db, "transacoes"), payload);
+
+            // 3. Atualizar Saldo de quem envia
             await updateDoc(userRef, {
-                saldo: increment(-valorNumerico),
-                saida: increment(valorNumerico)
+                saldo: increment(-valorFinal)
             });
 
-            // Aumentar saldo de quem recebe (se for usuário interno)
+            // 4. Se for interno, atualiza quem recebe
             if(transacao.uidDestino && transacao.uidDestino !== "externo") {
                 const destRef = doc(db, "usuarios", transacao.uidDestino);
                 await updateDoc(destRef, {
-                    saldo: increment(valorNumerico),
-                    entrada: increment(valorNumerico)
+                    saldo: increment(valorFinal)
                 });
             }
 
-            // 4. GRAVAR HISTÓRICO (Onde o Extrato lê)
-            await addDoc(collection(db, "transacoes"), {
-                userId: userLogado.uid,
-                uidDestino: transacao.uidDestino || "externo",
-                nomeDestino: transacao.nomeDestino,
-                nomeRemetente: userData.nome, // Importante para o extrato de quem recebe
-                valor: valorNumerico,
-                tipo: "saida",
-                id: transId, // Campo corrigido de 'idTransacao' para 'id'
-                data: dataFormatada,
-                timestamp: serverTimestamp()
-            });
-
-            // TUDO OK: VAI PRO COMPROVANTE
+            // Salva para o comprovante ler
+            localStorage.setItem("comprovante_final", JSON.stringify({...payload, valor: transacao.valor}));
             window.location.href = "comprovante.html";
 
         } catch (err) {
-            console.error("Erro capturado:", err);
-            // Se já processou o saldo mas falhou no histórico, ainda assim vai pro comprovante
-            window.location.href = "comprovante.html";
+            console.error("ERRO NO FIREBASE:", err);
+            alert("ERRO AO SALVAR: " + err.message);
+            btnFinal.innerText = "Confirmar e Enviar";
+            btnFinal.disabled = false;
         }
     };
-    </script>
+    
+    // Configurações do PIN (Mantenha o resto do seu código de input igual)
+    pinInput.addEventListener('input', () => {
+        if(pinInput.value.length > 4) pinInput.value = pinInput.value.slice(0,4);
+        for(let i=1; i<=4; i++) {
+            document.getElementById(`dot-${i}`).classList.toggle('active', i <= pinInput.value.length);
+        }
+        btnFinal.disabled = pinInput.value.length < 4;
+    });
+</script>
     
 </body>
 </html>
