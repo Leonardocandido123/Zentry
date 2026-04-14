@@ -57,141 +57,132 @@
     <div id="listaExtrato">
         <div class="empty">Carregando...</div>
     </div>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
-            authDomain: "zentry-app-74275.firebaseapp.com",
-            projectId: "zentry-app-74275",
-            storageBucket: "zentry-app-74275.appspot.com",
-            messagingSenderId: "571422826071",
-            appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
+        authDomain: "zentry-app-74275.firebaseapp.com",
+        projectId: "zentry-app-74275",
+        storageBucket: "zentry-app-74275.appspot.com",
+        messagingSenderId: "571422826071",
+        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-        let transacoesCache = [];
+    let transacoesCache = [];
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                onSnapshot(doc(db, "usuarios", user.uid), (ds) => {
-                    if(ds.exists()) {
-                        const s = ds.data().saldo || 0;
-                        document.getElementById('txtSaldo').innerText = s.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            onSnapshot(doc(db, "usuarios", user.uid), (ds) => {
+                if(ds.exists()) {
+                    const s = ds.data().saldo || 0;
+                    document.getElementById('txtSaldo').innerText = s.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                }
+            });
+
+            onSnapshot(collection(db, "transacoes"), (snap) => {
+                const trintaDiasAtras = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
+                transacoesCache = [];
+
+                snap.forEach(d => {
+                    const t = d.data();
+                    const timestamp = t.timestamp?.seconds || 0;
+                    if ((t.userId === user.uid || t.uidDestino === user.uid) && timestamp > trintaDiasAtras) {
+                        transacoesCache.push({ id: d.id, ...t });
                     }
                 });
 
-                onSnapshot(collection(db, "transacoes"), (snap) => {
-                    const trintaDiasAtras = Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60);
-                    transacoesCache = [];
-
-                    snap.forEach(d => {
-                        const t = d.data();
-                        const timestamp = t.timestamp?.seconds || 0;
-                        // Filtra transações onde o usuário é o remetente OU o destino
-                        if ((t.userId === user.uid || t.uidDestino === user.uid) && timestamp > trintaDiasAtras) {
-                            transacoesCache.push({ id: d.id, ...t });
-                        }
-                    });
-
-                    transacoesCache.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                    renderizar("todos");
-                });
-            } else {
-                window.location.href = "login.html";
-            }
-        });
-function renderizar(filtro) {
-    const lista = document.getElementById('listaExtrato');
-    lista.innerHTML = "";
-    
-    // Pegamos o ID do usuário logado e garantimos que é uma string limpa
-    const me = auth.currentUser ? auth.currentUser.uid.trim() : null;
-
-    if (!me) {
-        console.error("Usuário não identificado!");
-        return;
-    }
-
-    let filtradas = transacoesCache.filter(t => {
-        // Garantimos que os IDs comparados existam e não tenham espaços
-        const remetente = String(t.userId || "").trim();
-        const destino = String(t.uidDestino || "").trim();
-
-        if (filtro === "entrada") return destino === me;
-        if (filtro === "saida") return remetente === me;
-        return true; // "todos"
-    });
-
-    if (filtradas.length === 0) {
-        lista.innerHTML = `<div class="empty">Nenhuma movimentação de ${filtro} encontrada.</div>`;
-        return;
-    }
-
-    filtradas.forEach(t => {
-        // Se eu sou o destino, é entrada (+) verde. 
-        // Se eu sou o remetente, é saída (-) vermelho.
-        const souEuRecebendo = String(t.uidDestino || "").trim() === me;
-        
-        let valorNumerico = 0;
-        if (typeof t.valor === 'number') {
-            valorNumerico = t.valor;
-        } else if (typeof t.valor === 'string') {
-            valorNumerico = parseFloat(t.valor.replace(/[^\d,.-]/g, '').replace(',', '.'));
-        }
-        
-        const valorFormatado = valorNumerico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        
-        let icone = souEuRecebendo ? '💰' : '💸'; 
-        let titulo = souEuRecebendo ? (t.nomeRemetente || "Pix Recebido") : (t.nomeDestino || "Pix Enviado");
-
-        if(t.tipo === 'recarga') {
-            icone = '📱';
-            titulo = "Recarga de Celular";
-        }
-
-        const corClasse = souEuRecebendo ? 'pos' : 'neg';
-        const sinal = souEuRecebendo ? '+' : '-';
-
-        lista.innerHTML += `
-            <div class="item" onclick="verComprovante('${t.id}')">
-                <div class="left">
-                    <div class="icon">${icone}</div>
-                    <div class="info">
-                        <b>${titulo}</b>
-                        <span>${t.data || 'Recentemente'} • ${t.tipo?.toUpperCase() || 'PIX'}</span>
-                    </div>
-                </div>
-                <div class="right">
-                    <div class="val ${corClasse}">
-                        ${sinal} ${valorFormatado}
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-}
-        
-        document.querySelectorAll('.filter').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                renderizar(btn.dataset.type);
+                transacoesCache.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                renderizar("todos");
             });
+        } else {
+            window.location.href = "login.html";
+        }
+    });
+
+    function renderizar(filtro) {
+        const lista = document.getElementById('listaExtrato');
+        lista.innerHTML = "";
+        const me = auth.currentUser ? auth.currentUser.uid : null;
+        if (!me) return;
+
+        let filtradas = transacoesCache.filter(t => {
+            const nomeStr = (t.nomeDestino || t.nomeRemetente || "").toLowerCase();
+            // AJUSTE: Se for Zentap, o sistema considera ENTRADA independente do campo
+            const eEntradaForcada = nomeStr.includes("zentap");
+            const souDestino = t.uidDestino === me;
+
+            if (filtro === "entrada") return souDestino || eEntradaForcada;
+            if (filtro === "saida") return t.userId === me && !eEntradaForcada;
+            return true;
         });
-        window.verComprovante = (id) => {
-            const t = transacoesCache.find(x => x.id === id);
-            if (t) {
-                localStorage.setItem("comprovante_ativo", JSON.stringify(t));
-                window.location.href = "comprovante.html";
+
+        if (filtradas.length === 0) {
+            lista.innerHTML = `<div class="empty">Nenhuma movimentação encontrada.</div>`;
+            return;
+        }
+
+        filtradas.forEach(t => {
+            const nomeStr = (t.nomeDestino || t.nomeRemetente || "").toLowerCase();
+            const eEntradaForcada = nomeStr.includes("zentap");
+            const souEuRecebendo = t.uidDestino === me || eEntradaForcada;
+            
+            let valorNumerico = 0;
+            if (typeof t.valor === 'number') valorNumerico = t.valor;
+            else if (typeof t.valor === 'string') valorNumerico = parseFloat(t.valor.replace(/[^\d,.-]/g, '').replace(',', '.'));
+            
+            const valorFormatado = valorNumerico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            
+            let icone = souEuRecebendo ? '💰' : '💸'; 
+            let titulo = t.nomeDestino || "Pix";
+
+            if (souEuRecebendo && eEntradaForcada) {
+                titulo = t.nomeDestino || "Venda Zentap";
+            } else if (souEuRecebendo) {
+                titulo = t.nomeRemetente || "Pix Recebido";
             }
-        };
+
+            const corClasse = souEuRecebendo ? 'pos' : 'neg';
+            const sinal = souEuRecebendo ? '+' : '-';
+
+            lista.innerHTML += `
+                <div class="item" onclick="verComprovante('${t.id}')">
+                    <div class="left">
+                        <div class="icon">${icone}</div>
+                        <div class="info">
+                            <b>${titulo}</b>
+                            <span>${t.data || 'Recentemente'} • ${t.tipo?.toUpperCase() || 'PIX'}</span>
+                        </div>
+                    </div>
+                    <div class="right">
+                        <div class="val ${corClasse}">${sinal} ${valorFormatado}</div>
+                    </div>
+                </div>`;
+        });
+    }
+
+    document.querySelectorAll('.filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderizar(btn.dataset.type);
+        });
+    });
+
+    window.verComprovante = (id) => {
+        const t = transacoesCache.find(x => x.id === id);
+        if (t) {
+            localStorage.setItem("comprovante_ativo", JSON.stringify(t));
+            window.location.href = "comprovante.html";
+        }
+    };
     </script>
+    
 </body>
 </html>
