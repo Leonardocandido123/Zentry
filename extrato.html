@@ -93,6 +93,7 @@
                 snap.forEach(d => {
                     const t = d.data();
                     const timestamp = t.timestamp?.seconds || 0;
+                    // Pega transações onde o usuário participa (Remetente ou Destino)
                     if ((t.userId === user.uid || t.uidDestino === user.uid) && timestamp > trintaDiasAtras) {
                         transacoesCache.push({ id: d.id, ...t });
                     }
@@ -113,13 +114,11 @@
         if (!me) return;
 
         let filtradas = transacoesCache.filter(t => {
-            const nomeStr = (t.nomeDestino || t.nomeRemetente || "").toLowerCase();
-            // AJUSTE: Se for Zentap, o sistema considera ENTRADA independente do campo
-            const eEntradaForcada = nomeStr.includes("zentap");
-            const souDestino = t.uidDestino === me;
+            const ehEntrada = t.tipo === "entrada" || t.uidDestino === me;
+            const ehSaida = t.tipo === "saida" || (t.userId === me && t.tipo !== "entrada");
 
-            if (filtro === "entrada") return souDestino || eEntradaForcada;
-            if (filtro === "saida") return t.userId === me && !eEntradaForcada;
+            if (filtro === "entrada") return ehEntrada;
+            if (filtro === "saida") return ehSaida;
             return true;
         });
 
@@ -129,39 +128,28 @@
         }
 
         filtradas.forEach(t => {
-            const nomeStr = (t.nomeDestino || t.nomeRemetente || "").toLowerCase();
-            const eEntradaForcada = nomeStr.includes("zentap");
-            const souEuRecebendo = t.uidDestino === me || eEntradaForcada;
+            const souEuRecebendo = t.tipo === "entrada" || t.uidDestino === me;
             
-            let valorNumerico = 0;
-            if (typeof t.valor === 'number') valorNumerico = t.valor;
-            else if (typeof t.valor === 'string') valorNumerico = parseFloat(t.valor.replace(/[^\d,.-]/g, '').replace(',', '.'));
-            
-            const valorFormatado = valorNumerico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            
-            let icone = souEuRecebendo ? '💰' : '💸'; 
-            let titulo = t.nomeDestino || "Pix";
-
-            if (souEuRecebendo && eEntradaForcada) {
-                titulo = t.nomeDestino || "Venda Zentap";
-            } else if (souEuRecebendo) {
-                titulo = t.nomeRemetente || "Pix Recebido";
+            let valorExibir = t.valor;
+            if (typeof t.valor === 'number') {
+                valorExibir = t.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             }
 
             const corClasse = souEuRecebendo ? 'pos' : 'neg';
             const sinal = souEuRecebendo ? '+' : '-';
+            const icone = souEuRecebendo ? '💰' : '💸';
 
             lista.innerHTML += `
                 <div class="item" onclick="verComprovante('${t.id}')">
                     <div class="left">
                         <div class="icon">${icone}</div>
                         <div class="info">
-                            <b>${titulo}</b>
+                            <b>${t.nomeDestino || t.nomeRemetente || "Pix"}</b>
                             <span>${t.data || 'Recentemente'} • ${t.tipo?.toUpperCase() || 'PIX'}</span>
                         </div>
                     </div>
                     <div class="right">
-                        <div class="val ${corClasse}">${sinal} ${valorFormatado}</div>
+                        <div class="val ${corClasse}">${sinal} ${valorExibir}</div>
                     </div>
                 </div>`;
         });
