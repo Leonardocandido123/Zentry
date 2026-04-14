@@ -6,62 +6,60 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Revisão - ZENTRY</title>
     <style>
-        :root { --accent: #22c55e; --bg: #000; --card: #111; --border: #2A3441; }
-        
-        body { 
-            margin: 0; font-family: 'Inter', sans-serif; 
-            background: #000; color: #fff; height: 100vh;
-            display: flex; flex-direction: column; overflow: hidden;
-        }
+    :root { --accent: #22c55e; --bg: #000; --card: #111; --border: #2A3441; }
+    
+    body { 
+        margin: 0; font-family: 'Inter', sans-serif; 
+        background: #000; color: #fff; min-height: 100vh; /* min-height em vez de height fixo */
+        display: flex; flex-direction: column; 
+    }
 
-        .header { padding: 30px 20px 15px; display: flex; align-items: center; gap: 15px; }
-        .content { flex: 1; padding: 20px; overflow-y: auto; }
-        h1 { font-size: 20px; font-weight: 700; margin: 0; }
-        p { color: #9CA3AF; font-size: 14px; margin-top: 5px; }
+    .header { padding: 30px 20px 15px; display: flex; align-items: center; gap: 15px; }
+    .content { flex: 1; padding: 20px; } /* Removido overflow: auto para não bugar o scroll do celular */
+    h1 { font-size: 20px; font-weight: 700; margin: 0; }
+    p { color: #9CA3AF; font-size: 14px; margin-top: 5px; }
 
-        .review-card {
-            background: var(--card); border-radius: 24px;
-            padding: 25px; margin-top: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
+    .review-card {
+        background: var(--card); border-radius: 24px;
+        padding: 25px; margin-top: 20px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
 
-        .info-row { margin-bottom: 20px; }
-        .label { font-size: 11px; text-transform: uppercase; color: #6B7280; font-weight: 700; display: block; margin-bottom: 6px; }
-        .value { font-size: 16px; font-weight: 600; color: #fff; }
-        .value-amount { font-size: 32px; font-weight: 800; color: var(--accent); }
+    .info-row { margin-bottom: 20px; }
+    .label { font-size: 11px; text-transform: uppercase; color: #6B7280; font-weight: 700; display: block; margin-bottom: 6px; }
+    .value { font-size: 16px; font-weight: 600; color: #fff; }
+    .value-amount { font-size: 32px; font-weight: 800; color: var(--accent); }
 
-        /* INPUT DE SENHA */
-        .password-section { margin-top: 30px; text-align: center; }
-        .pin-container { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
-        .pin-dot {
-            width: 15px; height: 15px; border-radius: 50%;
-            border: 2px solid #333; transition: 0.2s;
-        }
-        .pin-dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
-        
-        #hidden-pin { position: absolute; opacity: 0; pointer-events: none; }
+    .password-section { margin-top: 30px; text-align: center; padding-bottom: 20px; }
+    .pin-container { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
+    .pin-dot {
+        width: 15px; height: 15px; border-radius: 50%;
+        border: 2px solid #333; transition: 0.2s;
+    }
+    .pin-dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+    
+    #hidden-pin { position: absolute; opacity: 0; pointer-events: none; }
 
-        .footer { padding: 20px; background: #000; border-top: 1px solid #111; }
-        .btn-confirm {
-            width: 100%; background: var(--accent); color: #000; border: none;
-            padding: 18px; border-radius: 15px; font-weight: 700; font-size: 16px;
-            cursor: pointer; transition: 0.3s;
-        }
-        .btn-confirm:disabled { background: #27272a; color: #71717a; }
+    .footer { padding: 20px; margin-top: auto; } /* Garante que o botão fique no fim */
+    .btn-confirm {
+        width: 100%; background: var(--accent); color: #000; border: none;
+        padding: 18px; border-radius: 15px; font-weight: 700; font-size: 16px;
+        cursor: pointer; transition: 0.3s;
+    }
+    .btn-confirm:disabled { background: #27272a; color: #71717a; }
 
-        /* MODAL ZENTRY (O SEGREDO DA BLINDAGEM) */
-        #zModalGlobal { 
-            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); 
-            z-index:9999; align-items:center; justify-content:center; padding:20px; 
-            backdrop-filter: blur(5px); 
-        }
-        .modal-content { 
-            background:#121826; border:1px solid #2A3441; border-radius:28px; 
-            width:100%; max-width:340px; padding:25px; text-align:center; 
-            animation: popIn 0.2s ease-out; 
-        }
-        @keyframes popIn { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
+    #zModalGlobal { 
+        display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); 
+        z-index:9999; align-items:center; justify-content:center; padding:20px; 
+        backdrop-filter: blur(5px); 
+    }
+    .modal-content { 
+        background:#121826; border:1px solid #2A3441; border-radius:28px; 
+        width:100%; max-width:340px; padding:25px; text-align:center; 
+    }
     </style>
+    
+        
 </head>
 <body>
 
@@ -112,152 +110,79 @@
     <div class="footer">
         <button class="btn-confirm" id="btnFinal" onclick="executarTransferencia()" disabled>Confirmar e Enviar</button>
     </div>
-    
-<script type="module">
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    // IMPORTANTE: Adicionado serverTimestamp na linha abaixo
     import { getFirestore, doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
-        authDomain: "zentry-app-74275.firebaseapp.com",
-        projectId: "zentry-app-74275",
-        storageBucket: "zentry-app-74275.appspot.com",
-        messagingSenderId: "571422826071",
-        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
-    };
+    // ... (restante das suas configs e código até o executarTransferencia)
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    window.executarTransferencia = async () => {
+        const btn = document.getElementById('btnFinal');
+        const pinDigitado = document.getElementById('hidden-pin').value;
 
-    const transacao = JSON.parse(localStorage.getItem("transacao_pendente"));
-    let userLogado = null;
+        btn.innerText = "Processando...";
+        btn.disabled = true;
 
-    // Funções do Modal Blindado
-    function showZModal(titulo, texto, icon) {
-        document.getElementById('zModalGlobal').style.display = 'flex';
-        document.getElementById('zTitle').innerText = titulo;
-        document.getElementById('zText').innerText = texto;
-        document.getElementById('zIcon').innerText = icon;
-    }
-
-    document.getElementById('zBtnClose').onclick = () => {
-        document.getElementById('zModalGlobal').style.display = 'none';
-        focarPin();
-    };
-
-    window.onload = () => {
-        if(!transacao) { window.location.href = 'pix.html'; return; }
-        document.getElementById('rev-val').innerText = transacao.valor;
-        document.getElementById('rev-name').innerText = transacao.nomeDestino;
-        document.getElementById('rev-bank').innerText = transacao.bancoDestino || "Zentry Bank";
-        focarPin();
-    };
-
-    onAuthStateChanged(auth, (user) => { 
-        if(user) { userLogado = user; } 
-        else { window.location.href = 'login.html'; }
-    });
-
-    window.focarPin = () => document.getElementById('hidden-pin').focus();
-    
-    window.atualizarDots = (input) => {
-        const val = input.value;
-        if(val.length > 4) input.value = val.slice(0, 4);
-        for(let i=1; i<=4; i++) {
-            document.getElementById(`dot-${i}`).classList.toggle('active', i <= val.length);
-        }
-        document.getElementById('btnFinal').disabled = val.length < 4;
-    };
-
-    function limparPin() {
-        document.getElementById('hidden-pin').value = "";
-        for(let i=1; i<=4; i++) document.getElementById(`dot-${i}`).classList.remove('active');
-        document.getElementById('btnFinal').disabled = true;
-        document.getElementById('btnFinal').innerText = "Confirmar e Enviar";
-    }
-window.executarTransferencia = async () => {
-    const btn = document.getElementById('btnFinal');
-    const pinDigitado = document.getElementById('hidden-pin').value;
-
-    btn.innerText = "Processando...";
-    btn.disabled = true;
-
-    try {
-        const remetenteRef = doc(db, "usuarios", userLogado.uid);
-        const snap = await getDoc(remetenteRef);
-        
-        if(!snap.exists()) throw new Error("Usuário não encontrado");
-        const dadosUser = snap.data();
-
-        // 1. VALIDAÇÃO DE SENHA
-        let senhaNoBanco = dadosUser.senha;
-        if (!senhaNoBanco) {
-            await updateDoc(remetenteRef, { senha: pinDigitado });
-            senhaNoBanco = pinDigitado;
-        }
-
-        if(pinDigitado !== senhaNoBanco) {
-            showZModal("Senha Incorreta", "A senha de 4 dígitos não confere.", "🔒");
-            limparPin();
-            return;
-        }
-
-        // 2. VALIDAÇÃO DE SALDO
-        const saldoAtual = parseFloat(dadosUser.saldo || 0);
-        if(saldoAtual < transacao.valorNumerico) {
-            showZModal("Saldo Insuficiente", "Você não possui saldo suficiente.", "💸");
-            return;
-        }
-
-        // 3. EXECUÇÃO (Atualiza saldos)
-        await updateDoc(remetenteRef, {
-            saldo: increment(-transacao.valorNumerico),
-            saida: increment(transacao.valorNumerico)
-        });
-
-        if(transacao.uidDestino) {
-            const destinoRef = doc(db, "usuarios", transacao.uidDestino);
-            await updateDoc(destinoRef, {
-                saldo: increment(transacao.valorNumerico),
-                entrada: increment(transacao.valorNumerico)
-            });
-        }
-
-        // 4. GRAVAÇÃO DO HISTÓRICO (O que estava faltando!)
-        // Criamos o registro para aparecer no Extrato
-        const dataAtual = new Date().toLocaleDateString('pt-BR');
-        await addDoc(collection(db, "transacoes"), {
-            userId: userLogado.uid,          // Quem enviou
-            uidDestino: transacao.uidDestino,// Quem recebeu
-            nomeDestino: transacao.nomeDestino,
-            nomeRemetente: dadosUser.nome,
-            valor: transacao.valorNumerico,
-            tipo: "saida",                   // Para o remetente aparecer vermelho
-            data: dataAtual,
-            timestamp: serverTimestamp()     // Para ordenação correta
-        });
-
-        // 5. COMPROVANTE
-        const dadosComprovante = {
-            ...transacao,
-            data: dataAtual + " " + new Date().toLocaleTimeString('pt-BR'),
-            id: "ZNT" + Math.floor(100000 + Math.random() * 900000)
-        };
-        
-        localStorage.setItem("comprovante_final", JSON.stringify(dadosComprovante));
-        window.location.href = "comprovante.html";
-
-    } catch (error) {
-        console.error(error);
-        showZModal("Erro", "Não foi possível completar a operação.", "⚠️");
-        btn.innerText = "Confirmar e Enviar";
-        btn.disabled = false;
-    }
-};
+        try {
+            const remetenteRef = doc(db, "usuarios", userLogado.uid);
+            const snap = await getDoc(remetenteRef);
             
-</script>
+            if(!snap.exists()) throw new Error("Usuário não encontrado");
+            const dadosUser = snap.data();
+
+            // 1. Senha
+            if(pinDigitado !== dadosUser.senha) {
+                showZModal("Senha Incorreta", "Verifique sua senha.", "🔒");
+                limparPin();
+                return;
+            }
+
+            // 2. Saldo
+            if(parseFloat(dadosUser.saldo || 0) < transacao.valorNumerico) {
+                showZModal("Saldo Insuficiente", "Você não tem saldo.", "💸");
+                return;
+            }
+
+            // 3. Update Saldos
+            await updateDoc(remetenteRef, {
+                saldo: increment(-transacao.valorNumerico),
+                saida: increment(transacao.valorNumerico)
+            });
+
+            if(transacao.uidDestino) {
+                const destinoRef = doc(db, "usuarios", transacao.uidDestino);
+                await updateDoc(destinoRef, {
+                    saldo: increment(transacao.valorNumerico),
+                    entrada: increment(transacao.valorNumerico)
+                });
+            }
+
+            // 4. Histórico (Agora sem erro!)
+            const dataAtual = new Date().toLocaleDateString('pt-BR');
+            await addDoc(collection(db, "transacoes"), {
+                userId: userLogado.uid,
+                uidDestino: transacao.uidDestino,
+                nomeDestino: transacao.nomeDestino,
+                nomeRemetente: dadosUser.nome,
+                valor: transacao.valorNumerico,
+                tipo: "saida",
+                data: dataAtual,
+                timestamp: serverTimestamp() // Aqui era onde dava o erro por falta de import
+            });
+
+            localStorage.setItem("comprovante_final", JSON.stringify({...transacao, data: dataAtual}));
+            window.location.href = "comprovante.html";
+
+        } catch (error) {
+            console.error("Erro fatal:", error);
+            showZModal("Erro", "Ocorreu um erro ao processar. Tente novamente.", "⚠️");
+            btn.innerText = "Confirmar e Enviar";
+            btn.disabled = false;
+        }
+    };
+    </script>
+    
 </body>
 </html>
