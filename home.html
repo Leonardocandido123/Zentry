@@ -72,12 +72,56 @@ body {
 
 /* ATIVIDADE RECENTE */
 .smart-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-sizing: border-box; }
+/* CONTAINER DOS ÍCONES (A GRADE) */
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 colunas iguais */
+    gap: 20px;
+    padding: 20px;
+}
 
-/* EM BREVE / PREMIUM ICON */
-.premium-icon { position: relative; border: 1px solid rgba(34, 197, 94, 0.4); animation: pulseGlow 2.5s infinite; }
-@keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.2); } 50% { box-shadow: 0 0 18px rgba(34, 197, 94, 0.5); } }
-.badge-premium { position: absolute; top: -6px; right: -6px; background: #22c55e; color: #000; font-size: 8px; font-weight: 900; padding: 3px 6px; border-radius: 6px; }
+/* CADA BOTÃO (Link + Ícone) */
+.action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #fff; /* Nome do botão em branco */
+    font-size: 13px;
+    font-weight: 500;
+    transition: transform 0.2s;
+}
 
+.action-item:active {
+    transform: scale(0.95); /* Efeito de clique */
+}
+
+/* O QUADRADINHO DO ÍCONE */
+.action-icon {
+    width: 60px;
+    height: 60px;
+    background: #1a1f26; /* Fundo escuro padrão igual aos outros */
+    border-radius: 16px; /* Bordas arredondadas estilo iOS/C6 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    color: #fff; /* Cor do ícone interna */
+}
+
+.action-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: #fff; /* Deixa o desenho do ícone branco */
+}
+
+/* NOME DO BOTÃO */
+.action-item span {
+    opacity: 0.8;
+}
+
+/* REMOVIDO: premium-icon e pulseGlow (Layout Limpo) */
+    
 /* ========================================= */
 /* NAV BAR CORRIGIDA (ÍCONES & ALINHAMENTO)  */
 /* ========================================= */
@@ -158,7 +202,20 @@ body {
 
   <section class="actions-grid">
     <a href="extrato.html" class="action-item"><div class="action-icon"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2"/></svg></div><span>Extrato</span></a>
-    <a href="#" onclick="alert('Disponível em breve')" class="action-item"><div class="action-icon premium-icon"><div class="badge-premium">EM BREVE</div><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><span>Crédito</span></a>
+
+    <a href="pagar.html" class="action-item">
+  <div class="action-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+      <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+      <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+      <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+      <line x1="7" y1="12" x2="17" y2="12"></line>
+    </svg>
+  </div>
+  <span>Pagar</span>
+    </a>
+    
     <a href="cobrar.html" class="action-item"><div class="action-icon"><svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><span>Cobrar</span></a>
     <a href="contas.html" class="action-item"><div class="action-icon"><svg viewBox="0 0 24 24"><path d="M20 12V8H4v4M2 4h20v16H2V4zm2 4h16v10H4V8z"/></svg></div><span>Contas</span></a>
     <a href="cartao.html" class="action-item"><div class="action-icon"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><span>Cartão</span></a>
@@ -289,6 +346,12 @@ body {
             document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
         }, 5000);
     }
+    function abrirLeitor() {
+    // Por enquanto deixei um alerta, depois você coloca o código da câmera aqui
+    alert('Abrindo leitor de código de barras...');
+    // window.location.href = 'pagar_camera.html'; (exemplo de futuro uso)
+    }
+    
           </script>
   
 
