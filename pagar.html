@@ -111,18 +111,47 @@ function startScanner() {
     }
     Quagga.start();
   });
+Quagga.onDetected(function(result) {
+  const code = result.codeResult.code;
 
-  Quagga.onDetected(function(result) {
-    const code = result.codeResult.code;
+  if (navigator.vibrate) navigator.vibrate(200);
 
-    if (navigator.vibrate) navigator.vibrate(200);
+  Quagga.stop();
 
-    Quagga.stop();
+  if (code.length === 44) {
+    processarBoleto(code);
+  } else {
     alert("Código detectado: " + code);
-  });
-}
-
+  }
+});
+  
 window.onload = startScanner;
+  function converterLinhaDigitavel(codigo) {
+  return `${codigo.slice(0,5)}.${codigo.slice(5,10)} ` +
+         `${codigo.slice(10,15)}.${codigo.slice(15,21)} ` +
+         `${codigo.slice(21,26)}.${codigo.slice(26,32)} ` +
+         `${codigo.slice(32,33)} ` +
+         `${codigo.slice(33)}`;
+  }
+  function processarBoleto(codigo) {
+  const linha = converterLinhaDigitavel(codigo);
+
+  // Valor (últimos 10 dígitos)
+  const valor = parseInt(codigo.slice(37)) / 100;
+
+  // Data de vencimento
+  const fator = parseInt(codigo.slice(33, 37));
+
+  let dataBase = new Date(1997, 9, 7); // padrão FEBRABAN
+  let vencimento = new Date(dataBase.getTime() + fator * 86400000);
+
+  alert(
+    "💳 BOLETO DETECTADO\n\n" +
+    "Linha: " + linha + "\n\n" +
+    "Valor: R$ " + valor.toFixed(2) + "\n" +
+    "Vencimento: " + vencimento.toLocaleDateString()
+  );
+              }
 </script>
 </body>
 </html>
