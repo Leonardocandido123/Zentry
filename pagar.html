@@ -1,106 +1,142 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <title>ZENTRY - Scanner</title>
-  <style>
-    :root { --primary: #22C55E; --bg: #000; }
-    * { box-sizing: border-box; }
-    
-    body { 
-        margin: 0; background: #000; color: white; 
-        height: 100vh; width: 100vw; overflow: hidden;
-        font-family: 'Inter', sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    /* CONTAINER DO SCANNER OCUPANDO TUDO */
-    .full-scanner {
-        position: fixed; inset: 0;
-        background: #000;
-        display: flex; align-items: center; justify-content: center;
-        z-index: 1;
-    }
+<title>ZENTRY - Scanner</title>
 
-    /* O SEGREDO: Rotaciona o vídeo se o celular estiver em pé */
-    #reader { width: 100% !important; height: 100% !important; }
-    #reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; }
-
-    /* MOLDURA DE LEITURA (ESTILO NUBANK) */
-    .overlay {
-        position: absolute; inset: 0;
-        border: 40px solid rgba(0,0,0,0.6); /* Escurece as bordas */
-        display: flex; align-items: center; justify-content: center;
-        z-index: 10; pointer-events: none;
-    }
-
-    .focus-area {
-        width: 85%; height: 35%; /* Formato retangular de boleto */
-        border: 2px solid var(--primary);
-        border-radius: 15px;
-        position: relative;
-        box-shadow: 0 0 0 1000px rgba(0,0,0,0.4); /* Sombra que cobre o resto */
-    }
-
-    .scanner-line {
-        position: absolute; inset: 0;
-        width: 100%; height: 2px; background: var(--primary);
-        box-shadow: 0 0 15px var(--primary);
-        animation: scan 2s infinite ease-in-out;
-    }
-
-    @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-    /* BOTÃO VOLTAR POR CIMA */
-    .back-btn {
-        position: absolute; top: 20px; left: 20px;
-        z-index: 20; background: rgba(255,255,255,0.1);
-        border: none; color: white; padding: 12px;
-        border-radius: 50%; backdrop-filter: blur(10px);
-    }
-
-    .tip-msg {
-        position: absolute; bottom: 40px; width: 100%;
-        text-align: center; z-index: 20; font-size: 14px;
-        font-weight: 500; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    }
-  </style>
-</head>
-<body>
-
-  <button class="back-btn" onclick="window.history.back()">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-  </button>
-
-  <div class="full-scanner">
-    <div id="reader"></div>
-    <div class="overlay">
-        <div class="focus-area">
-            <div class="scanner-line"></div>
-        </div>
-    </div>
-  </div>
-
-  <div class="tip-msg">Posicione o código de barras na linha verde</div>
 <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
 
+<style>
+:root { --primary: #22C55E; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #000;
+  color: white;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+/* SCANNER FULL */
+#reader {
+  position: fixed;
+  inset: 0;
+}
+
+#reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* OVERLAY ESCURO */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* ÁREA DE FOCO (BOLETO) */
+.focus-area {
+  width: 90%;
+  height: 140px;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* LINHA NUBANK */
+.scanner-line {
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: var(--primary);
+  box-shadow: 0 0 20px var(--primary);
+  animation: scan 2s infinite;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* BOTÃO VOLTAR */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+}
+
+/* TEXTO */
+.tip {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+
+<button class="back-btn" onclick="window.history.back()">
+←
+</button>
+
+<div id="reader"></div>
+
+<div class="overlay">
+  <div class="focus-area">
+    <div class="scanner-line"></div>
+  </div>
+</div>
+
+<div class="tip">Aponte para o código de barras do boleto</div>
+
 <script>
+let jaLeu = false;
+
 function startScanner() {
   Quagga.init({
     inputStream: {
       type: "LiveStream",
       target: document.querySelector('#reader'),
       constraints: {
-        facingMode: "environment"
+        facingMode: "environment",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
       }
     },
+    locator: {
+      patchSize: "medium",
+      halfSample: true
+    },
+    numOfWorkers: 2,
     decoder: {
       readers: [
         "ean_reader",
         "ean_13_reader",
         "code_128_reader",
-        "code_39_reader"
+        "code_39_reader",
+        "i2of5_reader"
       ]
     },
     locate: true
@@ -111,47 +147,71 @@ function startScanner() {
     }
     Quagga.start();
   });
-Quagga.onDetected(function(result) {
-  const code = result.codeResult.code;
 
-  if (navigator.vibrate) navigator.vibrate(200);
+  Quagga.onDetected(function(result) {
+    if (jaLeu) return;
 
-  Quagga.stop();
+    const code = result.codeResult.code;
 
-  if (code.length === 44) {
-    processarBoleto(code);
-  } else {
-    alert("Código detectado: " + code);
-  }
-});
-  
-window.onload = startScanner;
-  function converterLinhaDigitavel(codigo) {
+    if (!code || code.length < 10) return;
+
+    jaLeu = true;
+
+    if (navigator.vibrate) navigator.vibrate(200);
+
+    Quagga.stop();
+
+    if (code.length === 44) {
+      processarBoleto(code);
+    } else {
+      alert("Código: " + code);
+
+      setTimeout(() => {
+        jaLeu = false;
+        Quagga.start();
+      }, 2000);
+    }
+  });
+}
+
+/* FORMATAR BOLETO */
+function converterLinhaDigitavel(codigo) {
   return `${codigo.slice(0,5)}.${codigo.slice(5,10)} ` +
          `${codigo.slice(10,15)}.${codigo.slice(15,21)} ` +
          `${codigo.slice(21,26)}.${codigo.slice(26,32)} ` +
          `${codigo.slice(32,33)} ` +
          `${codigo.slice(33)}`;
-  }
-  function processarBoleto(codigo) {
-  const linha = converterLinhaDigitavel(codigo);
+}
 
-  // Valor (últimos 10 dígitos)
+/* PROCESSAR */
+function processarBoleto(codigo) {
+
+  const linha = converterLinhaDigitavel(codigo);
   const valor = parseInt(codigo.slice(37)) / 100;
 
-  // Data de vencimento
   const fator = parseInt(codigo.slice(33, 37));
+  let base = new Date(1997, 9, 7);
+  let vencimento = new Date(base.getTime() + fator * 86400000);
 
-  let dataBase = new Date(1997, 9, 7); // padrão FEBRABAN
-  let vencimento = new Date(dataBase.getTime() + fator * 86400000);
+  const boleto = {
+    codigo,
+    linha,
+    valor: valor.toFixed(2),
+    vencimento: vencimento.toLocaleDateString()
+  };
 
-  alert(
-    "💳 BOLETO DETECTADO\n\n" +
-    "Linha: " + linha + "\n\n" +
-    "Valor: R$ " + valor.toFixed(2) + "\n" +
-    "Vencimento: " + vencimento.toLocaleDateString()
-  );
-              }
+  localStorage.setItem("boletoAtual", JSON.stringify(boleto));
+
+  // TRANSIÇÃO SUAVE
+  document.body.style.opacity = "0";
+
+  setTimeout(() => {
+    window.location.href = "pagamento.html";
+  }, 300);
+}
+
+window.onload = startScanner;
 </script>
+
 </body>
 </html>
