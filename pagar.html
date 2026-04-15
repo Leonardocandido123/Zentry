@@ -32,7 +32,7 @@ body {
   object-fit: cover;
 }
 
-/* OVERLAY MAIS LEVE (ANTES tava escuro demais) */
+/* OVERLAY */
 .overlay {
   position: absolute;
   inset: 0;
@@ -42,15 +42,14 @@ body {
   pointer-events: none;
 }
 
-/* ESCURECER SÓ FORA DA ÁREA */
 .overlay::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.4); /* MAIS CLARO */
+  background: rgba(0,0,0,0.4);
 }
 
-/* ÁREA FOCO (BOLETO) */
+/* FOCO */
 .focus-area {
   width: 90%;
   height: 120px;
@@ -61,7 +60,7 @@ body {
   overflow: hidden;
 }
 
-/* LINHA NUBANK */
+/* LINHA */
 .scanner-line {
   position: absolute;
   width: 100%;
@@ -118,6 +117,112 @@ body {
 <script>
 let jaLeu = false;
 
+/* =========================
+   🔢 VALIDAÇÃO REAL BOLETO
+========================= */
+
+// remove tudo que não for número
+function apenasNumeros(str){
+  return str.replace(/\D/g, '');
+}
+
+// módulo 10
+function modulo10(numero) {
+  let soma = 0;
+  let peso = 2;
+
+  for (let i = numero.length - 1; i >= 0; i--) {
+    let calc = numero[i] * peso;
+    if (calc >= 10) calc = 1 + (calc - 10);
+    soma += calc;
+    peso = peso === 2 ? 1 : 2;
+  }
+
+  return (10 - (soma % 10)) % 10;
+}
+
+// módulo 11
+function modulo11(numero) {
+  let soma = 0;
+  let peso = 2;
+
+  for (let i = numero.length - 1; i >= 0; i--) {
+    soma += numero[i] * peso;
+    peso = peso === 9 ? 2 : peso + 1;
+  }
+
+  let resto = soma % 11;
+
+  if (resto === 0 || resto === 1) return 0;
+  if (resto === 10) return 1;
+
+  return 11 - resto;
+}
+
+// converter linha → código
+function linhaParaCodigo(linha) {
+  return (
+    linha.slice(0,4) +
+    linha.slice(32,33) +
+    linha.slice(33,47) +
+    linha.slice(4,9) +
+    linha.slice(10,20) +
+    linha.slice(21,31)
+  );
+}
+
+// validar linha digitável
+function validarLinhaDigitavel(linha) {
+  linha = apenasNumeros(linha);
+
+  if (linha.length !== 47) return false;
+
+  const bloco1 = linha.slice(0,9);
+  const dv1 = linha[9];
+
+  const bloco2 = linha.slice(10,20);
+  const dv2 = linha[20];
+
+  const bloco3 = linha.slice(21,31);
+  const dv3 = linha[31];
+
+  if (modulo10(bloco1) != dv1) return false;
+  if (modulo10(bloco2) != dv2) return false;
+  if (modulo10(bloco3) != dv3) return false;
+
+  const codigo = linhaParaCodigo(linha);
+  const dvGeral = codigo[4];
+  const semDV = codigo.slice(0,4) + codigo.slice(5);
+
+  if (modulo11(semDV) != dvGeral) return false;
+
+  return codigo;
+}
+
+/* =========================
+   🏦 IDENTIFICAR BANCO
+========================= */
+
+function identificarBanco(codigo) {
+  const banco = codigo.slice(0,3);
+
+  const bancos = {
+    "001": "Banco do Brasil",
+    "237": "Bradesco",
+    "341": "Itaú",
+    "033": "Santander",
+    "104": "Caixa",
+    "260": "Nubank",
+    "077": "Inter"
+  };
+
+  return bancos[banco] || "Banco desconhecido";
+}
+
+/* =========================
+   📷 SCANNER
+========================= */
+
 function startScanner() {
   Quagga.init({
     inputStream: {
@@ -125,9 +230,9 @@ function startScanner() {
       target: document.querySelector('#reader'),
       constraints: {
         facingMode: "environment",
-        focusMode: "continuous" // 🔥 melhora foco
+        focusMode: "continuous"
       },
-      area: { // 🔥 só lê dentro da área verde
+      area: {
         top: "40%",
         right: "5%",
         left: "5%",
@@ -136,7 +241,7 @@ function startScanner() {
     },
 
     locator: {
-      patchSize: "large", // 🔥 melhora leitura de boleto
+      patchSize: "large",
       halfSample: false
     },
 
@@ -144,7 +249,7 @@ function startScanner() {
 
     decoder: {
       readers: [
-        "i2of5_reader",   // 🔥 PRINCIPAL PRA BOLETO
+        "i2of5_reader",
         "code_128_reader",
         "ean_reader",
         "ean_13_reader"
@@ -163,7 +268,7 @@ function startScanner() {
   Quagga.onDetected(function(result) {
     if (jaLeu) return;
 
-    const code = result.codeResult.code;
+    let code = result.codeResult.code;
 
     if (!code || code.length < 20) return;
 
@@ -173,10 +278,29 @@ function startScanner() {
 
     Quagga.stop();
 
-    if (code.length === 44) {
+    code = apenasNumeros(code);
+
+    // se vier como linha digitável
+    if (code.length === 47) {
+      const convertido = validarLinhaDigitavel(code);
+
+      if (!convertido) {
+        alert("❌ Boleto inválido");
+        jaLeu = false;
+        Quagga.start();
+        return;
+      }
+
+      processarBoleto(convertido);
+    }
+
+    // se já vier código de barras
+    else if (code.length === 44) {
       processarBoleto(code);
-    } else {
-      alert("Código: " + code);
+    }
+
+    else {
+      alert("Código inválido");
 
       setTimeout(() => {
         jaLeu = false;
@@ -186,18 +310,14 @@ function startScanner() {
   });
 }
 
-/* FORMATAR */
-function converterLinhaDigitavel(codigo) {
-  return `${codigo.slice(0,5)}.${codigo.slice(5,10)} ` +
-         `${codigo.slice(10,15)}.${codigo.slice(15,21)} ` +
-         `${codigo.slice(21,26)}.${codigo.slice(26,32)} ` +
-         `${codigo.slice(32,33)} ` +
-         `${codigo.slice(33)}`;
-}
+/* =========================
+   💳 PROCESSAR BOLETO
+========================= */
 
-/* PROCESSAR */
 function processarBoleto(codigo) {
-  const linha = converterLinhaDigitavel(codigo);
+
+  const banco = identificarBanco(codigo);
+
   const valor = parseInt(codigo.slice(37)) / 100;
 
   const fator = parseInt(codigo.slice(33, 37));
@@ -206,7 +326,8 @@ function processarBoleto(codigo) {
 
   const boleto = {
     codigo,
-    linha,
+    linha: codigo,
+    banco,
     valor: valor.toFixed(2),
     vencimento: vencimento.toLocaleDateString()
   };
