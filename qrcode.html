@@ -1,257 +1,261 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <title>ZENTRY - Pagar</title>
-  <style>
-    :root { --primary: #22C55E; --bg: #000000; --card: #121826; --border: #2A3441; }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    .header { padding: 20px; display: flex; align-items: center; gap: 15px; z-index: 10; }
-    .back-btn { background: var(--card); border: 1px solid var(--border); color: white; cursor: pointer; padding: 10px; border-radius: 50%; display: flex; border: none; align-items: center; justify-content: center; }
-    .header h2 { font-size: 20px; font-weight: 600; margin: 0; }
+<title>ZENTRY - Pagar</title>
 
-    .content { flex: 1; padding: 20px; display: flex; flex-direction: column; }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    .scanner-container {
-      width: 100%; height: 300px; background: #050505; border-radius: 28px;
-      border: 1px solid var(--border); position: relative; overflow: hidden;
-      display: flex; align-items: center; justify-content: center; margin-bottom: 25px;
-    }
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
 
-    #reader { width: 100% !important; height: 100% !important; border-radius: 28px; overflow: hidden; }
-    #reader video { object-fit: cover !important; }
+<style>
+:root { --primary:#22C55E; --bg:#000; --card:#121826; --border:#2A3441; }
 
-    .corner { position: absolute; width: 40px; height: 40px; border: 4px solid var(--primary); z-index: 5; pointer-events: none; }
-    .top-left { top: 20px; left: 20px; border-right: 0; border-bottom: 0; border-radius: 12px 0 0 0; }
-    .top-right { top: 20px; right: 20px; border-left: 0; border-bottom: 0; border-radius: 0 12px 0 0; }
-    .bottom-left { bottom: 20px; left: 20px; border-right: 0; border-top: 0; border-radius: 0 0 0 12px; }
-    .bottom-right { bottom: 20px; right: 20px; border-left: 0; border-top: 0; border-radius: 0 0 12px 0; }
+* { box-sizing:border-box; font-family:'Inter'; }
 
-    .scanner-line {
-      position: absolute; width: 85%; height: 3px; background: var(--primary);
-      box-shadow: 0 0 25px var(--primary); top: 20px;
-      animation: scan 2s infinite ease-in-out; z-index: 4; pointer-events: none;
-    }
+body {
+  margin:0;
+  background:var(--bg);
+  color:white;
+}
 
-    @keyframes scan { 0%, 100% { top: 30px; opacity: 0.5; } 50% { top: 260px; opacity: 1; } }
-    #status-msg { text-align: center; color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 20px; letter-spacing: 1px; }
+/* HEADER */
+.header {
+  padding:20px;
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
 
-    .pay-option {
-      background: var(--card); border: 1px solid var(--border); border-radius: 22px;
-      padding: 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px;
-      cursor: pointer; transition: 0.2s; color: white; text-decoration: none;
-    }
-    .icon-box { width: 44px; height: 44px; background: rgba(34, 197, 94, 0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
+.back-btn {
+  background:var(--card);
+  border:none;
+  padding:10px;
+  border-radius:50%;
+  color:white;
+}
 
-    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-    .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: var(--primary); border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
+/* SCANNER */
+.scanner-container {
+  height:280px;
+  margin:20px;
+  border-radius:25px;
+  overflow:hidden;
+  position:relative;
+  border:1px solid var(--border);
+}
 
-    @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes popIn { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
-    svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; }
-  </style>
+#reader {
+  width:100%;
+  height:100%;
+}
+
+#reader video {
+  object-fit:cover;
+}
+
+/* LINHA */
+.scan-line {
+  position:absolute;
+  width:90%;
+  height:3px;
+  background:var(--primary);
+  box-shadow:0 0 20px var(--primary);
+  animation:scan 2s infinite;
+}
+
+@keyframes scan {
+  0% { top:10%; }
+  100% { top:90%; }
+}
+
+/* TEXTO */
+.status {
+  text-align:center;
+  color:var(--primary);
+  font-size:13px;
+}
+
+/* BOTÃO */
+.option {
+  margin:20px;
+  padding:20px;
+  border-radius:20px;
+  background:var(--card);
+  border:1px solid var(--border);
+}
+</style>
 </head>
+
 <body>
 
-  <div id="zentryModalGlobal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(5px);">
-    <div style="background:#121826; border:1px solid #2A3441; border-radius:28px; width:100%; max-width:340px; padding:25px; text-align:center; animation: popIn 0.2s ease-out;">
-      <div id="zIcon" style="font-size:40px; margin-bottom:15px;">💰</div>
-      <h3 id="zTitle" style="margin:0 0 10px; font-size:18px; color:#fff; font-weight:700;">Aviso</h3>
-      <p id="zText" style="color:#9CA3AF; font-size:14px; margin-bottom:20px; line-height:1.5;"></p>
-      <input type="text" id="zInput" placeholder="R$ 0,00" inputmode="decimal" style="display:none; width:100%; padding:15px; background:#050505; border:1px solid #2A3441; border-radius:12px; color:#22C55E; text-align:center; font-size:24px; font-weight:700; margin-bottom:20px; outline:none;">
-      <div style="display:flex; gap:10px;">
-          <button id="zBtnCancel" style="display:none; flex:1; padding:15px; border-radius:14px; background:transparent; border:1px solid #2A3441; color:#fff; font-weight:600;">Voltar</button>
-          <button id="zBtnOk" style="flex:1; padding:15px; border-radius:14px; background:#22C55E; border:none; color:#000; font-weight:700;">Confirmar</button>
-      </div>
-    </div>
-  </div>
+<div class="header">
+  <button class="back-btn" onclick="history.back()">←</button>
+  <h2>Pagar</h2>
+</div>
 
-  <div id="loading-overlay">
-    <span class="loader"></span>
-    <p style="margin-top: 20px; font-weight: 600;">Processando...</p>
-  </div>
+<div class="scanner-container">
+  <div id="reader"></div>
+  <div class="scan-line"></div>
+</div>
 
-  <div class="header">
-    <button class="back-btn" onclick="window.location.href='pix.html'">
-      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <h2>Pagar</h2>
-  </div>
+<div class="status" id="status">Aponte para QR Code ou Código de Barras</div>
 
-  <div class="content">
-    <div class="scanner-container">
-      <div id="reader"></div>
-      <div class="corner top-left"></div>
-      <div class="corner top-right"></div>
-      <div class="corner bottom-left"></div>
-      <div class="corner bottom-right"></div>
-      <div class="scanner-line"></div>
-    </div>
-    <div id="status-msg">POSICIONE O QR CODE NA MOLDURA</div>
+<div class="option" onclick="modoManual()">
+  Digitar código manualmente
+</div>
 
-    <div class="pay-option" id="btnManual">
-      <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 3l3.8 3.8L12 10.6 8.2 6.8 12 3zM21 12l-3.8 3.8L13.4 12l3.8-3.8L21 12zM12 21l-3.8-3.8L12 13.4l3.8 3.8L12 21zM3 12l3.8-3.8L10.6 12l-3.8 3.8L3 12z"/></svg></div>
-      <div class="info">
-          <b style="display:block">Escanear Manualmente</b>
-          <span style="color:#9CA3AF; font-size:12px">Simular leitura agora</span>
-      </div>
-    </div>
-  </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "zentry-app-74275.firebaseapp.com",
+  projectId: "zentry-app-74275"
+};
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
-        authDomain: "zentry-app-74275.firebaseapp.com",
-        projectId: "zentry-app-74275",
-        storageBucket: "zentry-app-74275.appspot.com",
-        messagingSenderId: "571422826071",
-        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
-    };
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+let userLogado = null;
+let qrScanner = null;
+let jaLeu = false;
 
-    let userLogado = null;
-    let html5QrCode = null;
+/* LOGIN */
+onAuthStateChanged(auth, (user)=>{
+  if(user){
+    userLogado = user;
+    iniciarQR();
+  } else {
+    location.href="login.html";
+  }
+});
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            userLogado = user;
-            setTimeout(iniciarScanner, 500); // Pequeno delay pra garantir que a lib carregou
-        } else {
-            window.location.href = 'login.html';
-        }
-    });
+/* =========================
+   🔳 QR CODE
+========================= */
+function iniciarQR(){
+  qrScanner = new Html5Qrcode("reader");
 
-    // MÁSCARA DINÂMICA
-    const inputMoeda = document.getElementById('zInput');
-    inputMoeda.addEventListener('input', (e) => {
-        let v = e.target.value.replace(/\D/g, '');
-        v = (v / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        e.target.value = v;
-    });
+  qrScanner.start(
+    { facingMode:"environment" },
+    { fps:10, qrbox:250 },
+    (text)=>{
+      if(jaLeu) return;
+      jaLeu = true;
 
-    function limparParaNumero(valorStr) {
-        if(!valorStr) return 0;
-        return parseFloat(valorStr.replace(/[^\d,]/g, '').replace(',', '.'));
+      vibrar();
+      qrScanner.stop();
+
+      document.getElementById("status").innerText = "QR detectado ✔";
+
+      processar(text);
     }
+  ).catch(()=>{
+    iniciarBarras();
+  });
 
-    // MODAIS
-    window.zAlert = (titulo, msg, icon = "⚠️") => {
-        return new Promise(res => {
-            document.getElementById('zIcon').innerText = icon;
-            document.getElementById('zTitle').innerText = titulo;
-            document.getElementById('zText').innerText = msg;
-            document.getElementById('zInput').style.display = 'none';
-            document.getElementById('zBtnCancel').style.display = 'none';
-            document.getElementById('zentryModalGlobal').style.display = 'flex';
-            document.getElementById('zBtnOk').onclick = () => { document.getElementById('zentryModalGlobal').style.display = 'none'; res(); };
-        });
-    };
+  // fallback automático depois de 3s
+  setTimeout(()=>{
+    if(!jaLeu) iniciarBarras();
+  },3000);
+}
 
-    window.zPrompt = (titulo, msg) => {
-        return new Promise(res => {
-            document.getElementById('zIcon').innerText = "💰";
-            document.getElementById('zTitle').innerText = titulo;
-            document.getElementById('zText').innerText = msg;
-            const input = document.getElementById('zInput');
-            input.style.display = 'block';
-            input.value = "";
-            document.getElementById('zBtnCancel').style.display = 'block';
-            document.getElementById('zentryModalGlobal').style.display = 'flex';
-            document.getElementById('zBtnOk').onclick = () => { 
-                const val = input.value;
-                document.getElementById('zentryModalGlobal').style.display = 'none'; 
-                res(val); 
-            };
-            document.getElementById('zBtnCancel').onclick = () => { document.getElementById('zentryModalGlobal').style.display = 'none'; res(null); };
-        });
-    };
+/* =========================
+   📊 CÓDIGO DE BARRAS
+========================= */
+function iniciarBarras(){
 
-    function iniciarScanner() {
-        if(!document.getElementById("reader")) return;
-        html5QrCode = new Html5Qrcode("reader");
-        const config = { fps: 15, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
-        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-            if (navigator.vibrate) navigator.vibrate(100);
-            html5QrCode.stop();
-            processarDadosLidos(decodedText);
-        }).catch(err => {
-            document.getElementById('status-msg').innerText = "CÂMERA NÃO DETECTADA OU BLOQUEADA";
-        });
+  document.getElementById("status").innerText = "Modo código de barras...";
+
+  Quagga.init({
+    inputStream:{
+      type:"LiveStream",
+      target:document.querySelector('#reader'),
+      constraints:{ facingMode:"environment" }
+    },
+    decoder:{
+      readers:[
+        "i2of5_reader",
+        "code_128_reader",
+        "ean_reader"
+      ]
     }
+  },(err)=>{
+    if(err) return console.error(err);
+    Quagga.start();
+  });
 
-    async function processarDadosLidos(texto) {
-        let valorNum = 0;
-        let nome = "Recebedor Externo";
-        
-        const digitado = await zPrompt("Valor do Pagamento", `Informe o valor para ${nome}:`);
-        if (digitado) {
-            valorNum = limparParaNumero(digitado);
-            abrirModalConfirmacao(nome, valorNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), valorNum);
-        } else {
-            location.reload();
-        }
-    }
+  Quagga.onDetected((res)=>{
+    if(jaLeu) return;
 
-    function abrirModalConfirmacao(nome, valorStr, valorNum) {
-        document.getElementById('zIcon').innerText = "✅";
-        document.getElementById('zTitle').innerText = "Confirmar Pagamento";
-        document.getElementById('zText').innerHTML = `Destino: <b>${nome}</b><br>Valor: <b style="color:#22C55E">${valorStr}</b>`;
-        document.getElementById('zInput').style.display = 'none';
-        document.getElementById('zBtnCancel').style.display = 'block';
-        document.getElementById('zentryModalGlobal').style.display = 'flex';
-        
-        document.getElementById('zBtnOk').onclick = () => {
-            document.getElementById('zentryModalGlobal').style.display = 'none';
-            executarDebitoReal(valorNum, valorStr, nome);
-        };
-        document.getElementById('zBtnCancel').onclick = () => { location.reload(); };
-    }
+    const code = res.codeResult.code;
 
-    // Botão de simulação manual
-    document.getElementById('btnManual').onclick = () => {
-        processarDadosLidos("MANUAL");
-    };
+    if(!code || code.length < 20) return;
 
-    async function executarDebitoReal(valorNum, valorStr, recebedor) {
-        const overlay = document.getElementById('loading-overlay');
-        overlay.style.display = 'flex';
-        try {
-            const userRef = doc(db, "usuarios", userLogado.uid);
-            const snap = await getDoc(userRef);
-            const saldoAtual = snap.data().saldo || 0;
+    jaLeu = true;
 
-            if (saldoAtual < valorNum) {
-                overlay.style.display = 'none';
-                await zAlert("Saldo Insuficiente", "Seu saldo é insuficiente para esta transação.", "❌");
-                location.reload(); 
-                return;
-            }
-            
-            await updateDoc(userRef, { saldo: increment(-valorNum), saida: increment(valorNum) });
-            
-            localStorage.setItem("transacao_pendente", JSON.stringify({
-                nomeDestino: recebedor, valor: valorStr, valorNumerico: valorNum,
-                data: new Date().toLocaleString('pt-BR'), bancoDestino: "Zentry Payments",
-                chavePix: "Leitura de Scanner", id: "ZNT" + Math.floor(100000 + Math.random() * 900000)
-            }));
-            window.location.href = "comprovante.html";
-        } catch (error) {
-            overlay.style.display = 'none';
-            await zAlert("Erro no Sistema", "Falha ao processar o débito.", "❌");
-        }
-    }
-  </script>
+    vibrar();
+    Quagga.stop();
+
+    document.getElementById("status").innerText = "Código detectado ✔";
+
+    processar(code);
+  });
+}
+
+/* =========================
+   💳 PROCESSAR
+========================= */
+async function processar(valor){
+
+  let valorNum = prompt("Digite o valor:");
+  if(!valorNum) location.reload();
+
+  valorNum = parseFloat(valorNum.replace(",","."));
+
+  const userRef = doc(db,"usuarios",userLogado.uid);
+  const snap = await getDoc(userRef);
+
+  const saldo = snap.data().saldo || 0;
+
+  if(saldo < valorNum){
+    alert("Saldo insuficiente");
+    location.reload();
+    return;
+  }
+
+  document.getElementById("status").innerText = "Processando pagamento...";
+
+  await updateDoc(userRef,{
+    saldo: increment(-valorNum)
+  });
+
+  localStorage.setItem("transacao", JSON.stringify({
+    valor: valorNum,
+    data: new Date().toLocaleString()
+  }));
+
+  location.href="comprovante.html";
+}
+
+/* =========================
+   🧠 FUNÇÕES
+========================= */
+function vibrar(){
+  if(navigator.vibrate) navigator.vibrate(150);
+}
+
+window.modoManual = function(){
+  processar("manual");
+}
+</script>
+
 </body>
 </html>
