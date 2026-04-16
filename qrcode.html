@@ -3,89 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>ZENTRY - Pagar</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 :root { --primary:#22C55E; --bg:#000; --card:#121826; --border:#2A3441; }
-
 * { box-sizing:border-box; font-family:'Inter'; }
 
-body {
-  margin:0;
-  background:var(--bg);
-  color:white;
-}
+body { margin:0; background:var(--bg); color:white; overflow-x: hidden; }
 
-/* HEADER */
-.header {
-  padding:20px;
-  display:flex;
-  align-items:center;
-  gap:15px;
-}
+.header { padding:20px; display:flex; align-items:center; gap:15px; }
+.back-btn { background:var(--card); border:none; padding:10px; border-radius:50%; color:white; cursor:pointer; }
 
-.back-btn {
-  background:var(--card);
-  border:none;
-  padding:10px;
-  border-radius:50%;
-  color:white;
-}
-
-/* SCANNER */
+/* SCANNER CORRIGIDO */
 .scanner-container {
-  height:280px;
+  height:320px;
   margin:20px;
   border-radius:25px;
   overflow:hidden;
   position:relative;
-  border:1px solid var(--border);
+  border:2px solid var(--border);
+  background: #111;
 }
 
-#reader {
-  width:100%;
-  height:100%;
+/* ISSO AQUI RESOLVE A TELA PRETA */
+#reader { width: 100% !important; height: 100% !important; }
+#reader video { 
+  width: 100% !important; 
+  height: 100% !important; 
+  object-fit: cover !important; 
 }
 
-#reader video {
-  object-fit:cover;
-}
-
-/* LINHA */
+/* LINHA CENTRALIZADA E VISÍVEL */
 .scan-line {
   position:absolute;
+  left: 5%;
   width:90%;
   height:3px;
   background:var(--primary);
   box-shadow:0 0 20px var(--primary);
-  animation:scan 2s infinite;
+  z-index: 99; /* Fica na frente do vídeo */
+  pointer-events: none;
+  animation: scan 2.5s infinite ease-in-out;
 }
 
 @keyframes scan {
-  0% { top:10%; }
-  100% { top:90%; }
+  0% { top: 15%; }
+  50% { top: 85%; }
+  100% { top: 15%; }
 }
 
-/* TEXTO */
-.status {
-  text-align:center;
-  color:var(--primary);
-  font-size:13px;
-}
-
-/* BOTÃO */
-.option {
-  margin:20px;
-  padding:20px;
-  border-radius:20px;
-  background:var(--card);
-  border:1px solid var(--border);
-}
+.status { text-align:center; color:var(--primary); font-size:13px; margin: 10px 0; padding: 0 20px; }
+.option { margin:20px; padding:20px; border-radius:20px; background:var(--card); border:1px solid var(--border); text-align: center; cursor: pointer; }
 </style>
 </head>
 
@@ -101,19 +72,19 @@ body {
   <div class="scan-line"></div>
 </div>
 
-<div class="status" id="status">Aponte para QR Code ou Código de Barras</div>
+<div class="status" id="status">Iniciando sistema de segurança...</div>
 
 <div class="option" onclick="modoManual()">
   Digitar código manualmente
 </div> 
-  
-  <script type="module">
+
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSy...", 
+  apiKey: "AIzaSy...", // VERIFIQUE SE SUA KEY ESTÁ ATUALIZADA
   authDomain: "zentry-app-74275.firebaseapp.com",
   projectId: "zentry-app-74275"
 };
@@ -126,33 +97,35 @@ let userLogado = null;
 let html5QrCode = null;
 let jaLeu = false;
 
-/* --- PROTEÇÃO DE LOGIN --- */
+/* --- LOGIN COM DELAY DE SEGURANÇA --- */
 onAuthStateChanged(auth, (user) => {
   if (user) {
     userLogado = user;
-    // Pequeno delay para a página carregar 100%
-    setTimeout(iniciarScanner, 800);
+    console.log("Acesso autorizado!");
+    // Delay para garantir que o elemento #reader existe no DOM
+    setTimeout(iniciarScanner, 1000);
   } else {
+    // Aumentamos para 5 segundos. Se o Firebase não responder, aí sim volta pro login.
     setTimeout(() => {
       if (!auth.currentUser) window.location.href = "login.html";
-    }, 3000);
+    }, 5000);
   }
 });
 
-/* --- SCANNER ÚNICO (NÍVEL BANCO) --- */
 async function iniciarScanner() {
   const status = document.getElementById("status");
   
-  // Se já existir um scanner rodando, ele para antes de começar
   if (html5QrCode) {
     await html5QrCode.stop().catch(() => {});
   }
 
   html5QrCode = new Html5Qrcode("reader");
 
+  // Configurações para leitura rápida (Estilo Banco)
   const config = { 
     fps: 20, 
-    qrbox: { width: 250, height: 250 } 
+    qrbox: { width: 250, height: 250 },
+    aspectRatio: 1.0
   };
 
   try {
@@ -162,29 +135,23 @@ async function iniciarScanner() {
       (text) => {
         if (jaLeu) return;
         jaLeu = true;
-
         vibrar();
-        html5QrCode.stop(); // Desliga a câmera após a leitura
-        
-        status.innerText = "Código detectado! ✔";
+        html5QrCode.stop();
+        status.innerText = "Código identificado! ✔";
         processarPagamento(text);
       }
     );
     status.innerText = "Aponte para o QR Code ou Código de Barras";
   } catch (err) {
-    console.error("Erro ao abrir câmera:", err);
-    status.innerText = "Erro na câmera. Verifique as permissões.";
+    console.error("Câmera travada:", err);
+    status.innerText = "Erro ao acessar câmera. Verifique as permissões.";
   }
 }
 
-/* --- PROCESSAMENTO --- */
 async function processarPagamento(codigoLido) {
   try {
-    let valorPrompt = prompt("Código detectado!\n\nDigite o valor do pagamento:");
-    if (!valorPrompt) {
-        location.reload();
-        return;
-    }
+    let valorPrompt = prompt("Confirmar Pagamento\nDigite o valor (Ex: 50,00):");
+    if (!valorPrompt) { location.reload(); return; }
 
     const valorFinal = parseFloat(valorPrompt.replace(".", "").replace(",", "."));
     
@@ -194,23 +161,27 @@ async function processarPagamento(codigoLido) {
         return;
     }
 
-    // Busca saldo real no Firebase
+    status.innerText = "Validando saldo...";
+
     const userRef = doc(db, "usuarios", userLogado.uid);
     const snap = await getDoc(userRef);
+
+    if (!snap.exists()) {
+        alert("Erro no perfil do usuário!");
+        return;
+    }
+
     const saldoAtual = snap.data().saldo || 0;
 
     if (saldoAtual < valorFinal) {
-        alert("Saldo insuficiente!");
+        alert("Saldo insuficiente!\nSeu saldo: R$ " + saldoAtual.toLocaleString('pt-BR'));
         location.reload();
         return;
     }
 
-    // Debita o valor
-    await updateDoc(userRef, {
-        saldo: increment(-valorFinal)
-    });
+    // Debita o valor no Firebase
+    await updateDoc(userRef, { saldo: increment(-valorFinal) });
 
-    // Salva para o comprovante
     localStorage.setItem("transacao", JSON.stringify({
         valor: valorFinal,
         data: new Date().toLocaleString(),
@@ -220,19 +191,14 @@ async function processarPagamento(codigoLido) {
     window.location.href = "comprovante.html";
 
   } catch (e) {
-    console.error(e);
-    alert("Erro ao processar.");
+    alert("Erro no processamento.");
     location.reload();
   }
 }
 
-function vibrar() {
-  if (navigator.vibrate) navigator.vibrate(100);
-}
+function vibrar() { if (navigator.vibrate) navigator.vibrate(150); }
 
 window.modoManual = () => processarPagamento("DIGITADO_MANUAL");
-  </script>
-  
-  
+</script>
 </body>
 </html>
