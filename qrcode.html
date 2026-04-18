@@ -84,19 +84,34 @@ let dadosPix = null;
 let saldoAtual = 0;
 
 // 🔐 LOGIN
+  let jaVerificou = false;
+
 onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    setTimeout(() => {
-      if (!auth.currentUser) {
-        window.location.href = "login.html";
-      }
-    }, 1500);
-    return;
+
+  // Primeira vez: Firebase ainda carregando
+  if (!jaVerificou) {
+    jaVerificou = true;
+
+    if (!user) {
+      setTimeout(() => {
+        if (!auth.currentUser) {
+          window.location.href = "login.html";
+        }
+      }, 8000); // ⬅️ AUMENTEI PRA 3s (IMPORTANTE)
+
+      return;
+    }
   }
 
-  userLogado = user;
-  carregarPix();
+  // Usuário confirmado
+  if (user) {
+    userLogado = user;
+    carregarPix();
+  }
 });
+  import { setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+setPersistence(auth, browserLocalPersistence);
 
 // 📥 RECEBER DADOS DO SCANNER
 function carregarPix() {
