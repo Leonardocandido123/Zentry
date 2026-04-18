@@ -65,6 +65,7 @@ body { margin:0; background:var(--bg); color:white; }
 </div>
 
 <script type="module">
+  console.log("UID:", localStorage.getItem("userLogado"));
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, updateDoc, increment, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
