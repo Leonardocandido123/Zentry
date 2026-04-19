@@ -5,100 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scanner QR</title>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 body {
-  margin: 0;
-  background: #000;
-  color: #22C55E;
-  font-family: Arial;
-  text-align: center;
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:Arial;
+  text-align:center;
 }
 
 #reader {
-  width: 100%;
-  height: 100vh;
-}
-
-.top {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 10;
-}
-
-.btn {
-  background: #22C55E;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 10px;
-  font-weight: bold;
+  width:100%;
 }
 </style>
 </head>
 
 <body>
 
-<div class="top">
-  <button class="btn" onclick="voltar()">← Voltar</button>
-</div>
-
+<h2>Escaneie o QR Code</h2>
 <div id="reader"></div>
 
 <script>
-let qr = new Html5Qrcode("reader");
-let jaLeu = false;
+const html5QrCode = new Html5Qrcode("reader");
 
-async function iniciar() {
-  try {
-    const cameras = await Html5Qrcode.getCameras();
+Html5Qrcode.getCameras().then(devices => {
+  if (devices.length) {
 
-    if (!cameras.length) {
-      alert("Sem câmera");
-      return;
-    }
-
-    await qr.start(
-      cameras[0].id,
-      {
-        fps: 10,
-        qrbox: 250
-      },
-      (text) => {
-        if (jaLeu) return;
-        jaLeu = true;
-
-        navigator.vibrate?.(150);
+    html5QrCode.start(
+      devices[0].id,
+      { fps: 10, qrbox: 250 },
+      (decodedText) => {
 
         try {
-          const dados = JSON.parse(text);
+          const dados = JSON.parse(decodedText);
 
-          // salva pro app
+          // 🔥 SALVA DADOS DO QR
           localStorage.setItem("pixData", JSON.stringify(dados));
 
-          alert("QR lido com sucesso!");
+          window.location.href = "qrcode.html";
 
-          voltar();
-
-        } catch {
+        } catch (e) {
           alert("QR inválido");
-          location.reload();
         }
+
       }
     );
 
-  } catch (e) {
-    alert("Erro ao abrir câmera");
-    console.error(e);
   }
-}
-
-function voltar() {
-  window.location.href = "index.html"; // ou sua tela principal
-}
-
-iniciar();
+}).catch(err => {
+  alert("Erro câmera: " + err);
+});
 </script>
 
 </body>
