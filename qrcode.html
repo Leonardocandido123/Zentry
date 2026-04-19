@@ -3,156 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZENTRY - Qrcode</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Pagamento QR</title>
 
 <style>
-:root { --primary:#22C55E; --bg:#000; --card:#121826; --border:#2A3441; }
-* { box-sizing:border-box; font-family:'Inter'; }
-
-body { margin:0; background:var(--bg); color:white; }
-
-.header {
+body {
+  background:#000;
+  color:#fff;
+  font-family:Arial;
   padding:20px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
 }
 
-.back-btn {
-  background:var(--card);
-  border:none;
-  padding:10px;
-  border-radius:50%;
-  color:white;
-}
-
-.btn {
-  padding:12px 18px;
-  border:none;
+.box {
+  background:#111;
+  padding:20px;
   border-radius:15px;
-  background:var(--primary);
-  color:#000;
-  font-weight:bold;
 }
-
-.confirm-box {
-  margin:20px;
-  padding:20px;
-  border-radius:20px;
-  background:var(--card);
-  border:1px solid var(--border);
-  display:none;
+button {
+  margin-top:20px;
+  padding:15px;
+  background:#22C55E;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <button class="back-btn" onclick="history.back()">←</button>
-  <h2>Qrcode</h2>
-  <button class="btn" onclick="abrirScanner()">Ler QR</button>
+<h2>Confirmar pagamento</h2>
+
+<div class="box">
+  <p>Nome: <span id="nome"></span></p>
+  <p>Valor: R$ <span id="valor"></span></p>
 </div>
 
-<div class="confirm-box" id="confirmBox">
-  <p><b>Nome:</b> <span id="nome"></span></p>
-  <p><b>Valor:</b> R$ <span id="valor"></span></p>
-  <p><b>Saldo:</b> R$ <span id="saldo"></span></p>
+<button onclick="pagar()">Pagar</button>
 
-  <button class="btn" onclick="confirmarPagamento()">Concluir pagamento</button>
-</div>
+<script>
+const dados = JSON.parse(localStorage.getItem("pixData"));
 
-<script type="module">
-  console.log("UID:", localStorage.getItem("userLogado"));
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, updateDoc, increment, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "SUA_KEY_AQUI",
-  authDomain: "zentry-app-74275.firebaseapp.com",
-  projectId: "zentry-app-74275"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let dadosPix = null;
-let saldoAtual = 0;
-
-// 🔐 LOGIN VIA LOCALSTORAGE (SEM BUG)
-const uid = localStorage.getItem("userLogado");
-
-if (!uid) {
-  window.location.href = "login.html";
+if (!dados) {
+  alert("Nenhum QR encontrado");
 }
 
-const userLogado = { uid };
+document.getElementById("nome").innerText = dados.nome;
+document.getElementById("valor").innerText = dados.valor;
 
-// 📥 RECEBER DADOS DO SCANNER
-function carregarPix() {
-  const dados = localStorage.getItem("pixData");
+function pagar() {
 
-  if (!dados) return;
-
-  const pix = JSON.parse(dados);
-  localStorage.removeItem("pixData");
-
-  dadosPix = pix;
-  mostrarConfirmacao();
-}
-
-// 💰 MOSTRAR CONFIRMAÇÃO
-async function mostrarConfirmacao() {
-  const ref = doc(db, "usuarios", userLogado.uid);
-  const snap = await getDoc(ref);
-
-  saldoAtual = snap.data()?.saldo || 0;
-
-  document.getElementById("nome").innerText = dadosPix.nome;
-  document.getElementById("valor").innerText = dadosPix.valor;
-  document.getElementById("saldo").innerText = saldoAtual;
-
-  document.getElementById("confirmBox").style.display = "block";
-}
-
-// 💳 PAGAMENTO
-window.confirmarPagamento = async () => {
-  if (!dadosPix) return;
-
-  if (saldoAtual < dadosPix.valor) {
-    alert("Saldo insuficiente");
-    return;
-  }
-
-  const ref = doc(db, "usuarios", userLogado.uid);
-
-  await updateDoc(ref, {
-    saldo: increment(-dadosPix.valor)
-  });
-
-  const transacao = {
-    valor: dadosPix.valor,
-    nome: dadosPix.nome,
-    data: new Date().toLocaleString(),
-    user: userLogado.uid
+  const comprovante = {
+    ...dados,
+    data: new Date().toLocaleString()
   };
 
-  await addDoc(collection(db, "transacoes"), transacao);
-
-  localStorage.setItem("comprovante", JSON.stringify(transacao));
+  localStorage.setItem("comprovante", JSON.stringify(comprovante));
 
   window.location.href = "comprovante.html";
-};
-
-// 📷 ABRIR SCANNER
-window.abrirScanner = () => {
-  window.location.href = "scanner.html";
-};
-
-// 🔥 CARREGAR AO ABRIR
-carregarPix();
+}
 </script>
 
 </body>
