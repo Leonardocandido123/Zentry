@@ -3,11 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zentry - Confirmar</title>
+<title>Zentry - Qrcode</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, updateDoc, increment, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  runTransaction,
+  updateDoc,
+  increment
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "SUA_KEY",
@@ -18,84 +27,134 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const pixID = localStorage.getItem("pixID");
+let qrAtual = null;
 
-if (!pixID) {
-  alert("Erro: QR não encontrado");
-  window.location.href = "scanner.html";
+// 🔥 SCANNER
+async function startScanner() {
+  const scanner = new Html5Qrcode("reader");
+  const devices = await Html5Qrcode.getCameras();
+
+  const backCam =
+    devices.find(d => d.label.toLowerCase().includes("back"))?.id
+    || devices[0].id;
+
+  scanner.start(
+    { deviceId: { exact: backCam } },
+    { fps: 10, qrbox: 250 },
+
+    async (text) => {
+      try {
+        const data = JSON.parse(text);
+
+        await scanner.stop();
+
+        await processarQR(data);
+
+      } catch {
+        alert("QR inválido");
+      }
+    }
+  );
 }
 
-let dadosPix = null;
-let saldoAtual = 0;
+// 🔥 NÚCLEO BANCO 3.0
+async function processarQR(data) {
 
-// 🔥 carregar dados
-async function carregar() {
-  const ref = doc(db, "pix_temp", pixID);
-  const snap = await getDoc(ref);
+  const qrRef = doc(db, "pix_qr", data.id);
+  const qrSnap = await getDoc(qrRef);
 
-  if (!snap.exists()) {
+  if (!qrSnap.exists()) {
+    alert("QR não existe");
+    return;
+  }
+
+  const qr = qrSnap.data();
+
+  // ❌ expirado
+  if (qr.status !== "ativo") {
+    alert("QR já utilizado ou expirado");
+    return;
+  }
+
+  if (Date.now() > qr.expiraEm) {
     alert("QR expirado");
     return;
   }
 
-  dadosPix = snap.data();
+  document.getElementById("nome").innerText = qr.nome || "Destino";
+  document.getElementById("valor").innerText = qr.valor;
 
-  document.getElementById("nome").innerText = dadosPix.nome;
-  document.getElementById("valor").innerText = dadosPix.valor;
-
-  // 🔥 pegar saldo
-  const uid = localStorage.getItem("userLogado");
-  const userRef = doc(db, "usuarios", uid);
-  const userSnap = await getDoc(userRef);
-
-  saldoAtual = userSnap.data()?.saldo || 0;
-
-  document.getElementById("saldo").innerText = saldoAtual;
+  qrAtual = qr;
+  document.getElementById("scan").style.display = "none";
+  document.getElementById("confirm").style.display = "block";
 }
 
-window.confirmarPagamento = async () => {
-  if (saldoAtual < dadosPix.valor) {
-    alert("Saldo insuficiente");
-    return;
-  }
-
+// 🔥 TRANSAÇÃO ATÔMICA (BANCO REAL)
+window.pagar = async () => {
   const uid = localStorage.getItem("userLogado");
+  if (!uid || !qrAtual) return;
+
   const userRef = doc(db, "usuarios", uid);
+  const qrRef = doc(db, "pix_qr", qrAtual.id);
 
-  await updateDoc(userRef, {
-    saldo: increment(-dadosPix.valor)
+  await runTransaction(db, async (tx) => {
+
+    const userSnap = await tx.get(userRef);
+    const qrSnap = await tx.get(qrRef);
+
+    if (!userSnap.exists() || !qrSnap.exists()) throw "erro";
+
+    const saldo = userSnap.data().saldo || 0;
+
+    if (saldo < qrSnap.data().valor) {
+      throw "saldo insuficiente";
+    }
+
+    if (qrSnap.data().status !== "ativo") {
+      throw "QR já usado";
+    }
+
+    // 🔒 bloqueio imediato
+    tx.update(qrRef, { status: "usado" });
+
+    tx.update(userRef, {
+      saldo: increment(-qrSnap.data().valor)
+    });
   });
 
-  await addDoc(collection(db, "transacoes"), {
-    ...dadosPix,
-    user: uid,
-    data: new Date().toLocaleString()
-  });
-
-  window.location.href = "comprovante.html";
+  alert("Pagamento aprovado");
+  location.href = "home.html";
 };
 
-window.onload = carregar;
+window.startScanner = startScanner;
 </script>
 
 <style>
-body { background:#000; color:#fff; padding:20px; }
-.box { background:#111; padding:20px; border-radius:15px; }
-button { width:100%; padding:15px; background:#22C55E; border:none; margin-top:20px; }
+body { margin:0; background:#000; color:#fff; font-family:Inter; text-align:center; }
+#reader { width:100%; max-width:420px; margin:auto; }
+.box { background:#111827; margin:20px; padding:20px; border-radius:20px; }
+button { width:90%; padding:15px; border:none; border-radius:12px; margin-top:10px; }
+.green { background:#22C55E; color:#fff; }
+.gray { background:#374151; color:#fff; }
 </style>
 </head>
 
-<body>
+<body onload="startScanner()">
 
-<h2>Confirmar pagamento</h2>
-
-<div class="box">
-  <p>Nome: <span id="nome"></span></p>
-  <p>Valor: R$ <span id="valor"></span></p>
-  <p>Saldo: R$ <span id="saldo"></span></p>
+<div id="scan">
+  <h3>Qrcode</h3>
+  <div id="reader"></div>
 </div>
 
-<button onclick="confirmarPagamento()">Pagar</button>
+<div id="confirm" style="display:none;">
+  <div class="box">
+    <p>Destino: <span id="nome"></span></p>
+    <p>Valor: R$ <span id="valor"></span></p>
+  </div>
+
+  <button class="green" onclick="pagar()">Confirmar pagamento</button>
+  <button class="gray" onclick="location.reload()">Cancelar</button>
+</div>
 
 </body>
 </html>
