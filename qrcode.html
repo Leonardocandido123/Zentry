@@ -1,13 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/html5-qrcode"></script>
 
 <title>Qrcode</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 body{
@@ -21,10 +20,9 @@ body{
 }
 
 .header{
+  text-align:center;
   padding:18px;
   font-weight:700;
-  font-size:18px;
-  text-align:center;
   border-bottom:1px solid #222;
 }
 
@@ -33,7 +31,7 @@ body{
   max-width:420px;
   margin:auto;
   margin-top:20px;
-  border-radius:20px;
+  border-radius:18px;
   overflow:hidden;
 }
 
@@ -41,7 +39,7 @@ body{
   text-align:center;
   color:#22C55E;
   font-size:13px;
-  margin-top:15px;
+  margin:15px;
 }
 
 button{
@@ -59,25 +57,38 @@ button{
 
 <body>
 
-<div class="header">Qrcode Scanner</div>
+<div class="header">Qrcode</div>
 
 <div id="reader"></div>
 
-<div class="status" id="status">Iniciando câmera...</div>
+<div class="status" id="status">Preparando câmera...</div>
 
-<button onclick="reiniciar()">Reiniciar Scanner</button>
+<button onclick="reiniciar()">Reiniciar</button>
 
 <script>
-let scanner = null;
+let scanner;
 let ativo = false;
 
-async function iniciarScanner() {
+/* 🔥 1. PERMISSÃO FORÇADA (ANDROID 15 SAFE) */
+async function pedirPermissao(){
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    stream.getTracks().forEach(t => t.stop());
+    return true;
+  } catch (e) {
+    alert("Permissão da câmera negada");
+    return false;
+  }
+}
+
+/* 🔥 2. INICIAR SCANNER SEGURO */
+async function iniciarScanner(){
+  if (ativo) return;
+  ativo = true;
+
   try {
 
-    if (ativo) return;
-    ativo = true;
-
-    document.getElementById("status").innerText = "Solicitando câmera...";
+    document.getElementById("status").innerText = "Abrindo câmera...";
 
     scanner = new Html5Qrcode("reader");
 
@@ -89,12 +100,10 @@ async function iniciarScanner() {
       return;
     }
 
-    // força traseira
+    // 🔥 força câmera traseira real
     let cameraId = cameras[0].id;
-    const back = cameras.find(c => c.label.toLowerCase().includes("back"));
-    if (back) cameraId = back.id;
-
-    document.getElementById("status").innerText = "Aponte para o QR Code";
+    const backCam = cameras.find(c => c.label.toLowerCase().includes("back"));
+    if (backCam) cameraId = backCam.id;
 
     await scanner.start(
       cameraId,
@@ -102,7 +111,7 @@ async function iniciarScanner() {
         fps: 10,
         qrbox: 250
       },
-      async (decodedText) => {
+      async (text) => {
 
         try {
           navigator.vibrate?.(80);
@@ -112,47 +121,46 @@ async function iniciarScanner() {
 
           document.getElementById("status").innerText = "QR detectado";
 
-          processarQR(decodedText);
+          processarQR(text);
 
         } catch (e) {
-          console.log("erro scan:", e);
+          console.log(e);
         }
 
-      },
-      (error) => {
-        // ignora erros de frame
       }
     );
+
+    document.getElementById("status").innerText = "Aponte para o QR Code";
 
   } catch (err) {
     console.log(err);
     document.getElementById("status").innerText =
-      "Erro na câmera (permissão ou WebView)";
+      "Erro na câmera (WebView bloqueou)";
     ativo = false;
   }
 }
 
-// evita crash APK
-function processarQR(texto) {
+/* 🔥 3. PROCESSAMENTO SEGURO */
+function processarQR(text){
   try {
-    console.log("QR:", texto);
-
-    // aqui você manda pra próxima tela
-    localStorage.setItem("qr_raw", texto);
-
+    localStorage.setItem("qr_raw", text);
     window.location.href = "confirmar.html";
-
   } catch (e) {
     alert("QR inválido");
     location.reload();
   }
 }
 
+/* 🔥 4. RESTART LIMPO */
 function reiniciar(){
   location.reload();
 }
 
-window.addEventListener("load", () => {
+/* 🔥 START SEGURO ANDROID 15 */
+window.addEventListener("load", async () => {
+  const ok = await pedirPermissao();
+  if (!ok) return;
+
   setTimeout(iniciarScanner, 800);
 });
 </script>
