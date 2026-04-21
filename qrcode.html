@@ -1,182 +1,258 @@
+Tela Qrcode 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zentry - Qrcode</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <title>ZENTRY - Pagar</title>
+  <style>
+    :root { --primary: #22C55E; --bg: #000000; --card: #121826; --border: #2A3441; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: white; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+    .header { padding: 20px; display: flex; align-items: center; gap: 15px; z-index: 10; }
+    .back-btn { background: var(--card); border: 1px solid var(--border); color: white; cursor: pointer; padding: 10px; border-radius: 50%; display: flex; border: none; align-items: center; justify-content: center; }
+    .header h2 { font-size: 20px; font-weight: 600; margin: 0; }
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  runTransaction,
-  updateDoc,
-  increment
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    .content { flex: 1; padding: 20px; display: flex; flex-direction: column; }
 
-const firebaseConfig = {
-  apiKey: "SUA_KEY",
-  authDomain: "zentry-app-74275.firebaseapp.com",
-  projectId: "zentry-app-74275"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let qrAtual = null;
-
-// 🔥 SCANNER
-async function startScanner() {
-  const scanner = new Html5Qrcode("reader");
-
-  try {
-    const devices = await Html5Qrcode.getCameras();
-
-    if (!devices || devices.length === 0) {
-      alert("Nenhuma câmera encontrada");
-      return;
+    .scanner-container {
+      width: 100%; height: 300px; background: #050505; border-radius: 28px;
+      border: 1px solid var(--border); position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 25px;
     }
 
-    // 🔥 pega traseira de forma segura
-    let cameraId = devices[0].id;
+    #reader { width: 100% !important; height: 100% !important; border-radius: 28px; overflow: hidden; }
+    #reader video { object-fit: cover !important; }
 
-    for (let d of devices) {
-      if (
-        d.label &&
-        (
-          d.label.toLowerCase().includes("back") ||
-          d.label.toLowerCase().includes("traseira") ||
-          d.label.toLowerCase().includes("rear")
-        )
-      ) {
-        cameraId = d.id;
-      }
+    .corner { position: absolute; width: 40px; height: 40px; border: 4px solid var(--primary); z-index: 5; pointer-events: none; }
+    .top-left { top: 20px; left: 20px; border-right: 0; border-bottom: 0; border-radius: 12px 0 0 0; }
+    .top-right { top: 20px; right: 20px; border-left: 0; border-bottom: 0; border-radius: 0 12px 0 0; }
+    .bottom-left { bottom: 20px; left: 20px; border-right: 0; border-top: 0; border-radius: 0 0 0 12px; }
+    .bottom-right { bottom: 20px; right: 20px; border-left: 0; border-top: 0; border-radius: 0 0 12px 0; }
+
+    .scanner-line {
+      position: absolute; width: 85%; height: 3px; background: var(--primary);
+      box-shadow: 0 0 25px var(--primary); top: 20px;
+      animation: scan 2s infinite ease-in-out; z-index: 4; pointer-events: none;
     }
 
-    await scanner.start(
-      cameraId, // 🔥 SEM {exact} (isso evita crash)
-      {
-        fps: 10,
-        qrbox: { width: 250, height: 250 }
-      },
-      async (text) => {
-        try {
-          const data = JSON.parse(text);
-          await scanner.stop();
-          await processarQR(data);
-        } catch (e) {
-          alert("QR inválido");
-        }
-      }
-    );
+    @keyframes scan { 0%, 100% { top: 30px; opacity: 0.5; } 50% { top: 260px; opacity: 1; } }
+    #status-msg { text-align: center; color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 20px; letter-spacing: 1px; }
 
-  } catch (err) {
-    console.log("ERRO CAMERA:", err);
-    alert("Erro ao abrir câmera. Verifique permissão.");
-  }
-}
-// 🔥 NÚCLEO BANCO 3.0
-async function processarQR(data) {
-
-  const qrRef = doc(db, "pix_qr", data.id);
-  const qrSnap = await getDoc(qrRef);
-
-  if (!qrSnap.exists()) {
-    alert("QR não existe");
-    return;
-  }
-
-  const qr = qrSnap.data();
-
-  // ❌ expirado
-  if (qr.status !== "ativo") {
-    alert("QR já utilizado ou expirado");
-    return;
-  }
-
-  if (Date.now() > qr.expiraEm) {
-    alert("QR expirado");
-    return;
-  }
-
-  document.getElementById("nome").innerText = qr.nome || "Destino";
-  document.getElementById("valor").innerText = qr.valor;
-
-  qrAtual = qr;
-  document.getElementById("scan").style.display = "none";
-  document.getElementById("confirm").style.display = "block";
-}
-
-// 🔥 TRANSAÇÃO ATÔMICA (BANCO REAL)
-window.pagar = async () => {
-  const uid = localStorage.getItem("userLogado");
-  if (!uid || !qrAtual) return;
-
-  const userRef = doc(db, "usuarios", uid);
-  const qrRef = doc(db, "pix_qr", qrAtual.id);
-
-  await runTransaction(db, async (tx) => {
-
-    const userSnap = await tx.get(userRef);
-    const qrSnap = await tx.get(qrRef);
-
-    if (!userSnap.exists() || !qrSnap.exists()) throw "erro";
-
-    const saldo = userSnap.data().saldo || 0;
-
-    if (saldo < qrSnap.data().valor) {
-      throw "saldo insuficiente";
+    .pay-option {
+      background: var(--card); border: 1px solid var(--border); border-radius: 22px;
+      padding: 20px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px;
+      cursor: pointer; transition: 0.2s; color: white; text-decoration: none;
     }
+    .icon-box { width: 44px; height: 44px; background: rgba(34, 197, 94, 0.1); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
 
-    if (qrSnap.data().status !== "ativo") {
-      throw "QR já usado";
-    }
+    #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+    .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: var(--primary); border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
 
-    // 🔒 bloqueio imediato
-    tx.update(qrRef, { status: "usado" });
-
-    tx.update(userRef, {
-      saldo: increment(-qrSnap.data().valor)
-    });
-  });
-
-  alert("Pagamento aprovado");
-  location.href = "home.html";
-};
-
-window.startScanner = startScanner;
-</script>
-
-<style>
-body { margin:0; background:#000; color:#fff; font-family:Inter; text-align:center; }
-#reader { width:100%; max-width:420px; margin:auto; }
-.box { background:#111827; margin:20px; padding:20px; border-radius:20px; }
-button { width:90%; padding:15px; border:none; border-radius:12px; margin-top:10px; }
-.green { background:#22C55E; color:#fff; }
-.gray { background:#374151; color:#fff; }
-</style>
+    @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes popIn { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
+    svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+  </style>
 </head>
+<body>
 
-<body onload="startScanner()">
-
-<div id="scan">
-  <h3>Qrcode</h3>
-  <div id="reader"></div>
-</div>
-
-<div id="confirm" style="display:none;">
-  <div class="box">
-    <p>Destino: <span id="nome"></span></p>
-    <p>Valor: R$ <span id="valor"></span></p>
+  <div id="zentryModalGlobal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(5px);">
+    <div style="background:#121826; border:1px solid #2A3441; border-radius:28px; width:100%; max-width:340px; padding:25px; text-align:center; animation: popIn 0.2s ease-out;">
+      <div id="zIcon" style="font-size:40px; margin-bottom:15px;">💰</div>
+      <h3 id="zTitle" style="margin:0 0 10px; font-size:18px; color:#fff; font-weight:700;">Aviso</h3>
+      <p id="zText" style="color:#9CA3AF; font-size:14px; margin-bottom:20px; line-height:1.5;"></p>
+      <input type="text" id="zInput" placeholder="R$ 0,00" inputmode="decimal" style="display:none; width:100%; padding:15px; background:#050505; border:1px solid #2A3441; border-radius:12px; color:#22C55E; text-align:center; font-size:24px; font-weight:700; margin-bottom:20px; outline:none;">
+      <div style="display:flex; gap:10px;">
+          <button id="zBtnCancel" style="display:none; flex:1; padding:15px; border-radius:14px; background:transparent; border:1px solid #2A3441; color:#fff; font-weight:600;">Voltar</button>
+          <button id="zBtnOk" style="flex:1; padding:15px; border-radius:14px; background:#22C55E; border:none; color:#000; font-weight:700;">Confirmar</button>
+      </div>
+    </div>
   </div>
 
-  <button class="green" onclick="pagar()">Confirmar pagamento</button>
-  <button class="gray" onclick="location.reload()">Cancelar</button>
-</div>
+  <div id="loading-overlay">
+    <span class="loader"></span>
+    <p style="margin-top: 20px; font-weight: 600;">Processando...</p>
+  </div>
 
+  <div class="header">
+    <button class="back-btn" onclick="window.location.href='pix.html'">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h2>Pagar</h2>
+  </div>
+
+  <div class="content">
+    <div class="scanner-container">
+      <div id="reader"></div>
+      <div class="corner top-left"></div>
+      <div class="corner top-right"></div>
+      <div class="corner bottom-left"></div>
+      <div class="corner bottom-right"></div>
+      <div class="scanner-line"></div>
+    </div>
+    <div id="status-msg">POSICIONE O QR CODE NA MOLDURA</div>
+
+    <div class="pay-option" id="btnManual">
+      <div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 3l3.8 3.8L12 10.6 8.2 6.8 12 3zM21 12l-3.8 3.8L13.4 12l3.8-3.8L21 12zM12 21l-3.8-3.8L12 13.4l3.8 3.8L12 21zM3 12l3.8-3.8L10.6 12l-3.8 3.8L3 12z"/></svg></div>
+      <div class="info">
+          <b style="display:block">Escanear Manualmente</b>
+          <span style="color:#9CA3AF; font-size:12px">Simular leitura agora</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
+        authDomain: "zentry-app-74275.firebaseapp.com",
+        projectId: "zentry-app-74275",
+        storageBucket: "zentry-app-74275.appspot.com",
+        messagingSenderId: "571422826071",
+        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let userLogado = null;
+    let html5QrCode = null;
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            userLogado = user;
+            setTimeout(iniciarScanner, 500); // Pequeno delay pra garantir que a lib carregou
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+
+    // MÁSCARA DINÂMICA
+    const inputMoeda = document.getElementById('zInput');
+    inputMoeda.addEventListener('input', (e) => {
+        let v = e.target.value.replace(/\D/g, '');
+        v = (v / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        e.target.value = v;
+    });
+
+    function limparParaNumero(valorStr) {
+        if(!valorStr) return 0;
+        return parseFloat(valorStr.replace(/[^\d,]/g, '').replace(',', '.'));
+    }
+
+    // MODAIS
+    window.zAlert = (titulo, msg, icon = "⚠️") => {
+        return new Promise(res => {
+            document.getElementById('zIcon').innerText = icon;
+            document.getElementById('zTitle').innerText = titulo;
+            document.getElementById('zText').innerText = msg;
+            document.getElementById('zInput').style.display = 'none';
+            document.getElementById('zBtnCancel').style.display = 'none';
+            document.getElementById('zentryModalGlobal').style.display = 'flex';
+            document.getElementById('zBtnOk').onclick = () => { document.getElementById('zentryModalGlobal').style.display = 'none'; res(); };
+        });
+    };
+
+    window.zPrompt = (titulo, msg) => {
+        return new Promise(res => {
+            document.getElementById('zIcon').innerText = "💰";
+            document.getElementById('zTitle').innerText = titulo;
+            document.getElementById('zText').innerText = msg;
+            const input = document.getElementById('zInput');
+            input.style.display = 'block';
+            input.value = "";
+            document.getElementById('zBtnCancel').style.display = 'block';
+            document.getElementById('zentryModalGlobal').style.display = 'flex';
+            document.getElementById('zBtnOk').onclick = () => { 
+                const val = input.value;
+                document.getElementById('zentryModalGlobal').style.display = 'none'; 
+                res(val); 
+            };
+            document.getElementById('zBtnCancel').onclick = () => { document.getElementById('zentryModalGlobal').style.display = 'none'; res(null); };
+        });
+    };
+
+    function iniciarScanner() {
+        if(!document.getElementById("reader")) return;
+        html5QrCode = new Html5Qrcode("reader");
+        const config = { fps: 15, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+            if (navigator.vibrate) navigator.vibrate(100);
+            html5QrCode.stop();
+            processarDadosLidos(decodedText);
+        }).catch(err => {
+            document.getElementById('status-msg').innerText = "CÂMERA NÃO DETECTADA OU BLOQUEADA";
+        });
+    }
+
+    async function processarDadosLidos(texto) {
+        let valorNum = 0;
+        let nome = "Recebedor Externo";
+        
+        const digitado = await zPrompt("Valor do Pagamento", `Informe o valor para ${nome}:`);
+        if (digitado) {
+            valorNum = limparParaNumero(digitado);
+            abrirModalConfirmacao(nome, valorNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), valorNum);
+        } else {
+            location.reload();
+        }
+    }
+
+    function abrirModalConfirmacao(nome, valorStr, valorNum) {
+        document.getElementById('zIcon').innerText = "✅";
+        document.getElementById('zTitle').innerText = "Confirmar Pagamento";
+        document.getElementById('zText').innerHTML = `Destino: <b>${nome}</b><br>Valor: <b style="color:#22C55E">${valorStr}</b>`;
+        document.getElementById('zInput').style.display = 'none';
+        document.getElementById('zBtnCancel').style.display = 'block';
+        document.getElementById('zentryModalGlobal').style.display = 'flex';
+        
+        document.getElementById('zBtnOk').onclick = () => {
+            document.getElementById('zentryModalGlobal').style.display = 'none';
+            executarDebitoReal(valorNum, valorStr, nome);
+        };
+        document.getElementById('zBtnCancel').onclick = () => { location.reload(); };
+    }
+
+    // Botão de simulação manual
+    document.getElementById('btnManual').onclick = () => {
+        processarDadosLidos("MANUAL");
+    };
+
+    async function executarDebitoReal(valorNum, valorStr, recebedor) {
+        const overlay = document.getElementById('loading-overlay');
+        overlay.style.display = 'flex';
+        try {
+            const userRef = doc(db, "usuarios", userLogado.uid);
+            const snap = await getDoc(userRef);
+            const saldoAtual = snap.data().saldo || 0;
+
+            if (saldoAtual < valorNum) {
+                overlay.style.display = 'none';
+                await zAlert("Saldo Insuficiente", "Seu saldo é insuficiente para esta transação.", "❌");
+                location.reload(); 
+                return;
+            }
+            
+            await updateDoc(userRef, { saldo: increment(-valorNum), saida: increment(valorNum) });
+            
+            localStorage.setItem("transacao_pendente", JSON.stringify({
+                nomeDestino: recebedor, valor: valorStr, valorNumerico: valorNum,
+                data: new Date().toLocaleString('pt-BR'), bancoDestino: "Zentry Payments",
+                chavePix: "Leitura de Scanner", id: "ZNT" + Math.floor(100000 + Math.random() * 900000)
+            }));
+            window.location.href = "comprovante.html";
+        } catch (error) {
+            overlay.style.display = 'none';
+            await zAlert("Erro no Sistema", "Falha ao processar o débito.", "❌");
+        }
+    }
+  </script>
 </body>
 </html>
