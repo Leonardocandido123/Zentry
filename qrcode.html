@@ -2,167 +2,333 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>Qrcode</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>QR Code - ZENTRY</title>
 <script src="https://unpkg.com/html5-qrcode"></script>
-
 <style>
-body{
-  margin:0;
-  background:#000;
-  color:#fff;
-  font-family:Inter;
-  display:flex;
-  flex-direction:column;
-  height:100vh;
-}
+  :root { --accent:#22C55E; --accent-glow:rgba(34,197,94,.5); }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+  html,body{margin:0;padding:0;height:100%;width:100%;background:#000;color:#fff;font-family:'Inter',sans-serif;overflow:hidden;overscroll-behavior:none}
 
-.header{
-  text-align:center;
-  padding:18px;
-  font-weight:700;
-  border-bottom:1px solid #222;
-}
+  /* CÂMERA FULLSCREEN */
+  #reader{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;background:#000}
+  #reader video{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover!important}
+  #reader > div, #reader__scan_region, #reader__dashboard{display:none!important}
+  #reader video{display:block!important}
 
-#reader{
-  width:100%;
-  max-width:420px;
-  margin:auto;
-  margin-top:20px;
-  border-radius:18px;
-  overflow:hidden;
-}
+  /* OVERLAY ESCURO COM RECORTE QUADRADO (mask) */
+  .overlay{
+    position:fixed;inset:0;z-index:2;pointer-events:none;
+    background:rgba(0,0,0,.72);
+    -webkit-mask:
+      linear-gradient(#000 0 0),
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+            mask-composite:exclude;
+    -webkit-mask-position: 0 0, center;
+    mask-position: 0 0, center;
+    -webkit-mask-size: 100% 100%, 270px 270px;
+            mask-size: 100% 100%, 270px 270px;
+    -webkit-mask-repeat: no-repeat, no-repeat;
+            mask-repeat: no-repeat, no-repeat;
+  }
 
-.status{
-  text-align:center;
-  color:#22C55E;
-  font-size:13px;
-  margin:15px;
-}
+  /* QUADRADO DE LEITURA + CANTOS + LINHA */
+  .scan-frame{
+    position:fixed;top:50%;left:50%;width:270px;height:270px;
+    transform:translate(-50%,-50%);z-index:3;pointer-events:none;
+    border-radius:24px;
+  }
+  .corner{position:absolute;width:34px;height:34px;border:3px solid var(--accent);filter:drop-shadow(0 0 6px var(--accent-glow))}
+  .corner.tl{top:-2px;left:-2px;border-right:none;border-bottom:none;border-top-left-radius:18px}
+  .corner.tr{top:-2px;right:-2px;border-left:none;border-bottom:none;border-top-right-radius:18px}
+  .corner.bl{bottom:-2px;left:-2px;border-right:none;border-top:none;border-bottom-left-radius:18px}
+  .corner.br{bottom:-2px;right:-2px;border-left:none;border-top:none;border-bottom-right-radius:18px}
 
-button{
-  width:90%;
-  margin:20px auto;
-  padding:14px;
-  border:none;
-  border-radius:12px;
-  background:#22C55E;
-  color:#000;
-  font-weight:700;
-}
+  .scan-line{
+    position:absolute;left:10px;right:10px;height:2px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    box-shadow:0 0 16px 2px var(--accent-glow);
+    border-radius:2px;top:10px;
+    animation:scan 2.4s ease-in-out infinite;
+  }
+  @keyframes scan{
+    0%{top:10px;opacity:.3}
+    10%{opacity:1}
+    50%{top:calc(100% - 12px);opacity:1}
+    90%{opacity:1}
+    100%{top:10px;opacity:.3}
+  }
+
+  /* TOPO: VOLTAR + LANTERNA */
+  .top-bar{
+    position:fixed;top:0;left:0;right:0;z-index:5;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:max(env(safe-area-inset-top),20px) 20px 0;
+  }
+  .icon-btn{
+    width:46px;height:46px;border-radius:50%;
+    background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,.12);color:#fff;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:transform .15s ease,background .2s ease;
+  }
+  .icon-btn:active{transform:scale(.92)}
+  .icon-btn.on{background:var(--accent);color:#000;border-color:var(--accent)}
+  .icon-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* TITULO ABAIXO DO QUADRO */
+  .hint{
+    position:fixed;left:0;right:0;text-align:center;z-index:4;
+    top:calc(50% + 160px);font-size:15px;font-weight:600;letter-spacing:.2px;
+    text-shadow:0 2px 12px rgba(0,0,0,.8);
+    padding:0 30px;
+  }
+  .hint small{display:block;margin-top:6px;font-weight:400;color:#cbd5e1;font-size:12px}
+  .hint.error{color:#fecaca}
+
+  /* BARRA INFERIOR */
+  .bottom-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:5;
+    padding:18px 20px max(env(safe-area-inset-bottom),22px);
+    display:flex;gap:10px;
+    background:linear-gradient(to top,rgba(0,0,0,.85),transparent);
+  }
+  .bottom-btn{
+    flex:1;padding:15px 14px;border:none;border-radius:16px;
+    background:rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    color:#fff;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;
+    border:1px solid rgba(255,255,255,.1);
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .bottom-btn:active{transform:scale(.97)}
+  .bottom-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+
+  /* FLASH DE SUCESSO */
+  .flash-success{
+    position:fixed;inset:0;z-index:9;background:var(--accent);
+    opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  .flash-success.show{opacity:.35}
+
+  #file-input{display:none}
 </style>
 </head>
-
 <body>
 
-<div class="header">Qrcode</div>
+  <div id="reader"></div>
 
-<div id="reader"></div>
+  <div class="overlay"></div>
 
-<div class="status" id="status">Preparando câmera...</div>
+  <div class="scan-frame">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <div class="scan-line"></div>
+  </div>
 
-<button onclick="reiniciar()">Reiniciar</button>
+  <div class="top-bar">
+    <button class="icon-btn" onclick="voltar()" aria-label="Voltar">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="icon-btn" id="flashBtn" onclick="toggleFlash()" aria-label="Lanterna">
+      <svg viewBox="0 0 24 24"><path d="M13 2L4.5 14H12l-1 8 8.5-12H12l1-8z"/></svg>
+    </button>
+  </div>
 
-<script>
-let scanner;
-let ativo = false;
+  <div class="hint" id="hint">Aponte para o QR Code<small>Mantenha o código dentro do quadro</small></div>
 
-/* 🔥 1. PERMISSÃO FORÇADA (ANDROID 15 SAFE) */
-async function pedirPermissao(){
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    stream.getTracks().forEach(t => t.stop());
-    return true;
-  } catch (e) {
-    alert("Permissão da câmera negada");
-    return false;
+  <div class="bottom-bar">
+    <button class="bottom-btn" onclick="document.getElementById('file-input').click()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      Galeria
+    </button>
+    <button class="bottom-btn" onclick="location.href='copia_cola.html'">
+      <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+      Copia e cola
+    </button>
+  </div>
+
+  <input type="file" id="file-input" accept="image/*">
+
+  <div class="flash-success" id="flashOk"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
+    authDomain: "zentry-app-74275.firebaseapp.com",
+    projectId: "zentry-app-74275",
+    storageBucket: "zentry-app-74275.appspot.com",
+    messagingSenderId: "571422826071",
+    appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let scanner = null;
+  let ativo = false;
+  let processando = false;
+  let flashOn = false;
+  let trackAtual = null;
+
+  const hint = document.getElementById("hint");
+  const flashBtn = document.getElementById("flashBtn");
+
+  function setHint(txt, sub, isError){
+    hint.className = "hint" + (isError ? " error" : "");
+    hint.innerHTML = txt + (sub ? `<small>${sub}</small>` : "");
   }
-}
 
-/* 🔥 2. INICIAR SCANNER SEGURO */
-async function iniciarScanner(){
-  if (ativo) return;
-  ativo = true;
+  function flashSuccess(){
+    const f = document.getElementById("flashOk");
+    f.classList.add("show");
+    setTimeout(()=>f.classList.remove("show"), 250);
+  }
 
-  try {
+  // Mesma extração do copia_cola.html
+  function extrairDadosPix(codigo) {
+    try {
+      let valor = "0.00";
+      if (codigo.includes("5405")) valor = codigo.split('5405')[1].substring(0, codigo.split('5405')[1].indexOf('5802'));
+      else if (codigo.includes("5404")) valor = codigo.split('5404')[1].substring(0, codigo.split('5404')[1].indexOf('5802'));
+      let nome = "Recebedor Externo";
+      if (codigo.includes("59")) {
+        const parteNome = codigo.split('59')[1];
+        const tam = parseInt(parteNome.substring(0, 2));
+        nome = parteNome.substring(2, 2 + tam);
+      }
+      return { valor: parseFloat(valor), nome: nome };
+    } catch (e) { return null; }
+  }
 
-    document.getElementById("status").innerText = "Abrindo câmera...";
+  async function buscarUsuarioPorNome(nome) {
+    try {
+      const q = query(collection(db, "usuarios"), where("nome", "==", nome));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const d = snap.docs[0];
+        return { uid: d.id, ...d.data() };
+      }
+    } catch(e) { console.warn("Firestore:", e); }
+    return null;
+  }
 
-    scanner = new Html5Qrcode("reader");
+  async function processarCodigo(text){
+    if (processando) return;
+    processando = true;
 
-    const cameras = await Html5Qrcode.getCameras();
+    if (navigator.vibrate) navigator.vibrate(80);
+    flashSuccess();
 
-    if (!cameras || cameras.length === 0) {
-      document.getElementById("status").innerText = "Nenhuma câmera encontrada";
-      ativo = false;
+    setHint("QR detectado", "Carregando dados...");
+    if (scanner && ativo) { try { await scanner.stop(); } catch(e){} ativo = false; }
+
+    const dados = extrairDadosPix(text);
+    if (!dados || !dados.valor || dados.valor <= 0) {
+      setHint("QR Code inválido", "Tente um código Pix válido", true);
+      setTimeout(()=>{ processando = false; iniciarScanner(); }, 1800);
       return;
     }
 
-    // 🔥 força câmera traseira real
-    let cameraId = cameras[0].id;
-    const backCam = cameras.find(c => c.label.toLowerCase().includes("back"));
-    if (backCam) cameraId = backCam.id;
+    const usuario = await buscarUsuarioPorNome(dados.nome);
 
-    await scanner.start(
-      cameraId,
-      {
-        fps: 10,
-        qrbox: 250
-      },
-      async (text) => {
+    const transacaoPendente = {
+      nomeDestino: usuario ? usuario.nome : dados.nome,
+      valor: dados.valor.toLocaleString('pt-BR', { style:'currency', currency:'BRL' }),
+      valorNumerico: dados.valor,
+      chavePix: "QR Code",
+      bancoDestino: usuario ? "Zentry Bank" : "Banco Externo",
+      uidDestino: usuario ? usuario.uid : "externo"
+    };
+    localStorage.setItem("transacao_pendente", JSON.stringify(transacaoPendente));
+    location.href = "revisao.html";
+  }
 
-        try {
-          navigator.vibrate?.(80);
+  async function iniciarScanner(){
+    if (ativo) return;
+    ativo = true;
 
-          await scanner.stop();
-          ativo = false;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setHint("Câmera não disponível", "Libere a permissão de câmera nas configurações do app", true);
+      ativo = false; return;
+    }
 
-          document.getElementById("status").innerText = "QR detectado";
+    try {
+      scanner = new Html5Qrcode("reader", { verbose:false });
+      const config = { fps: 12, qrbox: { width: 270, height: 270 }, aspectRatio: window.innerHeight / window.innerWidth };
 
-          processarQR(text);
-
-        } catch (e) {
-          console.log(e);
-        }
-
+      try {
+        await scanner.start({ facingMode:{ exact:"environment" } }, config, processarCodigo, ()=>{});
+      } catch(e1) {
+        await scanner.start({ facingMode:"environment" }, config, processarCodigo, ()=>{});
       }
-    );
 
-    document.getElementById("status").innerText = "Aponte para o QR Code";
+      // Pega a track pra controlar o flash
+      try {
+        const stream = scanner.getRunningTrackCameraCapabilities ? null : null;
+        const videoEl = document.querySelector("#reader video");
+        if (videoEl && videoEl.srcObject) {
+          trackAtual = videoEl.srcObject.getVideoTracks()[0];
+        }
+      } catch(e){}
 
-  } catch (err) {
-    console.log(err);
-    document.getElementById("status").innerText =
-      "Erro na câmera (WebView bloqueou)";
-    ativo = false;
+      setHint("Aponte para o QR Code", "Mantenha o código dentro do quadro");
+    } catch (err) {
+      console.error(err);
+      const msg = err && err.name === "NotAllowedError"
+        ? "Permissão de câmera negada"
+        : "Não foi possível abrir a câmera";
+      const sub = err && err.name === "NotAllowedError"
+        ? "Vá em Configurações do app e ative a câmera"
+        : (err?.message || "");
+      setHint(msg, sub, true);
+      ativo = false;
+    }
   }
-}
 
-/* 🔥 3. PROCESSAMENTO SEGURO */
-function processarQR(text){
-  try {
-    localStorage.setItem("qr_raw", text);
-    window.location.href = "confirmar.html";
-  } catch (e) {
-    alert("QR inválido");
-    location.reload();
-  }
-}
+  window.toggleFlash = async function(){
+    if (!trackAtual) {
+      const v = document.querySelector("#reader video");
+      if (v && v.srcObject) trackAtual = v.srcObject.getVideoTracks()[0];
+    }
+    if (!trackAtual) return;
+    const caps = trackAtual.getCapabilities ? trackAtual.getCapabilities() : {};
+    if (!caps.torch) { setHint("Lanterna não suportada", "Seu dispositivo não permite", true); setTimeout(()=>setHint("Aponte para o QR Code","Mantenha o código dentro do quadro"),1500); return; }
+    try {
+      flashOn = !flashOn;
+      await trackAtual.applyConstraints({ advanced: [{ torch: flashOn }] });
+      flashBtn.classList.toggle("on", flashOn);
+    } catch(e){ console.warn(e); }
+  };
 
-/* 🔥 4. RESTART LIMPO */
-function reiniciar(){
-  location.reload();
-}
+  window.voltar = function(){
+    if (scanner && ativo) scanner.stop().catch(()=>{});
+    location.href = "pix.html";
+  };
 
-/* 🔥 START SEGURO ANDROID 15 */
-window.addEventListener("load", async () => {
-  const ok = await pedirPermissao();
-  if (!ok) return;
+  // Leitura por imagem da galeria
+  document.getElementById("file-input").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (scanner && ativo) { try { await scanner.stop(); } catch(_){} ativo = false; }
+    const tmp = new Html5Qrcode("reader", { verbose:false });
+    try {
+      const result = await tmp.scanFile(file, false);
+      processarCodigo(result);
+    } catch(err){
+      setHint("QR não encontrado na imagem","Tente outra foto", true);
+      setTimeout(()=>{ processando = false; iniciarScanner(); }, 1800);
+    }
+  });
 
-  setTimeout(iniciarScanner, 800);
-});
+  window.addEventListener("load", () => setTimeout(iniciarScanner, 250));
+  window.addEventListener("beforeunload", () => { if (scanner && ativo) scanner.stop().catch(()=>{}); });
 </script>
 
 </body>
