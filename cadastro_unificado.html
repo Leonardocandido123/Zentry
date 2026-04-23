@@ -17,13 +17,13 @@
 
         #main-slider {
             display: flex;
-            width: 700%; 
+            width: 700%;
             height: 100vh;
             transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .step-page {
-            width: 14.28%; 
+            width: 14.28%;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -60,20 +60,21 @@
             width: 65px; height: 65px; background: #1F2937; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; border: none; transition: 0.3s;
         }
-        
+
         .next-btn svg { width: 30px; height: 30px; stroke: #4B5563; stroke-width: 2.5; fill: none; }
         .next-btn.active { background: var(--primary); box-shadow: 0 0 25px rgba(34, 197, 94, 0.4); }
         .next-btn.active svg { stroke: #000; }
 
         .finish-btn {
-            display: none; padding: 20px 40px; background: var(--primary); 
+            display: none; padding: 20px 40px; background: var(--primary);
             color: black; border: none; border-radius: 18px; font-weight: 700; font-size: 16px;
         }
 
-        /* MODAL ZENTRY (BLINDAGEM) */
         #zModalGlobal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(8px); }
         .z-content { background:#121826; border:1px solid #2A3441; border-radius:30px; width:100%; max-width:340px; padding:30px; text-align:center; animation: pop 0.3s ease; }
         @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        #recaptcha-container { position: fixed; bottom: -100px; left: 0; }
     </style>
 </head>
 <body>
@@ -105,7 +106,7 @@
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Qual o seu celular?</h2><p>Para envio de notificações e segurança.</p></div>
+            <div class="header-area"><h2>Qual o seu celular?</h2><p>Vamos enviar um código por SMS para confirmar.</p></div>
             <div class="input-wrapper"><input type="tel" id="cad_tel" class="input-line" placeholder="(00) 00000-0000" maxlength="15" autocomplete="off"></div>
         </div>
 
@@ -147,9 +148,17 @@
         <button id="finishBtn" class="finish-btn">FINALIZAR CADASTRO</button>
     </div>
 
+    <div id="recaptcha-container"></div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import {
+            getAuth,
+            RecaptchaVerifier,
+            signInWithPhoneNumber,
+            EmailAuthProvider,
+            linkWithCredential
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -165,7 +174,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Funções de Blindagem
+        // --- Modal ---
         function showZModal(titulo, texto, icon) {
             document.getElementById('zModalGlobal').style.display = 'flex';
             document.getElementById('zTitle').innerText = titulo;
@@ -174,7 +183,7 @@
         }
         document.getElementById('zBtnClose').onclick = () => document.getElementById('zModalGlobal').style.display = 'none';
 
-        // --- MÁSCARAS ---
+        // --- Máscaras ---
         const inputCPF = document.getElementById('cad_cpf');
         const inputTel = document.getElementById('cad_tel');
 
@@ -190,99 +199,147 @@
             e.target.value = v;
         });
 
-        // --- NAVEGAÇÃO ---
+        // --- reCAPTCHA invisível (necessário para Phone Auth) ---
+        const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible'
+        });
+
+        // --- Navegação ---
         let currentStep = 0;
         const totalSteps = 7;
         const slider = document.getElementById('main-slider');
         const pBar = document.getElementById('p-bar');
         const nextBtn = document.getElementById('nextBtn');
         const finishBtn = document.getElementById('finishBtn');
-        let tokenGerado = "";
+        let confirmationResult = null;
 
-        window.avancar = () => {
+        async function avancar() {
+            // Saindo do passo do telefone -> envia SMS de verdade
             if (currentStep === 2) {
-                tokenGerado = Math.floor(100000 + Math.random() * 900000).toString();
-                showZModal("Segurança SMS", "Seu código de ativação ZENTRY é: " + tokenGerado, "📱");
-                document.getElementById('token-msg').innerText = "Insira o código enviado para " + inputTel.value;
-            }
+                const numeroLimpo = inputTel.value.replace(/\D/g, "");
+                if (numeroLimpo.length < 10) {
+                    showZModal("Número inválido", "Digite um celular válido com DDD.", "📱");
+                    return;
+                }
+                const numeroE164 = "+55" + numeroLimpo;
 
-            if (currentStep === 3) {
-                const inputs = document.querySelectorAll('.token-input');
-                let digitado = "";
-                inputs.forEach(i => digitado += i.value);
-                if (digitado !== tokenGerado) {
-                    showZModal("Token Inválido", "O código inserido não confere. Tente novamente.", "❌");
+                nextBtn.classList.remove('active');
+                document.getElementById('token-msg').innerText = "Enviando código...";
+
+                try {
+                    confirmationResult = await signInWithPhoneNumber(auth, numeroE164, recaptchaVerifier);
+                    document.getElementById('token-msg').innerText = "Código enviado para " + inputTel.value;
+                } catch (e) {
+                    console.error(e);
+                    let msg = "Não conseguimos enviar o SMS. Verifique o número e tente novamente.";
+                    if (e.code === 'auth/too-many-requests') msg = "Muitas tentativas. Aguarde um pouco.";
+                    if (e.code === 'auth/invalid-phone-number') msg = "Número de celular inválido.";
+                    showZModal("Erro no SMS", msg, "❌");
                     return;
                 }
             }
 
-            if(currentStep < totalSteps - 1) {
+            // Saindo do passo do token -> confirma código
+            if (currentStep === 3) {
+                const inputs = document.querySelectorAll('.token-input');
+                let digitado = "";
+                inputs.forEach(i => digitado += i.value);
+                if (digitado.length !== 6) {
+                    showZModal("Código incompleto", "Digite os 6 dígitos do SMS.", "📱");
+                    return;
+                }
+                if (!confirmationResult) {
+                    showZModal("Sessão perdida", "Volte e solicite o código novamente.", "⚠️");
+                    return;
+                }
+
+                try {
+                    await confirmationResult.confirm(digitado);
+                } catch (e) {
+                    console.error(e);
+                    showZModal("Código inválido", "O código inserido não confere. Tente novamente.", "❌");
+                    return;
+                }
+            }
+
+            if (currentStep < totalSteps - 1) {
                 currentStep++;
                 const deslocamento = currentStep * (100 / totalSteps);
                 slider.style.transform = `translateX(-${deslocamento}%)`;
                 pBar.style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
-                
-                if(currentStep === 6) {
+
+                if (currentStep === 6) {
                     nextBtn.style.display = 'none';
                     finishBtn.style.display = 'block';
                 }
                 nextBtn.classList.remove('active');
             }
-        };
+        }
 
         nextBtn.onclick = avancar;
 
-        // --- TOKEN PULOS ---
+        // --- Pulos no token ---
         const tokenInputs = document.querySelectorAll('.token-input');
         tokenInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
                 if (e.target.value.length === 1 && index < tokenInputs.length - 1) tokenInputs[index + 1].focus();
-                if(Array.from(tokenInputs).every(i => i.value.length === 1)) nextBtn.classList.add('active');
+                if (Array.from(tokenInputs).every(i => i.value.length === 1)) nextBtn.classList.add('active');
             });
             input.addEventListener('keydown', (e) => {
                 if (e.key === "Backspace" && input.value === "" && index > 0) tokenInputs[index - 1].focus();
             });
         });
 
-        // --- FINALIZAÇÃO ---
-        window.finalizar = async () => {
-            const email = document.getElementById('cad_email').value;
+        // --- Finalização: vincula e-mail/senha ao usuário já autenticado por SMS ---
+        async function finalizar() {
+            const email = document.getElementById('cad_email').value.trim();
             const senha = document.getElementById('cad_senha').value;
-            const nome = document.getElementById('cad_nome').value;
+            const nome = document.getElementById('cad_nome').value.trim();
             const cpf = document.getElementById('cad_cpf').value;
             const tel = document.getElementById('cad_tel').value;
             const termo = document.getElementById('checkTermo').checked;
 
-            if(!termo) { showZModal("Termos", "Você precisa aceitar os termos para continuar.", "⚖️"); return; }
+            if (!termo) { showZModal("Termos", "Você precisa aceitar os termos para continuar.", "⚖️"); return; }
+            if (!email || senha.length < 6) { showZModal("Dados incompletos", "Preencha e-mail e senha (mínimo 6 dígitos).", "⚠️"); return; }
+
+            const user = auth.currentUser;
+            if (!user) { showZModal("Sessão expirada", "Reinicie o cadastro.", "⚠️"); return; }
 
             finishBtn.innerText = "CRIANDO CONTA...";
             finishBtn.style.opacity = "0.7";
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-                const user = userCredential.user;
+                // Vincula e-mail+senha à conta criada via telefone
+                const credential = EmailAuthProvider.credential(email, senha);
+                await linkWithCredential(user, credential);
+
                 await setDoc(doc(db, "usuarios", user.uid), {
-                    nome: nome, cpf: cpf, telefone: tel, email: email, saldo: 0.00, dataCriacao: new Date().toISOString()
+                    nome, cpf, telefone: tel, email,
+                    saldo: 0,
+                    dataCriacao: new Date().toISOString()
                 });
-                
-                localStorage.setItem("usuarioEmail", email); // Facilita o login automático
+
+                localStorage.setItem("usuarioEmail", email);
                 showZModal("Bem-vindo!", "Sua conta ZENTRY foi criada com sucesso. Vamos ao login?", "🎉");
                 setTimeout(() => { window.location.href = "login.html"; }, 3000);
 
-            } catch (error) { 
+            } catch (error) {
+                console.error(error);
                 finishBtn.innerText = "FINALIZAR CADASTRO";
                 finishBtn.style.opacity = "1";
                 let erroMsg = "Não foi possível criar sua conta agora.";
-                if(error.code === 'auth/email-already-in-use') erroMsg = "Este e-mail já está cadastrado.";
-                showZModal("Erro no Cadastro", erroMsg, "❌"); 
+                if (error.code === 'auth/email-already-in-use') erroMsg = "Este e-mail já está cadastrado.";
+                if (error.code === 'auth/credential-already-in-use') erroMsg = "Este e-mail já está vinculado a outra conta.";
+                if (error.code === 'auth/weak-password') erroMsg = "Senha fraca. Use pelo menos 6 caracteres.";
+                showZModal("Erro no Cadastro", erroMsg, "❌");
             }
-        };
+        }
 
         finishBtn.onclick = finalizar;
 
         document.querySelectorAll('.input-line').forEach(input => {
             input.addEventListener('input', () => {
-                if(input.value.length >= 3) nextBtn.classList.add('active');
+                if (input.value.length >= 3) nextBtn.classList.add('active');
                 else nextBtn.classList.remove('active');
             });
         });
