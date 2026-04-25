@@ -29,7 +29,6 @@
         .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; }
         .input-box input { background: transparent; border: none; color: #fff; font-size: 18px; width: 100%; font-weight: 600; }
         
-        /* GRID DE OPERADORAS COM IMAGENS */
         .op-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .op-item { 
             background: var(--card); 
@@ -44,65 +43,43 @@
             align-items: center;
             justify-content: center;
         }
-        
         .op-item img { 
-            width: 32px; 
-            height: 32px; 
-            object-fit: contain; 
-            margin-bottom: 8px; 
+            width: 32px; height: 32px; object-fit: contain; margin-bottom: 8px; 
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
-        
         .op-item span { display: block; font-size: 9px; font-weight: 800; color: #9CA3AF; }
-        
-        /* ESTADOS ATIVOS PERSONALIZADOS */
-        .op-item.active { background: rgba(255, 255, 255, 0.05); }
+        .op-item.active { background: rgba(255,255,255,0.05); }
         .op-item.active span { color: #fff; }
+        .op-vivo.active  { border-color: #662d91; box-shadow: 0 0 15px rgba(102,45,145,0.3); }
+        .op-tim.active   { border-color: #0038a8; box-shadow: 0 0 15px rgba(0,56,168,0.3); }
+        .op-claro.active { border-color: #ee1d23; box-shadow: 0 0 15px rgba(238,29,35,0.3); }
+        .op-oi.active    { border-color: #f7941d; box-shadow: 0 0 15px rgba(247,148,29,0.3); }
         
-        .op-vivo.active { border-color: #662d91; box-shadow: 0 0 15px rgba(102, 45, 145, 0.3); }
-        .op-tim.active { border-color: #0038a8; box-shadow: 0 0 15px rgba(0, 56, 168, 0.3); }
-        .op-claro.active { border-color: #ee1d23; box-shadow: 0 0 15px rgba(238, 29, 35, 0.3); }
-        .op-oi.active { border-color: #f7941d; box-shadow: 0 0 15px rgba(247, 148, 29, 0.3); }
-        
-        /* GRID DE VALORES */
         .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .v-chip { 
-            background: var(--card); 
-            border: 1px solid var(--border); 
-            border-radius: 14px; 
-            padding: 15px; 
-            text-align: center; 
-            font-weight: 800; 
-            cursor: pointer; 
-            font-size: 14px; 
-            transition: 0.2s;
+            background: var(--card); border: 1px solid var(--border); border-radius: 14px; 
+            padding: 15px; text-align: center; font-weight: 800; cursor: pointer; 
+            font-size: 14px; transition: 0.2s;
         }
         .v-chip.active { background: var(--primary); color: #052e16; border-color: var(--primary); transform: scale(1.05); }
         
-        /* CAMPO PERSONALIZADO */
         #customValueBox { display: none; margin-top: 15px; animation: slideIn 0.3s ease-out; border-color: var(--primary); }
         @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         .footer-action { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, #000 40%); }
         .btn-pay { 
-            width: 100%; 
-            padding: 18px; 
-            border-radius: 20px; 
-            border: none; 
-            background: var(--primary); 
-            color: #052e16; 
-            font-weight: 800; 
-            font-size: 16px; 
-            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3); 
-            cursor: pointer;
+            width: 100%; padding: 18px; border-radius: 20px; border: none; 
+            background: var(--primary); color: #052e16; font-weight: 800; font-size: 16px; 
+            box-shadow: 0 10px 25px rgba(34,197,94,0.3); cursor: pointer;
         }
         .btn-pay:active { transform: scale(0.98); }
+        .btn-pay:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
     <div class="app-bar">
-        <div class="back-btn" onclick="window.location.href='index.html'">Voltar</div>
+        <div class="back-btn" onclick="window.location.href='home.html'">← Voltar</div>
         <div id="displaySaldo" style="color: var(--primary); font-weight: 800; font-size: 18px;">R$ 0,00</div>
     </div>
 
@@ -152,46 +129,40 @@
         <button id="btnFinish" class="btn-pay" onclick="finalizarAgora()">Confirmar Recarga</button>
     </div>
 
+<!-- ✅ ANTES: ~20 linhas de import + firebaseConfig + initializeApp repetidos -->
+<!-- ✅ AGORA: 1 import do zentry-core.js faz tudo -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
-        authDomain: "zentry-app-74275.firebaseapp.com",
-        projectId: "zentry-app-74275",
-        storageBucket: "zentry-app-74275.appspot.com",
-        messagingSenderId: "571422826071",
-        appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
-    };
+    // ─── 1. IMPORTA DO ARQUIVO CENTRAL (única linha necessária) ───
+    import { auth, db, ZentryAuth, ZentryUser, ZentryUI } from './zentry-core.js';
+    import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    let userUid = "";
+    // ─── 2. VARIÁVEIS DE ESTADO DA TELA ───
+    let userUid    = "";
     let saldoAtual = 0;
-    let valorFinal = 20;
+    let valorFinal = 20;       // valor padrão selecionado
     let operadoraFinal = "";
 
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            userUid = user.uid;
-            const snap = await getDoc(doc(db, "usuarios", user.uid));
-            if(snap.exists()){
-                saldoAtual = Number(snap.data().saldo || 0);
-                document.getElementById('displaySaldo').innerText = saldoAtual.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-            }
-        } else { window.location.href = 'login.html'; }
-    });
+    // ─── 3. PROTEÇÃO DE TELA + CARREGA DADOS DO USUÁRIO ───
+    // ZentryAuth.exigirLogin() já redireciona para login.html se não logado
+    const user = await ZentryAuth.exigirLogin();
+    userUid = user.uid;
 
+    // Busca saldo uma única vez (sem tempo real, suficiente para esta tela)
+    const dados = await ZentryUser.buscar(userUid);
+    if (dados) {
+        saldoAtual = Number(dados.saldo || 0);
+        document.getElementById('displaySaldo').innerText = ZentryUI.formatarMoeda(saldoAtual);
+    }
+
+    // ─── 4. SELEÇÃO DE OPERADORA ───
     window.escolherOp = (el, nome) => {
         document.querySelectorAll('.op-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         operadoraFinal = nome;
     };
 
+    // ─── 5. SELEÇÃO DE VALOR ───
     window.escolherVal = (el, v) => {
         document.getElementById('customValueBox').style.display = 'none';
         document.querySelectorAll('.v-chip').forEach(i => i.classList.remove('active'));
@@ -206,59 +177,66 @@
         document.getElementById('outroValor').focus();
     };
 
+    // ─── 6. FINALIZAR RECARGA ───
     window.finalizarAgora = async () => {
-        const tel = document.getElementById('numTel').value;
-        const outroV = document.getElementById('outroValor').value;
-        const btn = document.getElementById('btnFinish');
+        const tel   = document.getElementById('numTel').value;
+        const btn   = document.getElementById('btnFinish');
+        const caixaAberta = document.getElementById('customValueBox').style.display === 'flex';
+        const valorParaDebitar = caixaAberta
+            ? Number(document.getElementById('outroValor').value)
+            : valorFinal;
 
-        let valorParaDebitar = valorFinal;
-        if(document.getElementById('customValueBox').style.display === 'flex') {
-            valorParaDebitar = Number(outroV);
-        }
+        // Validações — usa ZentryUI.toast() no lugar de alert()
+        if (tel.length < 14)        return ZentryUI.toast("Digite um número válido!", "aviso");
+        if (!operadoraFinal)        return ZentryUI.toast("Selecione a operadora!", "aviso");
+        if (valorParaDebitar <= 0)  return ZentryUI.toast("Insira um valor válido!", "aviso");
+        if (valorParaDebitar > saldoAtual) return ZentryUI.toast("Saldo insuficiente!", "erro");
 
-        if(tel.length < 14) return alert("Digite um número válido!");
-        if(!operadoraFinal) return alert("Selecione a operadora!");
-        if(valorParaDebitar <= 0) return alert("Insira um valor válido!");
-        if(valorParaDebitar > saldoAtual) return alert("Saldo insuficiente!");
-
+        // Bloqueia botão e exibe loading
         btn.disabled = true;
         btn.innerText = "Processando...";
+        ZentryUI.loading(true);
 
         try {
             const txId = "REC" + Date.now();
-            
-            // Grava a transação para o extrato/gráfico
-            await setDoc(doc(db, "transacoes", txId), {
-                userId: userUid,
-                tipo: "saida",
-                valor: valorParaDebitar,
-                data: new Date().toISOString().split('T')[0],
-                timestamp: new Date(),
-                descricao: "Recarga " + operadoraFinal
+
+            // Grava transação no histórico (subcoleção do usuário)
+            await setDoc(doc(db, "usuarios", userUid, "transacoes", txId), {
+                tipo:      "saida",
+                valor:     valorParaDebitar,
+                descricao: "Recarga " + operadoraFinal + " - " + tel,
+                data:      new Date().toISOString().split('T')[0],
+                timestamp: new Date()
             });
 
-            // Atualiza o saldo do usuário
+            // Atualiza saldo
             await updateDoc(doc(db, "usuarios", userUid), {
                 saldo: saldoAtual - valorParaDebitar
             });
 
-            btn.style.background = "#fff";
-            btn.innerText = "Recarga Concluída!";
-            setTimeout(() => { window.location.href = "index.html"; }, 1500);
+            ZentryUI.loading(false);
+            ZentryUI.toast("Recarga realizada com sucesso!", "sucesso");
 
-        } catch(e) {
-            alert("Erro ao processar. Tente novamente.");
+            btn.style.background = "#fff";
+            btn.innerText = "✓ Recarga Concluída!";
+            setTimeout(() => { window.location.href = "home.html"; }, 1800);
+
+        } catch (e) {
+            ZentryUI.loading(false);
+            ZentryUI.toast("Erro ao processar. Tente novamente.", "erro");
             btn.disabled = false;
             btn.innerText = "Confirmar Recarga";
         }
     };
 
+    // ─── 7. MÁSCARA DO TELEFONE (igual ao original) ───
     document.getElementById('numTel').addEventListener('input', (e) => {
-        let v = e.target.value.replace(/\D/g,'');
-        v = v.replace(/^(\d{2})(\d)/g,"($1) $2");
-        v = v.replace(/(\d)(\d{4})$/,"$1-$2");
+        let v = e.target.value.replace(/\D/g, '');
+        v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+        v = v.replace(/(\d)(\d{4})$/, "$1-$2");
         e.target.value = v;
     });
+
 </script>
 </body>
 </html>
