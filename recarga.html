@@ -3,240 +3,439 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
     <title>ZENTRY - Recarga</title>
     <style>
-        :root { --primary: #22c55e; --bg: #000; --card: #111827; --border: rgba(255,255,255,0.1); }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        
-        body { 
-            margin: 0; 
-            font-family: 'Inter', sans-serif; 
-            background: radial-gradient(circle at 20% 0%, #0f172a, #000 80%);
-            color: #fff; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
+        :root {
+            --primary: #22c55e;
+            --primary-dark: #16a34a;
+            --primary-glow: rgba(34,197,94,0.2);
+            --bg: #060910;
+            --card: #0f1623;
+            --card2: #161f2e;
+            --border: rgba(255,255,255,0.07);
+            --text: #fff;
+            --text-muted: #6b7a99;
+            --vivo: #662d91;
+            --tim: #0038a8;
+            --claro: #ee1d23;
+            --oi: #f7941d;
         }
-        
-        .app-bar { padding: 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-        .back-btn { padding: 10px 15px; background: var(--card); border-radius: 12px; cursor: pointer; font-size: 14px; font-weight: 600; border: 1px solid var(--border); }
-        
-        .content { flex: 1; overflow-y: auto; padding: 20px 20px 120px 20px; }
-        .section-title { font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 20px 0 10px; letter-spacing: 1px; }
-        
-        .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; }
-        .input-box input { background: transparent; border: none; color: #fff; font-size: 18px; width: 100%; font-weight: 600; }
-        
-        .op-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .op-item { 
-            background: var(--card); 
-            border: 2px solid transparent; 
-            border-radius: 16px; 
-            padding: 12px 5px; 
-            text-align: center; 
-            cursor: pointer; 
-            transition: 0.3s; 
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
+        }
+
+        /* ── APP BAR ── */
+        .app-bar {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .back-btn {
+            width: 40px; height: 40px;
+            background: var(--card2);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 18px;
+        }
+        .bar-title { font-size: 15px; font-weight: 700; }
+        .saldo-pill {
+            background: var(--primary-glow);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: var(--primary);
+            font-weight: 700; font-size: 13px;
+            padding: 6px 12px; border-radius: 20px;
+        }
+
+        /* ── STEPS ── */
+        .steps {
+            display: flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
+            padding: 14px 20px;
+            flex-shrink: 0;
         }
-        .op-item img { 
-            width: 32px; height: 32px; object-fit: contain; margin-bottom: 8px; 
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        .step-dot {
+            height: 4px; border-radius: 4px;
+            background: var(--card2);
+            transition: all 0.4s ease;
+            flex: 1; max-width: 60px;
         }
-        .op-item span { display: block; font-size: 9px; font-weight: 800; color: #9CA3AF; }
-        .op-item.active { background: rgba(255,255,255,0.05); }
-        .op-item.active span { color: #fff; }
-        .op-vivo.active  { border-color: #662d91; box-shadow: 0 0 15px rgba(102,45,145,0.3); }
-        .op-tim.active   { border-color: #0038a8; box-shadow: 0 0 15px rgba(0,56,168,0.3); }
-        .op-claro.active { border-color: #ee1d23; box-shadow: 0 0 15px rgba(238,29,35,0.3); }
-        .op-oi.active    { border-color: #f7941d; box-shadow: 0 0 15px rgba(247,148,29,0.3); }
-        
-        .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .v-chip { 
-            background: var(--card); border: 1px solid var(--border); border-radius: 14px; 
-            padding: 15px; text-align: center; font-weight: 800; cursor: pointer; 
-            font-size: 14px; transition: 0.2s;
-        }
-        .v-chip.active { background: var(--primary); color: #052e16; border-color: var(--primary); transform: scale(1.05); }
-        
-        #customValueBox { display: none; margin-top: 15px; animation: slideIn 0.3s ease-out; border-color: var(--primary); }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .step-dot.active { background: var(--primary); }
+        .step-dot.done   { background: var(--primary-dark); }
 
-        .footer-action { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(transparent, #000 40%); }
-        .btn-pay { 
-            width: 100%; padding: 18px; border-radius: 20px; border: none; 
-            background: var(--primary); color: #052e16; font-weight: 800; font-size: 16px; 
-            box-shadow: 0 10px 25px rgba(34,197,94,0.3); cursor: pointer;
+        /* ── CONTENT ── */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 140px;
+            -webkit-overflow-scrolling: touch;
         }
-        .btn-pay:active { transform: scale(0.98); }
-        .btn-pay:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* ── TELAS ── */
+        .tela { display: none; animation: fadeUp 0.35s ease; }
+        .tela.ativa { display: block; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .tela-titulo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin: 20px 0 6px; }
+        .tela-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+
+        /* ── ETAPA 1 — NÚMERO ── */
+        .num-box {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 18px;
+            padding: 18px 20px;
+            display: flex; align-items: center; gap: 12px;
+            transition: border-color 0.2s;
+        }
+        .num-box:focus-within { border-color: var(--primary); }
+        .num-box input {
+            background: transparent; border: none;
+            color: #fff; font-size: 20px; font-weight: 700;
+            font-family: 'Sora', sans-serif; width: 100%; letter-spacing: 1px;
+        }
+        .num-box input::placeholder { color: var(--text-muted); font-weight: 400; }
+
+        .op-detectada {
+            display: none; align-items: center; gap: 10px;
+            margin-top: 14px; background: var(--card2);
+            border: 1px solid var(--border); border-radius: 14px;
+            padding: 12px 16px; animation: fadeUp 0.3s ease;
+        }
+        .op-detectada.visivel { display: flex; }
+        .op-badge {
+            width: 32px; height: 32px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 800; color: #fff;
+        }
+        .op-detectada span { font-size: 13px; color: var(--text-muted); }
+
+        /* ── OPERADORAS ── */
+        .op-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+        .op-card {
+            background: var(--card); border: 2px solid var(--border);
+            border-radius: 18px; padding: 18px;
+            display: flex; align-items: center; gap: 14px;
+            cursor: pointer; transition: all 0.25s;
+        }
+        .op-card:active { transform: scale(0.97); }
+        .op-icon {
+            width: 44px; height: 44px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0;
+        }
+        .op-card .op-name { font-size: 15px; font-weight: 700; }
+        .op-card .op-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+        .op-card.active { background: var(--card2); }
+        .op-card[data-op="Vivo"].active  { border-color: var(--vivo);  box-shadow: 0 0 20px rgba(102,45,145,0.25); }
+        .op-card[data-op="Tim"].active   { border-color: var(--tim);   box-shadow: 0 0 20px rgba(0,56,168,0.25); }
+        .op-card[data-op="Claro"].active { border-color: var(--claro); box-shadow: 0 0 20px rgba(238,29,35,0.25); }
+        .op-card[data-op="Oi"].active    { border-color: var(--oi);    box-shadow: 0 0 20px rgba(247,148,29,0.25); }
+
+        /* ── PLANOS ── */
+        .plano-card {
+            background: var(--card); border: 2px solid var(--border);
+            border-radius: 20px; padding: 18px; margin-bottom: 12px;
+            cursor: pointer; transition: all 0.25s;
+            position: relative; overflow: hidden;
+        }
+        .plano-card:active { transform: scale(0.98); }
+        .plano-card.active { border-color: var(--primary); background: rgba(34,197,94,0.06); }
+        .plano-card.destaque::before {
+            content: 'MAIS POPULAR'; position: absolute; top: 12px; right: 12px;
+            background: var(--primary); color: #052e16;
+            font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 20px;
+        }
+        .plano-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .plano-valor { font-size: 22px; font-weight: 800; }
+        .plano-val-label { font-size: 11px; color: var(--text-muted); }
+        .plano-radio {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .plano-card.active .plano-radio { border-color: var(--primary); background: var(--primary); }
+        .plano-card.active .plano-radio::after { content: ''; width: 8px; height: 8px; background: #052e16; border-radius: 50%; }
+        .plano-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .plano-tag {
+            background: var(--card2); border: 1px solid var(--border);
+            border-radius: 8px; padding: 5px 10px;
+            font-size: 11px; color: var(--text-muted);
+        }
+
+        /* ── CONFIRMAÇÃO ── */
+        .confirm-hero {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 24px; margin-bottom: 16px;
+        }
+        .confirm-op-row {
+            display: flex; align-items: center; gap: 14px;
+            padding-bottom: 18px; margin-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+        }
+        .confirm-op-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 800; color: #fff;
+        }
+        .confirm-op-name { font-size: 16px; font-weight: 700; }
+        .confirm-op-sub  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .confirm-row {
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 0;
+        }
+        .confirm-row + .confirm-row { border-top: 1px solid var(--border); }
+        .confirm-label { font-size: 13px; color: var(--text-muted); }
+        .confirm-value { font-size: 14px; font-weight: 700; }
+        .confirm-total { font-size: 18px; font-weight: 800; color: var(--primary); }
+        .aviso-box {
+            background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);
+            border-radius: 14px; padding: 14px 16px;
+            font-size: 12px; color: #fbbf24; line-height: 1.6; margin-bottom: 16px;
+        }
+
+        /* ── SUCESSO ── */
+        .sucesso-wrap {
+            display: flex; flex-direction: column;
+            align-items: center; text-align: center; padding: 30px 0;
+        }
+        .sucesso-circle {
+            width: 90px; height: 90px; border-radius: 50%;
+            background: var(--primary-glow); border: 3px solid var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 38px; margin-bottom: 24px;
+            animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .sucesso-titulo { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .sucesso-sub { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+        .sucesso-comprovante {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 20px; padding: 20px; width: 100%; margin: 24px 0;
+        }
+        .comp-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 13px; }
+        .comp-row + .comp-row { border-top: 1px solid var(--border); }
+        .comp-label { color: var(--text-muted); }
+        .comp-val   { font-weight: 700; }
+
+        /* ── FOOTER ── */
+        .footer-action {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            padding: 16px 20px 32px;
+            background: linear-gradient(transparent, var(--bg) 35%);
+        }
+        .btn-main {
+            width: 100%; padding: 17px; border-radius: 18px; border: none;
+            background: var(--primary); color: #052e16;
+            font-weight: 800; font-size: 16px; font-family: 'Sora', sans-serif;
+            box-shadow: 0 8px 30px var(--primary-glow);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-main:active  { transform: scale(0.98); }
+        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-sec {
+            width: 100%; padding: 14px; border-radius: 18px;
+            border: 1px solid var(--border); background: transparent;
+            color: #fff; font-weight: 600; font-size: 15px;
+            font-family: 'Sora', sans-serif; cursor: pointer; margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="app-bar">
-        <div class="back-btn" onclick="window.location.href='home.html'">← Voltar</div>
-        <div id="displaySaldo" style="color: var(--primary); font-weight: 800; font-size: 18px;">R$ 0,00</div>
-    </div>
+<div class="app-bar">
+    <div class="back-btn" onclick="voltarEtapa()">←</div>
+    <span class="bar-title" id="barTitle">Recarga</span>
+    <div class="saldo-pill" id="displaySaldo">R$ 0,00</div>
+</div>
 
-    <div class="content">
-        <h2 style="margin: 0; font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">Recarga Celular</h2>
-        
-        <div class="section-title">Número do Telefone</div>
-        <div class="input-box">
-            <input type="tel" id="numTel" placeholder="(00) 00000-0000" maxlength="15">
+<div class="steps">
+    <div class="step-dot active" id="dot0"></div>
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+</div>
+
+<div class="content">
+
+    <!-- ETAPA 1 — NÚMERO + OPERADORA -->
+    <div class="tela ativa" id="tela0">
+        <p class="tela-titulo">Qual é o número?</p>
+        <p class="tela-sub">Digite o número que vai receber a recarga.</p>
+
+        <div class="num-box">
+            <span style="font-size:22px;">🇧🇷</span>
+            <input type="tel" id="numTel" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric">
         </div>
 
-        <div class="section-title">Selecione a Operadora</div>
+        <div class="op-detectada" id="opDetectada">
+            <div class="op-badge" id="opBadge"></div>
+            <div style="font-size:13px;">
+                <span style="color:var(--text-muted)">Detectada: </span>
+                <b id="opNomeDetectado"></b>
+            </div>
+        </div>
+
+        <p class="tela-titulo" style="margin-top:28px;">Ou escolha a operadora</p>
         <div class="op-grid">
-            <div class="op-item op-vivo" onclick="escolherOp(this, 'Vivo')">
-                <img src="https://logospng.org/download/vivo/logo-vivo-icon-256.png">
-                <span>VIVO</span>
+            <div class="op-card" data-op="Vivo" onclick="escolherOp(this)">
+                <div class="op-icon" style="background:#662d91;">VI</div>
+                <div><div class="op-name">Vivo</div><div class="op-desc">Telecom Brasil</div></div>
             </div>
-            <div class="op-item op-tim" onclick="escolherOp(this, 'Tim')">
-                <img src="https://logospng.org/download/tim/logo-tim-icon-256.png">
-                <span>TIM</span>
+            <div class="op-card" data-op="Tim" onclick="escolherOp(this)">
+                <div class="op-icon" style="background:#0038a8;">TM</div>
+                <div><div class="op-name">TIM</div><div class="op-desc">TIM Brasil</div></div>
             </div>
-            <div class="op-item op-claro" onclick="escolherOp(this, 'Claro')">
-                <img src="https://logospng.org/download/claro/logo-claro-icon-256.png">
-                <span>CLARO</span>
+            <div class="op-card" data-op="Claro" onclick="escolherOp(this)">
+                <div class="op-icon" style="background:#ee1d23;">CL</div>
+                <div><div class="op-name">Claro</div><div class="op-desc">Claro Brasil</div></div>
             </div>
-            <div class="op-item op-oi" onclick="escolherOp(this, 'Oi')">
-                <img src="https://logospng.org/download/oi/logo-oi-icon-256.png">
-                <span>OI</span>
+            <div class="op-card" data-op="Oi" onclick="escolherOp(this)">
+                <div class="op-icon" style="background:#f7941d;">OI</div>
+                <div><div class="op-name">Oi</div><div class="op-desc">Oi Móvel</div></div>
             </div>
-        </div>
-        
-        <div class="section-title">Escolha o Valor</div>
-        <div class="value-grid">
-            <div class="v-chip" onclick="escolherVal(this, 15)">R$ 15</div>
-            <div class="v-chip active" onclick="escolherVal(this, 20)">R$ 20</div>
-            <div class="v-chip" onclick="escolherVal(this, 30)">R$ 30</div>
-            <div class="v-chip" onclick="mostrarPersonalizado(this)">Outro</div>
-        </div>
-
-        <div id="customValueBox" class="input-box">
-            <span style="color: var(--primary); font-weight: 800; margin-right: 10px;">R$</span>
-            <input type="number" id="outroValor" placeholder="0,00" inputmode="decimal">
         </div>
     </div>
 
-    <div class="footer-action">
-        <button id="btnFinish" class="btn-pay" onclick="finalizarAgora()">Confirmar Recarga</button>
+    <!-- ETAPA 2 — PLANOS -->
+    <div class="tela" id="tela1">
+        <p class="tela-titulo" id="tituloPlanos">Planos</p>
+        <p class="tela-sub">Escolha o pacote ideal para recarregar.</p>
+        <div id="listaPlanos"></div>
     </div>
 
-<!-- ✅ ANTES: ~20 linhas de import + firebaseConfig + initializeApp repetidos -->
-<!-- ✅ AGORA: 1 import do zentry-core.js faz tudo -->
+    <!-- ETAPA 3 — CONFIRMAÇÃO -->
+    <div class="tela" id="tela2">
+        <p class="tela-titulo">Confirme a recarga</p>
+        <p class="tela-sub">Verifique os detalhes antes de finalizar.</p>
+        <div class="confirm-hero">
+            <div class="confirm-op-row">
+                <div class="confirm-op-icon" id="confirmOpIcon"></div>
+                <div>
+                    <div class="confirm-op-name" id="confirmOpName"></div>
+                    <div class="confirm-op-sub"  id="confirmOpSub"></div>
+                </div>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Número</span>
+                <span class="confirm-value" id="confirmNum"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Pacote</span>
+                <span class="confirm-value" id="confirmPlano"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Validade</span>
+                <span class="confirm-value" id="confirmValidade"></span>
+            </div>
+            <div class="confirm-row">
+                <span class="confirm-label">Total debitado</span>
+                <span class="confirm-value confirm-total" id="confirmTotal"></span>
+            </div>
+        </div>
+        <div class="aviso-box">
+            ⚡ O crédito é aplicado em até 5 minutos. Certifique-se de que o número está correto antes de confirmar.
+        </div>
+    </div>
+
+    <!-- ETAPA 4 — SUCESSO -->
+    <div class="tela" id="tela3">
+        <div class="sucesso-wrap">
+            <div class="sucesso-circle">✓</div>
+            <p class="sucesso-titulo">Recarga feita!</p>
+            <p class="sucesso-sub" id="sucessoSub"></p>
+            <div class="sucesso-comprovante">
+                <div class="comp-row"><span class="comp-label">Número</span><span class="comp-val" id="compNum"></span></div>
+                <div class="comp-row"><span class="comp-label">Operadora</span><span class="comp-val" id="compOp"></span></div>
+                <div class="comp-row"><span class="comp-label">Pacote</span><span class="comp-val" id="compPlano"></span></div>
+                <div class="comp-row"><span class="comp-label">Valor</span><span class="comp-val" id="compValor" style="color:var(--primary)"></span></div>
+                <div class="comp-row"><span class="comp-label">Data</span><span class="comp-val" id="compData"></span></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer-action">
+    <button class="btn-main" id="btnMain" onclick="avancarEtapa()">Continuar</button>
+    <button class="btn-sec"  id="btnSec"  onclick="window.location.href='home.html'" style="display:none;">Voltar ao início</button>
+</div>
+
 <script type="module">
-
-    // ─── 1. IMPORTA DO ARQUIVO CENTRAL (única linha necessária) ───
     import { auth, db, ZentryAuth, ZentryUser, ZentryUI } from './zentry-core.js';
-    import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // ─── 2. VARIÁVEIS DE ESTADO DA TELA ───
+    // ── ESTADO ──
     let userUid    = "";
     let saldoAtual = 0;
-    let valorFinal = 20;       // valor padrão selecionado
-    let operadoraFinal = "";
+    let etapa      = 0;
+    let operadora  = "";
+    let planoSel   = null;
 
-    // ─── 3. PROTEÇÃO DE TELA + CARREGA DADOS DO USUÁRIO ───
-    // ZentryAuth.exigirLogin() já redireciona para login.html se não logado
+    const COR_OP = { Vivo:"#662d91", Tim:"#0038a8", Claro:"#ee1d23", Oi:"#f7941d" };
+
+    const PLANOS = {
+        Vivo:  [
+            { valor:15, dados:"1.5GB", validade:"7 dias",  tags:["📱 1.5GB","📞 50 min","7 dias"] },
+            { valor:20, dados:"3GB",   validade:"15 dias", tags:["📱 3GB","📞 100 min","15 dias"], destaque:true },
+            { valor:35, dados:"6GB",   validade:"30 dias", tags:["📱 6GB","📞 Ilimitado","30 dias"] },
+            { valor:50, dados:"12GB",  validade:"30 dias", tags:["📱 12GB","📞 Ilimitado","30 dias","🎵 Spotify"] },
+        ],
+        Tim:   [
+            { valor:15, dados:"2GB",   validade:"7 dias",  tags:["📱 2GB","📞 60 min","7 dias"] },
+            { valor:25, dados:"4GB",   validade:"15 dias", tags:["📱 4GB","📞 Ilimitado","15 dias"], destaque:true },
+            { valor:40, dados:"8GB",   validade:"30 dias", tags:["📱 8GB","📞 Ilimitado","30 dias"] },
+            { valor:55, dados:"15GB",  validade:"30 dias", tags:["📱 15GB","📞 Ilimitado","30 dias","▶️ TIM Music"] },
+        ],
+        Claro: [
+            { valor:12, dados:"1GB",   validade:"7 dias",  tags:["📱 1GB","📞 30 min","7 dias"] },
+            { valor:20, dados:"2.5GB", validade:"15 dias", tags:["📱 2.5GB","📞 80 min","15 dias"] },
+            { valor:30, dados:"5GB",   validade:"30 dias", tags:["📱 5GB","📞 Ilimitado","30 dias"], destaque:true },
+            { valor:45, dados:"10GB",  validade:"30 dias", tags:["📱 10GB","📞 Ilimitado","30 dias","📺 Claro tv+"] },
+        ],
+        Oi:    [
+            { valor:10, dados:"1GB",   validade:"7 dias",  tags:["📱 1GB","📞 30 min","7 dias"] },
+            { valor:18, dados:"2GB",   validade:"15 dias", tags:["📱 2GB","📞 60 min","15 dias"], destaque:true },
+            { valor:28, dados:"4GB",   validade:"30 dias", tags:["📱 4GB","📞 Ilimitado","30 dias"] },
+            { valor:40, dados:"8GB",   validade:"30 dias", tags:["📱 8GB","📞 Ilimitado","30 dias"] },
+        ],
+    };
+
+    // ── INIT ──
     const user = await ZentryAuth.exigirLogin();
     userUid = user.uid;
-
-    // Busca saldo uma única vez (sem tempo real, suficiente para esta tela)
     const dados = await ZentryUser.buscar(userUid);
     if (dados) {
         saldoAtual = Number(dados.saldo || 0);
         document.getElementById('displaySaldo').innerText = ZentryUI.formatarMoeda(saldoAtual);
     }
 
-    // ─── 4. SELEÇÃO DE OPERADORA ───
-    window.escolherOp = (el, nome) => {
-        document.querySelectorAll('.op-item').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        operadoraFinal = nome;
-    };
-
-    // ─── 5. SELEÇÃO DE VALOR ───
-    window.escolherVal = (el, v) => {
-        document.getElementById('customValueBox').style.display = 'none';
-        document.querySelectorAll('.v-chip').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        valorFinal = v;
-    };
-
-    window.mostrarPersonalizado = (el) => {
-        document.querySelectorAll('.v-chip').forEach(i => i.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById('customValueBox').style.display = 'flex';
-        document.getElementById('outroValor').focus();
-    };
-
-    // ─── 6. FINALIZAR RECARGA ───
-    window.finalizarAgora = async () => {
-        const tel   = document.getElementById('numTel').value;
-        const btn   = document.getElementById('btnFinish');
-        const caixaAberta = document.getElementById('customValueBox').style.display === 'flex';
-        const valorParaDebitar = caixaAberta
-            ? Number(document.getElementById('outroValor').value)
-            : valorFinal;
-
-        // Validações — usa ZentryUI.toast() no lugar de alert()
-        if (tel.length < 14)        return ZentryUI.toast("Digite um número válido!", "aviso");
-        if (!operadoraFinal)        return ZentryUI.toast("Selecione a operadora!", "aviso");
-        if (valorParaDebitar <= 0)  return ZentryUI.toast("Insira um valor válido!", "aviso");
-        if (valorParaDebitar > saldoAtual) return ZentryUI.toast("Saldo insuficiente!", "erro");
-
-        // Bloqueia botão e exibe loading
-        btn.disabled = true;
-        btn.innerText = "Processando...";
-        ZentryUI.loading(true);
-
-        try {
-            const txId = "REC" + Date.now();
-
-            // Grava transação no histórico (subcoleção do usuário)
-            await setDoc(doc(db, "usuarios", userUid, "transacoes", txId), {
-                tipo:      "saida",
-                valor:     valorParaDebitar,
-                descricao: "Recarga " + operadoraFinal + " - " + tel,
-                data:      new Date().toISOString().split('T')[0],
-                timestamp: new Date()
-            });
-
-            // Atualiza saldo
-            await updateDoc(doc(db, "usuarios", userUid), {
-                saldo: saldoAtual - valorParaDebitar
-            });
-
-            ZentryUI.loading(false);
-            ZentryUI.toast("Recarga realizada com sucesso!", "sucesso");
-
-            btn.style.background = "#fff";
-            btn.innerText = "✓ Recarga Concluída!";
-            setTimeout(() => { window.location.href = "home.html"; }, 1800);
-
-        } catch (e) {
-            ZentryUI.loading(false);
-            ZentryUI.toast("Erro ao processar. Tente novamente.", "erro");
-            btn.disabled = false;
-            btn.innerText = "Confirmar Recarga";
-        }
-    };
-
-    // ─── 7. MÁSCARA DO TELEFONE (igual ao original) ───
+    // ── MÁSCARA + DETECÇÃO DE OPERADORA ──
     document.getElementById('numTel').addEventListener('input', (e) => {
-        let v = e.target.value.replace(/\D/g, '');
-        v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
-        v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+        let v = e.target.value.replace(/\D/g,'');
+        if (v.length > 11) v = v.slice(0,11);
+        v = v.replace(/^(\d{2})(\d)/,'($1) $2');
+        v = v.replace(/(\d)(\d{4})$/,'$1-$2');
         e.target.value = v;
-    });
 
-</script>
-</body>
-</html>
+        // Detecção simples por prefixo do 9º dígito
+        const digits = v.replace(/\D/g,'');
+        let op = null;
+        if (digits.length >= 5) 
