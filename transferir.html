@@ -3,255 +3,609 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Transferir - ZENTRY</title>
 <style>
-  * { box-sizing: border-box; }
-  :root { --primary: #22C55E; --bg: #000000; --border-input: #2A3441; --card: #121826; }
+  :root {
+    --primary: #22c55e; --primary-glow: rgba(34,197,94,0.2);
+    --bg: #060910; --card: #0f1623; --card2: #161f2e;
+    --border: rgba(255,255,255,0.07); --muted: #6b7a99; --red: #ef4444;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: #fff; font-family: 'Sora', sans-serif; overflow: hidden; }
+  body { display: flex; flex-direction: column; }
 
-  html, body { height: 100%; margin: 0; background: var(--bg); overflow-x: hidden; }
-  body { font-family:'Inter', sans-serif; color:#FFF; padding: 20px; display: flex; flex-direction: column; }
-  
-  .header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
-  .back-btn { background: none; border: none; color: white; cursor: pointer; padding: 0; display: flex; align-items: center; }
-  
-  .saldo-badge { 
-    background: rgba(34, 197, 94, 0.15); 
-    padding: 8px 15px; border-radius: 30px; 
-    color: var(--primary); font-size: 13px; font-weight: 700; 
-    display: inline-block; margin-bottom: 35px; 
+  /* ── APP BAR ── */
+  .app-bar {
+    padding: 16px 20px; display: flex; align-items: center;
+    justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .back-btn {
+    width: 40px; height: 40px; background: var(--card2);
+    border-radius: 12px; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 20px; color: #fff;
+  }
+  .bar-title { font-size: 15px; font-weight: 700; }
+  .saldo-pill {
+    background: var(--primary-glow); border: 1px solid rgba(34,197,94,0.3);
+    color: var(--primary); font-weight: 700; font-size: 13px;
+    padding: 6px 12px; border-radius: 20px;
   }
 
-  .input-group { margin-bottom: 30px; }
-  .label-input { color: #9CA3AF; font-size: 14px; display: block; margin-bottom: 8px; }
-  
-  input {
-    background: transparent !important; border: none;
-    border-bottom: 2px solid var(--border-input);
-    color: #FFFFFF !important; font-size: 20px;
-    font-weight: 500; padding: 12px 0; width: 100%;
-    outline: none; border-radius: 0; -webkit-appearance: none;
-  }
-  input:focus { border-bottom-color: var(--primary); }
-  
-  #feedbackDestino { 
-    display: none; background: #111827; padding: 15px; 
-    border-radius: 12px; margin-top: -15px; margin-bottom: 25px; 
-    border: 1px solid #1F2937; animation: slideIn 0.3s ease-out;
-  }
-  @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  /* ── STEPS ── */
+  .steps { display: flex; gap: 6px; padding: 14px 20px; flex-shrink: 0; }
+  .step-dot { height: 4px; border-radius: 4px; background: var(--card2); flex: 1; transition: all 0.4s; }
+  .step-dot.active { background: var(--primary); }
+  .step-dot.done   { background: #16a34a; }
 
-  .dest-name { display: block; font-weight: 700; color: #FFF; font-size: 15px; }
-  .dest-bank { font-size: 11px; color: #6B7280; text-transform: uppercase; margin-top: 2px; }
-  .valor-input { font-size: 42px !important; font-weight: 800 !important; color: var(--primary) !important; }
+  /* ── CONTENT ── */
+  .content { flex: 1; overflow-y: auto; padding: 0 20px 140px; -webkit-overflow-scrolling: touch; }
+  .tela { display: none; animation: fadeUp 0.3s ease; }
+  .tela.ativa { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .tela-titulo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin: 20px 0 6px; }
+  .tela-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
 
-  .footer-action { padding: 20px 0; margin-top: auto; width: 100%; background: var(--bg); }
+  /* ── CAMPO CHAVE ── */
+  .chave-box {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 18px; padding: 18px 20px;
+    display: flex; align-items: center; gap: 12px;
+    transition: border-color 0.2s; margin-bottom: 12px;
+  }
+  .chave-box:focus-within { border-color: var(--primary); }
+  .chave-box input {
+    background: transparent; border: none; color: #fff;
+    font-size: 17px; font-weight: 600; font-family: 'Sora', sans-serif;
+    width: 100%;
+  }
+  .chave-box input::placeholder { color: var(--muted); font-weight: 400; }
+  .chave-icon { color: var(--primary); flex-shrink: 0; font-size: 20px; }
 
-  .confirm-btn { 
-    width: 100%; background: #27272a; color: #71717a; border: none; 
-    padding: 18px; border-radius: 15px; font-weight: 700; font-size: 16px;
-    transition: 0.3s; cursor: pointer;
+  /* TIPOS DE CHAVE */
+  .tipos-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+  .tipo-chip {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 6px; text-align: center;
+    cursor: pointer; font-size: 11px; font-weight: 700; color: var(--muted);
+    transition: all 0.2s;
   }
-  .confirm-btn.active { background: var(--primary); color: #000; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2); }
+  .tipo-chip.active { background: var(--primary-glow); border-color: var(--primary); color: var(--primary); }
+  .tipo-chip .tipo-icon { font-size: 16px; display: block; margin-bottom: 4px; }
 
-  /* MODAL BLINDADO */
-  #zModalGlobal { 
-    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); 
-    z-index:9999; align-items:center; justify-content:center; padding:20px; 
-    backdrop-filter: blur(5px); 
+  /* DESTINO ENCONTRADO */
+  .destino-card {
+    display: none; background: var(--card2);
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 16px; padding: 16px;
+    margin-bottom: 16px; animation: fadeUp 0.3s ease;
   }
-  .modal-content { 
-    background:var(--card); border:1px solid var(--border-input); border-radius:28px; 
-    width:100%; max-width:340px; padding:25px; text-align:center; 
-    animation: popIn 0.2s ease-out; 
+  .destino-card.visivel { display: flex; align-items: center; gap: 14px; }
+  .dest-avatar {
+    width: 44px; height: 44px; border-radius: 14px;
+    background: var(--primary-glow); border: 1px solid var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: var(--primary); flex-shrink: 0;
   }
-  @keyframes popIn { from { transform:scale(0.8); opacity:0; } to { transform:scale(1); opacity:1; } }
+  .dest-nome { font-size: 15px; font-weight: 700; }
+  .dest-banco { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .dest-check { margin-left: auto; color: var(--primary); font-size: 20px; }
+
+  /* DESTINO NÃO ENCONTRADO */
+  .destino-externo {
+    display: none; background: rgba(251,191,36,0.08);
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 16px; padding: 14px 16px;
+    margin-bottom: 16px; font-size: 13px; color: #fbbf24;
+  }
+  .destino-externo.visivel { display: block; }
+
+  /* ── VALOR ── */
+  .valor-wrap { text-align: center; padding: 20px 0 10px; }
+  .valor-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .valor-input-wrap { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .valor-prefix { font-size: 24px; font-weight: 700; color: var(--muted); }
+  .valor-input {
+    background: transparent; border: none; color: var(--primary);
+    font-size: 48px; font-weight: 800; font-family: 'Sora', sans-serif;
+    width: 200px; text-align: center; letter-spacing: -2px;
+  }
+  .valor-input::placeholder { color: var(--card2); }
+  .saldo-disp { font-size: 12px; color: var(--muted); margin-top: 12px; text-align: center; }
+  .saldo-disp.insuf { color: var(--red); }
+
+  /* DESCRICAO */
+  .desc-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 16px 18px; margin-top: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .desc-box input {
+    background: transparent; border: none; color: #fff;
+    font-size: 14px; font-family: 'Sora', sans-serif; width: 100%;
+  }
+  .desc-box input::placeholder { color: var(--muted); }
+
+  /* ── CONFIRMAÇÃO ── */
+  .confirm-hero {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 24px; margin-bottom: 16px;
+  }
+  .confirm-top {
+    display: flex; align-items: center; gap: 14px;
+    padding-bottom: 18px; margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .confirm-avatar {
+    width: 52px; height: 52px; border-radius: 16px;
+    background: var(--primary-glow); border: 1px solid var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: var(--primary);
+  }
+  .confirm-nome { font-size: 16px; font-weight: 700; }
+  .confirm-banco { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .confirm-row { display: flex; justify-content: space-between; padding: 12px 0; font-size: 13px; }
+  .confirm-row + .confirm-row { border-top: 1px solid var(--border); }
+  .confirm-label { color: var(--muted); }
+  .confirm-val { font-weight: 700; }
+  .confirm-total { font-size: 20px; font-weight: 800; color: var(--primary); }
+
+  /* PIN */
+  .pin-wrap { text-align: center; padding: 10px 0; }
+  .pin-titulo { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin-bottom: 10px; }
+  .pin-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--border); transition: all 0.2s;
+  }
+  .pin-dot.ok { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
+  .pin-dot.err { background: var(--red); border-color: var(--red); }
+  #hiddenPin { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+  .pin-toque { font-size: 12px; color: var(--muted); margin-top: 8px; cursor: pointer; }
+
+  .aviso-box {
+    background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);
+    border-radius: 14px; padding: 14px 16px;
+    font-size: 12px; color: #fbbf24; line-height: 1.6;
+  }
+
+  /* ── SUCESSO ── */
+  .sucesso-wrap { text-align: center; padding: 30px 0; }
+  .sucesso-circle {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: var(--primary-glow); border: 3px solid var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 38px; margin: 0 auto 24px;
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+  .sucesso-titulo { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .sucesso-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .sucesso-comp {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 20px; margin: 24px 0;
+  }
+  .comp-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 13px; }
+  .comp-row + .comp-row { border-top: 1px solid var(--border); }
+  .comp-label { color: var(--muted); }
+  .comp-val   { font-weight: 700; }
+
+  /* ── FOOTER ── */
+  .footer-action {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 16px 20px 32px;
+    background: linear-gradient(transparent, var(--bg) 35%);
+  }
+  .btn-main {
+    width: 100%; padding: 17px; border-radius: 18px; border: none;
+    background: var(--primary); color: #052e16;
+    font-weight: 800; font-size: 16px; font-family: 'Sora', sans-serif;
+    box-shadow: 0 8px 30px var(--primary-glow);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-main:active   { transform: scale(0.98); }
+  .btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-sec {
+    width: 100%; padding: 14px; border-radius: 18px;
+    border: 1px solid var(--border); background: transparent;
+    color: #fff; font-weight: 600; font-size: 15px;
+    font-family: 'Sora', sans-serif; cursor: pointer; margin-top: 10px;
+  }
 </style>
 </head>
 <body>
 
-<div id="zModalGlobal">
-  <div class="modal-content">
-    <div id="zIcon" style="font-size:40px; margin-bottom:15px;">⚠️</div>
-    <h3 id="zTitle" style="margin:0 0 10px; font-size:18px; color:#fff; font-weight:700;">Aviso</h3>
-    <p id="zText" style="color:#9CA3AF; font-size:14px; margin-bottom:20px; line-height:1.5;"></p>
-    <button id="zBtnClose" style="width:100%; padding:15px; border-radius:14px; background:#22C55E; border:none; color:#000; font-weight:700; cursor:pointer;">Entendido</button>
+<input type="number" id="hiddenPin" inputmode="numeric" pattern="\d*" autocomplete="off" maxlength="4">
+
+<div class="app-bar">
+  <div class="back-btn" onclick="voltarEtapa()">←</div>
+  <span class="bar-title" id="barTitle">Transferir</span>
+  <div class="saldo-pill" id="displaySaldo">R$ 0,00</div>
+</div>
+
+<div class="steps">
+  <div class="step-dot active" id="dot0"></div>
+  <div class="step-dot" id="dot1"></div>
+  <div class="step-dot" id="dot2"></div>
+  <div class="step-dot" id="dot3"></div>
+</div>
+
+<div class="content">
+
+  <!-- ETAPA 1 — CHAVE PIX -->
+  <div class="tela ativa" id="tela0">
+    <p class="tela-titulo">Para quem vai?</p>
+    <p class="tela-sub">Digite a chave Pix do destinatário.</p>
+
+    <div class="tipos-grid">
+      <div class="tipo-chip active" data-tipo="cpf" onclick="selecionarTipo(this)">
+        <span class="tipo-icon">🪪</span>CPF
+      </div>
+      <div class="tipo-chip" data-tipo="celular" onclick="selecionarTipo(this)">
+        <span class="tipo-icon">📱</span>Celular
+      </div>
+      <div class="tipo-chip" data-tipo="email" onclick="selecionarTipo(this)">
+        <span class="tipo-icon">📧</span>E-mail
+      </div>
+      <div class="tipo-chip" data-tipo="cnpj" onclick="selecionarTipo(this)">
+        <span class="tipo-icon">🏢</span>CNPJ
+      </div>
+    </div>
+
+    <div class="chave-box">
+      <span class="chave-icon">🔑</span>
+      <input type="text" id="chaveInput" placeholder="Digite a chave Pix" inputmode="numeric">
+    </div>
+
+    <div class="destino-card" id="destinoCard">
+      <div class="dest-avatar" id="destAvatar">?</div>
+      <div>
+        <div class="dest-nome" id="destNome">—</div>
+        <div class="dest-banco">Zentry Bank</div>
+      </div>
+      <span class="dest-check">✓</span>
+    </div>
+
+    <div class="destino-externo" id="destinoExterno">
+      ⚠️ Destinatário não encontrado na Zentry. A transferência será enviada como Pix externo.
+    </div>
   </div>
-</div>
 
-<div class="header">
-  <button class="back-btn" onclick="location.href='pix.html'">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-  </button>
-  <h2 style="margin:0; font-size:18px;">Transferir</h2>
-</div>
+  <!-- ETAPA 2 — VALOR -->
+  <div class="tela" id="tela1">
+    <p class="tela-titulo">Quanto vai enviar?</p>
+    <p class="tela-sub">Digite o valor da transferência.</p>
 
-<div class="saldo-badge">Saldo disponível: <span id="saldoAtual">R$ 0,00</span></div>
+    <div class="valor-wrap">
+      <div class="valor-label">Valor da transferência</div>
+      <div class="valor-input-wrap">
+        <span class="valor-prefix">R$</span>
+        <input class="valor-input" type="text" id="valorInput" placeholder="0,00" inputmode="numeric">
+      </div>
+      <div class="saldo-disp" id="saldoDisp">Saldo disponível: R$ 0,00</div>
+    </div>
 
-<div class="input-group">
-  <span class="label-input">Chave Pix (CPF, Celular ou CNPJ)</span>
-  <input type="text" id="chavePix" placeholder="000.000.000-00" inputmode="numeric">
-</div>
+    <div class="desc-box">
+      <span style="font-size:18px;">💬</span>
+      <input type="text" id="descInput" placeholder="Adicionar descrição (opcional)" maxlength="50">
+    </div>
+  </div>
 
-<div id="feedbackDestino">
-    <span class="dest-name">---</span>
-    <span class="dest-bank">Zentry Bank - 001</span>
-</div>
+  <!-- ETAPA 3 — CONFIRMAÇÃO + PIN -->
+  <div class="tela" id="tela2">
+    <p class="tela-titulo">Confirme o Pix</p>
+    <p class="tela-sub">Verifique os dados e confirme com sua senha.</p>
 
-<div class="input-group">
-  <span class="label-input">Valor do Pix</span>
-  <input type="text" id="valorInput" class="valor-input" placeholder="R$ 0,00" inputmode="numeric">
+    <div class="confirm-hero">
+      <div class="confirm-top">
+        <div class="confirm-avatar" id="confirmAvatar"></div>
+        <div>
+          <div class="confirm-nome" id="confirmNome"></div>
+          <div class="confirm-banco" id="confirmBanco"></div>
+        </div>
+      </div>
+      <div class="confirm-row"><span class="confirm-label">Chave</span><span class="confirm-val" id="confirmChave"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Descrição</span><span class="confirm-val" id="confirmDesc"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Data</span><span class="confirm-val" id="confirmData"></span></div>
+      <div class="confirm-row"><span class="confirm-label">Valor</span><span class="confirm-val confirm-total" id="confirmValor"></span></div>
+    </div>
+
+    <div class="aviso-box" style="margin-bottom:20px;">⚡ Pix é instantâneo e irreversível. Verifique os dados antes de confirmar.</div>
+
+    <div class="pin-wrap" onclick="document.getElementById('hiddenPin').focus()">
+      <p class="pin-titulo">Digite sua senha de 4 dígitos</p>
+      <div class="pin-dots">
+        <div class="pin-dot" id="p1"></div>
+        <div class="pin-dot" id="p2"></div>
+        <div class="pin-dot" id="p3"></div>
+        <div class="pin-dot" id="p4"></div>
+      </div>
+      <p class="pin-toque">Toque aqui para digitar a senha</p>
+    </div>
+  </div>
+
+  <!-- ETAPA 4 — SUCESSO -->
+  <div class="tela" id="tela3">
+    <div class="sucesso-wrap">
+      <div class="sucesso-circle">✓</div>
+      <p class="sucesso-titulo">Pix enviado!</p>
+      <p class="sucesso-sub" id="sucessoSub"></p>
+      <div class="sucesso-comp">
+        <div class="comp-row"><span class="comp-label">Para</span><span class="comp-val" id="compNome"></span></div>
+        <div class="comp-row"><span class="comp-label">Chave</span><span class="comp-val" id="compChave"></span></div>
+        <div class="comp-row"><span class="comp-label">Valor</span><span class="comp-val" id="compValor" style="color:var(--primary)"></span></div>
+        <div class="comp-row"><span class="comp-label">Data</span><span class="comp-val" id="compData"></span></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="footer-action">
-    <button class="confirm-btn" id="btnProsseguir" disabled>Continuar</button>
+  <button class="btn-main" id="btnMain" onclick="avancarEtapa()" disabled>Continuar</button>
+  <button class="btn-sec"  id="btnSec"  onclick="irParaComprovante()" style="display:none;">Ver Comprovante</button>
 </div>
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { auth, db, ZentryAuth, ZentryUser, ZentryUI } from './zentry-core.js';
+  import { doc, setDoc, updateDoc, collection, query, where, getDocs, limit, increment }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
-    authDomain: "zentry-app-74275.firebaseapp.com",
-    projectId: "zentry-app-74275",
-    storageBucket: "zentry-app-74275.appspot.com",
-    messagingSenderId: "571422826071",
-    appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
+  let userUid = "", saldoAtual = 0, etapa = 0;
+  let destinoEncontrado = null, tipoChave = "cpf";
+  let dadosTransacao = null;
+
+  // ── INIT ──
+  async function init() {
+    const user = await ZentryAuth.exigirLogin();
+    userUid = user.uid;
+    ZentryUser.escutar(userUid, (d) => {
+      saldoAtual = Number(d.saldo || 0);
+      document.getElementById('displaySaldo').innerText = ZentryUI.formatarMoeda(saldoAtual);
+      document.getElementById('saldoDisp').innerText = "Saldo disponível: " + ZentryUI.formatarMoeda(saldoAtual);
+      document.getElementById('btnMain').disabled = false;
+    });
+    document.getElementById('hiddenPin').addEventListener('input', onPin);
+  }
+  init();
+
+  // ── TIPO DE CHAVE ──
+  window.selecionarTipo = function(el) {
+    document.querySelectorAll('.tipo-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    tipoChave = el.dataset.tipo;
+    document.getElementById('chaveInput').value = '';
+    document.getElementById('destinoCard').classList.remove('visivel');
+    document.getElementById('destinoExterno').classList.remove('visivel');
+    destinoEncontrado = null;
+
+    const placeholders = { cpf:'000.000.000-00', celular:'(00) 00000-0000', email:'seu@email.com', cnpj:'00.000.000/0001-00' };
+    const modes = { cpf:'numeric', celular:'numeric', email:'email', cnpj:'numeric' };
+    document.getElementById('chaveInput').placeholder  = placeholders[tipoChave];
+    document.getElementById('chaveInput').inputMode    = modes[tipoChave];
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
-
-  const chaveInput = document.getElementById("chavePix");
-  const valorInput = document.getElementById("valorInput");
-  const btn = document.getElementById("btnProsseguir");
-  const feedback = document.getElementById("feedbackDestino");
-  const saldoElement = document.getElementById("saldoAtual");
-
-  let saldoDisponivel = 0;
-  let destinoEncontrado = null;
-
-  function showZModal(titulo, texto, icon) {
-    document.getElementById('zModalGlobal').style.display = 'flex';
-    document.getElementById('zTitle').innerText = titulo;
-    document.getElementById('zText').innerText = texto;
-    document.getElementById('zIcon').innerText = icon;
-  }
-
-  document.getElementById('zBtnClose').onclick = () => {
-    document.getElementById('zModalGlobal').style.display = 'none';
-  };
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      onSnapshot(doc(db, "usuarios", user.uid), (docSnap) => {
-        if (docSnap.exists()) {
-          saldoDisponivel = parseFloat(docSnap.data().saldo || 0);
-          saldoElement.innerText = saldoDisponivel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-      });
+  // ── MÁSCARA + BUSCA ──
+  document.getElementById('chaveInput').addEventListener('input', async function(e) {
+    let v = e.target.value.replace(/\D/g, '');
+    if (tipoChave === 'cpf') {
+      v = v.slice(0,11).replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else if (tipoChave === 'celular') {
+      v = v.slice(0,11).replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else if (tipoChave === 'cnpj') {
+      v = v.slice(0,14).replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     } else {
-      window.location.href = "login.html";
+      v = e.target.value; // email — sem máscara
     }
-  });
+    if (tipoChave !== 'email') e.target.value = v;
 
-  async function buscarDestinatario(limpo) {
-    try {
-      const colRef = collection(db, "usuarios");
-      const q = query(colRef, where("chavepix", "==", limpo)); // Note: 'chavepix' em minúsculo conforme seu print do DB
-      const snap = await getDocs(q);
+    const limpo = tipoChave === 'email' ? v : v.replace(/\D/g,'');
+    const pronto = tipoChave === 'email' ? v.includes('@') : (limpo.length === 11 || limpo.length === 14);
 
-      if (!snap.empty) {
-        const userDoc = snap.docs[0];
-        if (userDoc.id === auth.currentUser.uid) {
-           showZModal("Ops!", "Você não pode transferir para si mesmo.", "👤");
-           chaveInput.value = "";
-           feedback.style.display = "none";
-           return;
-        }
-
-        destinoEncontrado = { id: userDoc.id, ...userDoc.data() };
-        document.querySelector(".dest-name").innerText = destinoEncontrado.nome;
-        feedback.style.display = "block";
-      } else {
-        destinoEncontrado = null;
-        feedback.style.display = "none";
-      }
-      validar();
-    } catch (e) { 
-      console.error(e);
-    }
-  }
-  chaveInput.addEventListener("input", (e) => {
-    let v = e.target.value.replace(/\D/g, "");
-    
-    if (v.length <= 11) {
-      // REGRA: Se tiver 11 dígitos e o TERCEIRO dígito for '9', tratamos como Celular.
-      // Se não for '9', tratamos como CPF.
-      if (v.length === 11 && v.charAt(2) === "9") {
-        v = v.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-      } else {
-        v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-      }
+    if (pronto) {
+      await buscarDestinatario(limpo);
     } else {
-      v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
-    }
-    
-    e.target.value = v;
-    const limpo = v.replace(/\D/g, "");
-    if (limpo.length === 11 || limpo.length === 14) {
-      buscarDestinatario(limpo);
-    } else {
-      feedback.style.display = "none";
+      document.getElementById('destinoCard').classList.remove('visivel');
+      document.getElementById('destinoExterno').classList.remove('visivel');
       destinoEncontrado = null;
-      validar();
+      document.getElementById('btnMain').disabled = true;
     }
   });
- 
 
-  valorInput.addEventListener("input", (e) => {
+  async function buscarDestinatario(chave) {
+    try {
+      // Tenta por CPF, celular, email ou chavepix
+      const campos = ['cpf','celular','email','chavepix'];
+      for (const campo of campos) {
+        const q = query(collection(db, "usuarios"), where(campo, "==", chave), limit(1));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const d = snap.docs[0];
+          if (d.id === userUid) { ZentryUI.toast("Você não pode transferir para si mesmo", "aviso"); return; }
+          destinoEncontrado = { uid: d.id, ...d.data() };
+          const iniciais = destinoEncontrado.nome.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+          document.getElementById('destAvatar').textContent = iniciais;
+          document.getElementById('destNome').textContent   = destinoEncontrado.nome;
+          document.getElementById('destinoCard').classList.add('visivel');
+          document.getElementById('destinoExterno').classList.remove('visivel');
+          document.getElementById('btnMain').disabled = false;
+          return;
+        }
+      }
+      // Não encontrou — Pix externo
+      destinoEncontrado = { uid: 'externo', nome: 'Pix Externo', banco: 'Banco Externo' };
+      document.getElementById('destinoCard').classList.remove('visivel');
+      document.getElementById('destinoExterno').classList.add('visivel');
+      document.getElementById('btnMain').disabled = false;
+    } catch(e) { ZentryUI.toast("Erro ao buscar destinatário", "erro"); }
+  }
+
+  // ── VALOR ──
+  document.getElementById('valorInput').addEventListener('input', function(e) {
     let v = e.target.value.replace(/\D/g,'');
-    v = (v/100).toFixed(2) + '';
-    v = v.replace(".", ",");
-    v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    e.target.value = "R$ " + v;
-    validar();
+    v = (parseInt(v||'0') / 100).toFixed(2).replace('.',',');
+    e.target.value = v;
+    const num = parseFloat(v.replace(',','.')) || 0;
+    const disp = document.getElementById('saldoDisp');
+    disp.textContent = "Saldo disponível: " + ZentryUI.formatarMoeda(saldoAtual);
+    disp.className = 'saldo-disp' + (num > saldoAtual ? ' insuf' : '');
   });
 
-  function validar() {
-    const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
-    const valorNum = parseFloat(valorLimpo) || 0;
+  // ── PIN ──
+  function onPin() {
+    const pin = document.getElementById('hiddenPin');
+    if (pin.value.length > 4) pin.value = pin.value.slice(0,4);
+    for (let i=1; i<=4; i++) {
+      document.getElementById(`p${i}`).className = 'pin-dot' + (i <= pin.value.length ? ' ok' : '');
+    }
+    document.getElementById('btnMain').disabled = pin.value.length < 4;
+  }
 
-    // O botão só ativa se: houver destino AND valor > 0 AND valor <= saldo
-    if (destinoEncontrado && valorNum > 0 && valorNum <= saldoDisponivel) {
-      btn.disabled = false;
-      btn.classList.add("active");
-    } else {
-      btn.disabled = true;
-      btn.classList.remove("active");
+  // ── DOTS ──
+  function atualizarDots() {
+    for (let i=0; i<4; i++) {
+      const d = document.getElementById(`dot${i}`);
+      d.classList.remove('active','done');
+      if (i === etapa) d.classList.add('active');
+      else if (i < etapa) d.classList.add('done');
     }
   }
 
-  btn.addEventListener("click", () => {
-    if (btn.disabled) return;
+  function irPara(n) {
+    document.getElementById(`tela${etapa}`).classList.remove('ativa');
+    etapa = n;
+    document.getElementById(`tela${etapa}`).classList.add('ativa');
+    atualizarDots();
+    document.querySelector('.content').scrollTop = 0;
+    const titles = ["Transferir","Valor","Confirmação","Concluído"];
+    document.getElementById('barTitle').textContent = titles[n];
+  }
 
-    const valorLimpo = valorInput.value.replace("R$ ", "").replace(/\./g, "").replace(",", ".");
-    const dados = {
-        valor: valorInput.value,
-        valorNumerico: parseFloat(valorLimpo),
-        nomeDestino: destinoEncontrado.nome,
-        uidDestino: destinoEncontrado.id,
-        bancoDestino: "Zentry Bank - 001",
-        chavePix: chaveInput.value,
-        tipo: "transferencia"
-    };
-    localStorage.setItem("transacao_pendente", JSON.stringify(dados));
-    window.location.href = 'revisao.html';
-  });
-     </script>
- 
+  // ── AVANÇAR ──
+  window.avancarEtapa = async function() {
+    const btn = document.getElementById('btnMain');
 
+    if (etapa === 0) {
+      if (!destinoEncontrado) return ZentryUI.toast("Digite a chave Pix", "aviso");
+      irPara(1);
+      document.getElementById('btnMain').disabled = false;
+
+    } else if (etapa === 1) {
+      const v = parseFloat((document.getElementById('valorInput').value||'0').replace(',','.')) || 0;
+      if (v <= 0)          return ZentryUI.toast("Digite um valor válido", "aviso");
+      if (v > saldoAtual)  return ZentryUI.toast("Saldo insuficiente!", "erro");
+
+      const chave = document.getElementById('chaveInput').value;
+      const desc  = document.getElementById('descInput').value || "Pix Zentry";
+      const iniciais = destinoEncontrado.nome.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+
+      document.getElementById('confirmAvatar').textContent = iniciais;
+      document.getElementById('confirmNome').textContent   = destinoEncontrado.nome;
+      document.getElementById('confirmBanco').textContent  = destinoEncontrado.banco || "Zentry Bank";
+      document.getElementById('confirmChave').textContent  = chave;
+      document.getElementById('confirmDesc').textContent   = desc || "—";
+      document.getElementById('confirmData').textContent   = new Date().toLocaleDateString('pt-BR');
+      document.getElementById('confirmValor').textContent  = ZentryUI.formatarMoeda(v);
+
+      dadosTransacao = { valor: v, destino: destinoEncontrado, chave, desc };
+      irPara(2);
+      document.getElementById('btnMain').textContent = "Confirmar Pix";
+      document.getElementById('btnMain').disabled = true;
+      setTimeout(() => document.getElementById('hiddenPin').focus(), 300);
+
+    } else if (etapa === 2) {
+      // Valida PIN
+      const pin = document.getElementById('hiddenPin').value;
+      const userData = await ZentryUser.buscar(userUid);
+      if (pin !== userData.senha) {
+        for (let i=1; i<=4; i++) document.getElementById(`p${i}`).className = 'pin-dot err';
+        setTimeout(() => {
+          document.getElementById('hiddenPin').value = '';
+          for (let i=1; i<=4; i++) document.getElementById(`p${i}`).className = 'pin-dot';
+          document.getElementById('btnMain').disabled = true;
+        }, 800);
+        return ZentryUI.toast("Senha incorreta!", "erro");
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+      ZentryUI.loading(true);
+
+      try {
+        const txId = "PIX" + Date.now();
+        const { valor, destino, chave, desc } = dadosTransacao;
+
+        await setDoc(doc(db, "usuarios", userUid, "transacoes", txId), {
+          tipo: "saida", valor, descricao: "Pix - " + destino.nome,
+          nomeDestino: destino.nome, uidDestino: destino.uid,
+          bancoDestino: destino.banco || "Zentry Bank",
+          chavePix: chave, descricaoUsuario: desc,
+          data: new Date().toISOString().split('T')[0],
+          timestamp: new Date(), id: txId
+        });
+
+        await updateDoc(doc(db, "usuarios", userUid), { saldo: increment(-valor) });
+
+        if (destino.uid !== 'externo') {
+          const txIdDest = "PIX" + Date.now() + "R";
+          await setDoc(doc(db, "usuarios", destino.uid, "transacoes", txIdDest), {
+            tipo: "entrada", valor, descricao: "Pix Recebido",
+            nomeRemetente: userData.nome || "Usuário Zentry",
+            uidRemetente: userUid, chavePix: chave,
+            data: new Date().toISOString().split('T')[0],
+            timestamp: new Date(), id: txIdDest
+          });
+          await updateDoc(doc(db, "usuarios", destino.uid), { saldo: increment(valor) });
+        }
+
+        // Salva para comprovante
+        localStorage.setItem("comprovante_final", JSON.stringify({
+          tipo: "saida", valor, descricao: "Pix - " + destino.nome,
+          nomeDestino: destino.nome, bancoDestino: destino.banco || "Zentry Bank",
+          chavePix: chave, data: new Date().toLocaleString('pt-BR'), id: txId
+        }));
+
+        ZentryUI.loading(false);
+
+        // Preenche sucesso
+        document.getElementById('sucessoSub').textContent  = ZentryUI.formatarMoeda(valor) + " enviado para " + destino.nome;
+        document.getElementById('compNome').textContent    = destino.nome;
+        document.getElementById('compChave').textContent   = chave;
+        document.getElementById('compValor').textContent   = ZentryUI.formatarMoeda(valor);
+        document.getElementById('compData').textContent    = new Date().toLocaleString('pt-BR');
+
+        irPara(3);
+        btn.textContent = "Compartilhar";
+        btn.disabled = false;
+        document.getElementById('btnSec').style.display = "block";
+
+      } catch(e) {
+        ZentryUI.loading(false);
+        ZentryUI.toast("Erro ao enviar. Tente novamente.", "erro");
+        btn.disabled = false;
+        btn.textContent = "Confirmar Pix";
+      }
+
+    } else if (etapa === 3) {
+      if (navigator.share) {
+        navigator.share({ title: 'Comprovante Zentry', text: `Pix de ${ZentryUI.formatarMoeda(dadosTransacao.valor)} enviado para ${dadosTransacao.destino.nome} pelo Zentry!` });
+      } else { ZentryUI.toast("Comprovante copiado!", "sucesso"); }
+    }
+  };
+
+  window.voltarEtapa = function() {
+    if (etapa === 0) { window.location.href = "pix.html"; return; }
+    if (etapa === 3) { window.location.href = "home.html"; return; }
+    irPara(etapa - 1);
+    document.getElementById('btnMain').textContent = "Continuar";
+    document.getElementById('btnMain').disabled = false;
+    document.getElementById('btnSec').style.display = "none";
+    document.getElementById('hiddenPin').value = '';
+    for(let i=1;i<=4;i++) document.getElementById(`p${i}`).className='pin-dot';
+  };
+
+  window.irParaComprovante = function() { window.location.href = "comprovante.html"; };
+</script>
 </body>
 </html>
