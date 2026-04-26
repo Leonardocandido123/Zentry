@@ -4,332 +4,687 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<title>QR Code - ZENTRY</title>
-<script src="https://unpkg.com/html5-qrcode"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<title>Ler QR Code - ZENTRY</title>
 <style>
-  :root { --accent:#22C55E; --accent-glow:rgba(34,197,94,.5); }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-  html,body{margin:0;padding:0;height:100%;width:100%;background:#000;color:#fff;font-family:'Inter',sans-serif;overflow:hidden;overscroll-behavior:none}
+  :root {
+    --green: #22c55e;
+    --green-glow: rgba(34,197,94,0.5);
+    --green-dim: rgba(34,197,94,0.15);
+    --red: #ef4444;
+    --bg: #000;
+    --glass: rgba(0,0,0,0.55);
+  }
 
-  /* CÂMERA FULLSCREEN */
-  #reader{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;background:#000}
-  #reader video{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover!important}
-  #reader > div, #reader__scan_region, #reader__dashboard{display:none!important}
-  #reader video{display:block!important}
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
+  html, body { height: 100%; width: 100%; background: var(--bg); color: #fff; font-family: 'Sora', sans-serif; overflow: hidden; overscroll-behavior: none; }
 
-  /* OVERLAY ESCURO COM RECORTE QUADRADO (mask) */
-  .overlay{
-    position:fixed;inset:0;z-index:2;pointer-events:none;
-    background:rgba(0,0,0,.72);
-    -webkit-mask:
-      linear-gradient(#000 0 0),
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor;
-            mask-composite:exclude;
+  /* ── CÂMERA FULLSCREEN ── */
+  #reader { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; background: #000; }
+  #reader video { position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
+  #reader > div, #reader__scan_region, #reader__dashboard { display: none !important; }
+
+  /* ── TELA DE PERMISSÃO ── */
+  .perm-screen {
+    position: fixed; inset: 0; z-index: 20;
+    background: #060910;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 30px; text-align: center;
+    gap: 0;
+  }
+  .perm-screen.oculto { display: none; }
+
+  .perm-icon-wrap {
+    width: 100px; height: 100px; border-radius: 30px;
+    background: var(--green-dim); border: 2px solid var(--green);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+    animation: pulseIcon 2s ease-in-out infinite;
+  }
+  @keyframes pulseIcon {
+    0%, 100% { box-shadow: 0 0 0 0 var(--green-glow); }
+    50%       { box-shadow: 0 0 0 16px transparent; }
+  }
+  .perm-icon-wrap svg { width: 48px; height: 48px; stroke: var(--green); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+
+  .perm-titulo { font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .perm-sub { font-size: 14px; color: #6b7a99; line-height: 1.7; margin-bottom: 32px; }
+
+  .perm-item {
+    display: flex; align-items: center; gap: 12px;
+    background: #0f1623; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 14px 16px; width: 100%;
+    margin-bottom: 10px; text-align: left;
+  }
+  .perm-item-icon { font-size: 20px; flex-shrink: 0; }
+  .perm-item-txt { font-size: 13px; color: #9ca3af; line-height: 1.5; }
+  .perm-item-txt b { color: #fff; display: block; margin-bottom: 2px; }
+
+  .btn-perm {
+    width: 100%; padding: 17px; border-radius: 18px; border: none;
+    background: var(--green); color: #052e16;
+    font-weight: 800; font-size: 16px; font-family: 'Sora', sans-serif;
+    cursor: pointer; margin-top: 10px;
+    box-shadow: 0 8px 30px var(--green-glow);
+    transition: transform 0.15s;
+  }
+  .btn-perm:active { transform: scale(0.97); }
+
+  .btn-perm-sec {
+    width: 100%; padding: 14px; border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.1); background: transparent;
+    color: #6b7a99; font-size: 14px; font-family: 'Sora', sans-serif;
+    cursor: pointer; margin-top: 8px;
+  }
+
+  /* ── TELA DE ERRO DE PERMISSÃO ── */
+  .erro-screen {
+    position: fixed; inset: 0; z-index: 20;
+    background: #060910;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 30px; text-align: center;
+  }
+  .erro-screen.visivel { display: flex; }
+  .erro-icon { font-size: 64px; margin-bottom: 20px; }
+  .erro-titulo { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+  .erro-sub { font-size: 14px; color: #6b7a99; line-height: 1.7; margin-bottom: 28px; }
+  .erro-steps {
+    background: #0f1623; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px; padding: 20px; width: 100%;
+    text-align: left; margin-bottom: 24px;
+  }
+  .erro-step { font-size: 13px; color: #9ca3af; padding: 6px 0; display: flex; gap: 10px; }
+  .erro-step span { color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+  /* ── OVERLAY ESCURO COM RECORTE ── */
+  .overlay {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    background: rgba(0,0,0,0.72);
+    -webkit-mask: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
     -webkit-mask-position: 0 0, center;
     mask-position: 0 0, center;
     -webkit-mask-size: 100% 100%, 270px 270px;
-            mask-size: 100% 100%, 270px 270px;
-    -webkit-mask-repeat: no-repeat, no-repeat;
-            mask-repeat: no-repeat, no-repeat;
+    mask-size: 100% 100%, 270px 270px;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
   }
 
-  /* QUADRADO DE LEITURA + CANTOS + LINHA */
-  .scan-frame{
-    position:fixed;top:50%;left:50%;width:270px;height:270px;
-    transform:translate(-50%,-50%);z-index:3;pointer-events:none;
-    border-radius:24px;
+  /* ── FRAME DE LEITURA ── */
+  .scan-frame {
+    position: fixed; top: 50%; left: 50%;
+    width: 270px; height: 270px;
+    transform: translate(-50%, -50%);
+    z-index: 3; pointer-events: none;
+    border-radius: 24px;
   }
-  .corner{position:absolute;width:34px;height:34px;border:3px solid var(--accent);filter:drop-shadow(0 0 6px var(--accent-glow))}
-  .corner.tl{top:-2px;left:-2px;border-right:none;border-bottom:none;border-top-left-radius:18px}
-  .corner.tr{top:-2px;right:-2px;border-left:none;border-bottom:none;border-top-right-radius:18px}
-  .corner.bl{bottom:-2px;left:-2px;border-right:none;border-top:none;border-bottom-left-radius:18px}
-  .corner.br{bottom:-2px;right:-2px;border-left:none;border-top:none;border-bottom-right-radius:18px}
+  .corner {
+    position: absolute; width: 36px; height: 36px;
+    border: 3px solid var(--green);
+    filter: drop-shadow(0 0 8px var(--green-glow));
+    transition: border-color 0.3s;
+  }
+  .corner.tl { top:-2px; left:-2px; border-right:none; border-bottom:none; border-top-left-radius:18px; }
+  .corner.tr { top:-2px; right:-2px; border-left:none; border-bottom:none; border-top-right-radius:18px; }
+  .corner.bl { bottom:-2px; left:-2px; border-right:none; border-top:none; border-bottom-left-radius:18px; }
+  .corner.br { bottom:-2px; right:-2px; border-left:none; border-top:none; border-bottom-right-radius:18px; }
 
-  .scan-line{
-    position:absolute;left:10px;right:10px;height:2px;
-    background:linear-gradient(90deg,transparent,var(--accent),transparent);
-    box-shadow:0 0 16px 2px var(--accent-glow);
-    border-radius:2px;top:10px;
-    animation:scan 2.4s ease-in-out infinite;
+  .scan-line {
+    position: absolute; left: 10px; right: 10px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    box-shadow: 0 0 16px 4px var(--green-glow);
+    border-radius: 2px; top: 10px;
+    animation: scan 2.4s ease-in-out infinite;
   }
-  @keyframes scan{
-    0%{top:10px;opacity:.3}
-    10%{opacity:1}
-    50%{top:calc(100% - 12px);opacity:1}
-    90%{opacity:1}
-    100%{top:10px;opacity:.3}
+  @keyframes scan {
+    0%   { top: 10px; opacity: 0.3; }
+    10%  { opacity: 1; }
+    50%  { top: calc(100% - 12px); opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 10px; opacity: 0.3; }
   }
 
-  /* TOPO: VOLTAR + LANTERNA */
-  .top-bar{
-    position:fixed;top:0;left:0;right:0;z-index:5;
-    display:flex;justify-content:space-between;align-items:center;
-    padding:max(env(safe-area-inset-top),20px) 20px 0;
-  }
-  .icon-btn{
-    width:46px;height:46px;border-radius:50%;
-    background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    border:1px solid rgba(255,255,255,.12);color:#fff;
-    display:flex;align-items:center;justify-content:center;cursor:pointer;
-    transition:transform .15s ease,background .2s ease;
-  }
-  .icon-btn:active{transform:scale(.92)}
-  .icon-btn.on{background:var(--accent);color:#000;border-color:var(--accent)}
-  .icon-btn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  /* Cantos ficam vermelhos em erro */
+  .scan-frame.erro .corner { border-color: var(--red); filter: drop-shadow(0 0 8px rgba(239,68,68,0.5)); }
+  .scan-frame.sucesso .corner { border-color: var(--green); animation: piscar 0.4s ease; }
+  @keyframes piscar { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* TITULO ABAIXO DO QUADRO */
-  .hint{
-    position:fixed;left:0;right:0;text-align:center;z-index:4;
-    top:calc(50% + 160px);font-size:15px;font-weight:600;letter-spacing:.2px;
-    text-shadow:0 2px 12px rgba(0,0,0,.8);
-    padding:0 30px;
+  /* ── TOP BAR ── */
+  .top-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: max(env(safe-area-inset-top), 20px) 20px 0;
   }
-  .hint small{display:block;margin-top:6px;font-weight:400;color:#cbd5e1;font-size:12px}
-  .hint.error{color:#fecaca}
+  .icon-btn {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: var(--glass); backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.12); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .icon-btn:active { transform: scale(0.92); }
+  .icon-btn.on { background: var(--green); color: #000; border-color: var(--green); }
+  .icon-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* BARRA INFERIOR */
-  .bottom-bar{
-    position:fixed;left:0;right:0;bottom:0;z-index:5;
-    padding:18px 20px max(env(safe-area-inset-bottom),22px);
-    display:flex;gap:10px;
-    background:linear-gradient(to top,rgba(0,0,0,.85),transparent);
+  /* ── HINT CENTRAL ── */
+  .hint {
+    position: fixed; left: 0; right: 0; text-align: center; z-index: 4;
+    top: calc(50% + 155px);
+    font-size: 15px; font-weight: 600;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+    padding: 0 30px;
+    transition: color 0.3s;
   }
-  .bottom-btn{
-    flex:1;padding:15px 14px;border:none;border-radius:16px;
-    background:rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    color:#fff;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;
-    border:1px solid rgba(255,255,255,.1);
-    display:flex;align-items:center;justify-content:center;gap:8px;
-  }
-  .bottom-btn:active{transform:scale(.97)}
-  .bottom-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+  .hint small { display: block; margin-top: 6px; font-weight: 400; color: #cbd5e1; font-size: 12px; }
+  .hint.erro  { color: #fca5a5; }
+  .hint.ok    { color: var(--green); }
 
-  /* FLASH DE SUCESSO */
-  .flash-success{
-    position:fixed;inset:0;z-index:9;background:var(--accent);
-    opacity:0;pointer-events:none;transition:opacity .25s;
+  /* ── BOTTOM BAR ── */
+  .bottom-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    padding: 18px 20px max(env(safe-area-inset-bottom), 28px);
+    display: flex; gap: 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
   }
-  .flash-success.show{opacity:.35}
+  .bottom-btn {
+    flex: 1; padding: 15px 14px; border: none; border-radius: 16px;
+    background: rgba(255,255,255,0.08); backdrop-filter: blur(14px);
+    color: #fff; font-weight: 600; font-size: 14px;
+    cursor: pointer; font-family: 'Sora', sans-serif;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+  }
+  .bottom-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.15); }
+  .bottom-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
 
-  #file-input{display:none}
+  /* ── MODAL DE REVISÃO ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 10;
+    background: rgba(0,0,0,0.85);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.aberto { display: flex; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: #0f1623; border-radius: 28px 28px 0 0;
+    width: 100%; padding: 0 0 40px;
+    animation: slideUp 0.4s cubic-bezier(0.34,1.2,0.64,1);
+    max-height: 85vh; overflow-y: auto;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin: 14px auto 24px; }
+
+  .modal-titulo { font-size: 11px; font-weight: 700; color: #6b7a99; text-transform: uppercase; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; }
+
+  .modal-valor { font-size: 38px; font-weight: 800; text-align: center; color: var(--green); letter-spacing: -1px; margin-bottom: 6px; }
+  .modal-para  { font-size: 14px; color: #6b7a99; text-align: center; margin-bottom: 24px; }
+
+  .modal-card {
+    background: #161f2e; border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 20px; padding: 4px 20px; margin: 0 20px 20px;
+  }
+  .modal-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; font-size: 13px;
+  }
+  .modal-row + .modal-row { border-top: 1px solid rgba(255,255,255,0.05); }
+  .modal-label { color: #6b7a99; }
+  .modal-val   { font-weight: 700; color: #fff; }
+
+  .modal-aviso {
+    margin: 0 20px 20px;
+    background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);
+    border-radius: 14px; padding: 12px 16px;
+    font-size: 12px; color: #fbbf24; line-height: 1.6;
+  }
+
+  .modal-acoes { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+  .btn-confirmar {
+    width: 100%; padding: 17px; border-radius: 18px; border: none;
+    background: var(--green); color: #052e16;
+    font-weight: 800; font-size: 16px; font-family: 'Sora', sans-serif;
+    cursor: pointer; box-shadow: 0 8px 30px rgba(34,197,94,0.3);
+    transition: transform 0.15s;
+  }
+  .btn-confirmar:active { transform: scale(0.98); }
+  .btn-cancelar {
+    width: 100%; padding: 14px; border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.1); background: transparent;
+    color: #fff; font-weight: 600; font-size: 15px; font-family: 'Sora', sans-serif;
+    cursor: pointer;
+  }
+
+  /* ── FLASH SUCESSO ── */
+  .flash-ok {
+    position: fixed; inset: 0; z-index: 15;
+    background: var(--green); opacity: 0;
+    pointer-events: none; transition: opacity 0.25s;
+  }
+  .flash-ok.show { opacity: 0.3; }
+
+  #file-input { display: none; }
 </style>
 </head>
 <body>
 
-  <div id="reader"></div>
+<!-- TELA DE PERMISSÃO -->
+<div class="perm-screen" id="permScreen">
+  <div class="perm-icon-wrap">
+    <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+  </div>
+  <p class="perm-titulo">Precisamos da sua câmera</p>
+  <p class="perm-sub">Para escanear QR Codes do Pix, o Zentry precisa acessar a câmera do seu dispositivo.</p>
 
-  <div class="overlay"></div>
-
-  <div class="scan-frame">
-    <div class="corner tl"></div>
-    <div class="corner tr"></div>
-    <div class="corner bl"></div>
-    <div class="corner br"></div>
-    <div class="scan-line"></div>
+  <div class="perm-item">
+    <span class="perm-item-icon">🔒</span>
+    <div class="perm-item-txt"><b>100% seguro</b>A câmera é usada apenas para leitura do QR Code</div>
+  </div>
+  <div class="perm-item">
+    <span class="perm-item-icon">🚫</span>
+    <div class="perm-item-txt"><b>Sem gravação</b>Nenhuma imagem é salva ou enviada</div>
+  </div>
+  <div class="perm-item">
+    <span class="perm-item-icon">⚡</span>
+    <div class="perm-item-txt"><b>Leitura instantânea</b>Aponte para o QR Code e o pagamento é detectado automaticamente</div>
   </div>
 
-  <div class="top-bar">
-    <button class="icon-btn" onclick="voltar()" aria-label="Voltar">
-      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <button class="icon-btn" id="flashBtn" onclick="toggleFlash()" aria-label="Lanterna">
-      <svg viewBox="0 0 24 24"><path d="M13 2L4.5 14H12l-1 8 8.5-12H12l1-8z"/></svg>
-    </button>
+  <button class="btn-perm" onclick="solicitarPermissao()">Permitir câmera e continuar</button>
+  <button class="btn-perm-sec" onclick="document.getElementById('file-input').click()">Usar imagem da galeria</button>
+</div>
+
+<!-- TELA DE ERRO DE PERMISSÃO -->
+<div class="erro-screen" id="erroScreen">
+  <div class="erro-icon">📷</div>
+  <p class="erro-titulo">Câmera bloqueada</p>
+  <p class="erro-sub">A permissão de câmera foi negada. Siga os passos abaixo para liberar:</p>
+  <div class="erro-steps">
+    <div class="erro-step"><span>1.</span> Abra as Configurações do seu celular</div>
+    <div class="erro-step"><span>2.</span> Vá em Apps → Navegador (Chrome/Safari)</div>
+    <div class="erro-step"><span>3.</span> Toque em Permissões → Câmera</div>
+    <div class="erro-step"><span>4.</span> Selecione "Permitir"</div>
+    <div class="erro-step"><span>5.</span> Volte ao Zentry e tente novamente</div>
   </div>
+  <button class="btn-perm" onclick="tentarNovamente()">Tentar novamente</button>
+  <button class="btn-perm-sec" onclick="document.getElementById('file-input').click()">Usar imagem da galeria</button>
+  <button class="btn-perm-sec" onclick="window.location.href='pix.html'">Voltar ao Pix</button>
+</div>
 
-  <div class="hint" id="hint">Aponte para o QR Code<small>Mantenha o código dentro do quadro</small></div>
+<!-- CÂMERA -->
+<div id="reader"></div>
+<div class="overlay" id="overlay" style="display:none"></div>
 
-  <div class="bottom-bar">
-    <button class="bottom-btn" onclick="document.getElementById('file-input').click()">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      Galeria
-    </button>
-    <button class="bottom-btn" onclick="location.href='copia_cola.html'">
-      <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
-      Copia e cola
-    </button>
+<!-- FRAME -->
+<div class="scan-frame" id="scanFrame" style="display:none">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+  <div class="scan-line"></div>
+</div>
+
+<!-- TOP BAR -->
+<div class="top-bar" id="topBar" style="display:none">
+  <button class="icon-btn" onclick="voltar()">
+    <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="icon-btn" id="flashBtn" onclick="toggleFlash()">
+    <svg viewBox="0 0 24 24"><path d="M13 2L4.5 14H12l-1 8 8.5-12H12l1-8z"/></svg>
+  </button>
+</div>
+
+<!-- HINT -->
+<div class="hint" id="hint" style="display:none">
+  Aponte para o QR Code
+  <small>Mantenha o código dentro do quadro verde</small>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar" id="bottomBar" style="display:none">
+  <button class="bottom-btn" onclick="document.getElementById('file-input').click()">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+    Galeria
+  </button>
+  <button class="bottom-btn" onclick="window.location.href='copia_cola.html'">
+    <svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+    Copia e Cola
+  </button>
+</div>
+
+<!-- MODAL REVISÃO -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <p class="modal-titulo">Confirmar Pagamento Pix</p>
+    <div class="modal-valor" id="modalValor">R$ 0,00</div>
+    <div class="modal-para" id="modalPara">Para: —</div>
+    <div class="modal-card">
+      <div class="modal-row"><span class="modal-label">Destinatário</span><span class="modal-val" id="modalNome">—</span></div>
+      <div class="modal-row"><span class="modal-label">Instituição</span><span class="modal-val" id="modalBanco">—</span></div>
+      <div class="modal-row"><span class="modal-label">Chave</span><span class="modal-val">QR Code</span></div>
+      <div class="modal-row"><span class="modal-label">Tipo</span><span class="modal-val">Pix imediato</span></div>
+    </div>
+    <div class="modal-aviso">⚡ O pagamento é imediato e irreversível. Verifique os dados antes de confirmar.</div>
+    <div class="modal-acoes">
+      <button class="btn-confirmar" onclick="confirmarPagamento()">Confirmar Pagamento</button>
+      <button class="btn-cancelar" onclick="cancelarModal()">Cancelar e escanear outro</button>
+    </div>
   </div>
+</div>
 
-  <input type="file" id="file-input" accept="image/*">
+<!-- FLASH -->
+<div class="flash-ok" id="flashOk"></div>
 
-  <div class="flash-success" id="flashOk"></div>
+<input type="file" id="file-input" accept="image/*">
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { auth, db, ZentryAuth, ZentryUser, ZentryUI } from './zentry-core.js';
+  import { doc, setDoc, updateDoc, collection, query, where, getDocs, limit }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
-    authDomain: "zentry-app-74275.firebaseapp.com",
-    projectId: "zentry-app-74275",
-    storageBucket: "zentry-app-74275.appspot.com",
-    messagingSenderId: "571422826071",
-    appId: "1:571422826071:web:ba1ca6fea76e360bb80d12"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  let scanner      = null;
+  let ativo        = false;
+  let processando  = false;
+  let flashOn      = false;
+  let trackAtual   = null;
+  let dadosQR      = null;
+  let userUid      = "";
+  let saldoAtual   = 0;
 
-  let scanner = null;
-  let ativo = false;
-  let processando = false;
-  let flashOn = false;
-  let trackAtual = null;
+  // ── INIT ──
+  async function init() {
+    const user = await ZentryAuth.exigirLogin();
+    userUid = user.uid;
+    const dados = await ZentryUser.buscar(userUid);
+    if (dados) saldoAtual = Number(dados.saldo || 0);
+  }
+  init();
 
-  const hint = document.getElementById("hint");
-  const flashBtn = document.getElementById("flashBtn");
-
-  function setHint(txt, sub, isError){
-    hint.className = "hint" + (isError ? " error" : "");
-    hint.innerHTML = txt + (sub ? `<small>${sub}</small>` : "");
+  // ── HELPERS ──
+  function mostrarCameraUI() {
+    document.getElementById('overlay').style.display   = 'block';
+    document.getElementById('scanFrame').style.display = 'block';
+    document.getElementById('topBar').style.display    = 'flex';
+    document.getElementById('hint').style.display      = 'block';
+    document.getElementById('bottomBar').style.display = 'flex';
   }
 
-  function flashSuccess(){
-    const f = document.getElementById("flashOk");
-    f.classList.add("show");
-    setTimeout(()=>f.classList.remove("show"), 250);
+  function setHint(txt, sub, tipo) {
+    const h = document.getElementById('hint');
+    h.className = 'hint' + (tipo ? ' ' + tipo : '');
+    h.innerHTML = txt + (sub ? `<small>${sub}</small>` : '');
   }
 
-  // Mesma extração do copia_cola.html
-  function extrairDadosPix(codigo) {
+  function flashSucesso() {
+    const f = document.getElementById('flashOk');
+    f.classList.add('show');
+    setTimeout(() => f.classList.remove('show'), 300);
+  }
+
+  // ── EXTRAIR DADOS DO PIX ──
+  function extrairPix(codigo) {
     try {
-      let valor = "0.00";
-      if (codigo.includes("5405")) valor = codigo.split('5405')[1].substring(0, codigo.split('5405')[1].indexOf('5802'));
-      else if (codigo.includes("5404")) valor = codigo.split('5404')[1].substring(0, codigo.split('5404')[1].indexOf('5802'));
+      let valor = 0;
+      const m54 = codigo.match(/5405(\d+(?:\.\d+)?)/);
+      const m54b = codigo.match(/5404(\d+(?:\.\d+)?)/);
+      if (m54)  valor = parseFloat(m54[1]);
+      else if (m54b) valor = parseFloat(m54b[1]);
+
       let nome = "Recebedor Externo";
-      if (codigo.includes("59")) {
-        const parteNome = codigo.split('59')[1];
-        const tam = parseInt(parteNome.substring(0, 2));
-        nome = parteNome.substring(2, 2 + tam);
+      const m59 = codigo.match(/59(\d{2})(.+?)60/);
+      if (m59) {
+        const tam = parseInt(m59[1]);
+        nome = m59[2].substring(0, tam).trim();
       }
-      return { valor: parseFloat(valor), nome: nome };
-    } catch (e) { return null; }
+
+      let chave = "";
+      const m00 = codigo.match(/00(\d{2})(.+?)01/);
+      if (m00) chave = m00[2].substring(0, parseInt(m00[1]));
+
+      return { valor, nome, chave };
+    } catch(e) { return null; }
   }
 
-  async function buscarUsuarioPorNome(nome) {
+  // ── BUSCAR USUÁRIO ──
+  async function buscarUsuario(nome) {
     try {
-      const q = query(collection(db, "usuarios"), where("nome", "==", nome));
+      const q = query(collection(db, "usuarios"), where("nome", "==", nome), limit(1));
       const snap = await getDocs(q);
-      if (!snap.empty) {
-        const d = snap.docs[0];
-        return { uid: d.id, ...d.data() };
-      }
-    } catch(e) { console.warn("Firestore:", e); }
+      if (!snap.empty) return { uid: snap.docs[0].id, ...snap.docs[0].data() };
+    } catch(e) {}
     return null;
   }
 
-  async function processarCodigo(text){
+  // ── PROCESSAR QR CODE ──
+  async function processarQR(texto) {
     if (processando) return;
     processando = true;
 
-    if (navigator.vibrate) navigator.vibrate(80);
-    flashSuccess();
+    if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+    flashSucesso();
+    document.getElementById('scanFrame').classList.add('sucesso');
 
-    setHint("QR detectado", "Carregando dados...");
-    if (scanner && ativo) { try { await scanner.stop(); } catch(e){} ativo = false; }
+    setHint("QR detectado!", "Carregando dados do pagamento...", "ok");
+    if (scanner && ativo) { try { await scanner.stop(); } catch(e) {} ativo = false; }
 
-    const dados = extrairDadosPix(text);
-    if (!dados || !dados.valor || dados.valor <= 0) {
-      setHint("QR Code inválido", "Tente um código Pix válido", true);
-      setTimeout(()=>{ processando = false; iniciarScanner(); }, 1800);
+    const pix = extrairPix(texto);
+    if (!pix || pix.valor <= 0) {
+      document.getElementById('scanFrame').classList.remove('sucesso');
+      document.getElementById('scanFrame').classList.add('erro');
+      setHint("QR Code inválido", "Este QR Code não é um Pix válido. Tente outro.", "erro");
+      setTimeout(() => {
+        document.getElementById('scanFrame').classList.remove('erro');
+        processando = false;
+        iniciarScanner();
+      }, 2000);
       return;
     }
 
-    const usuario = await buscarUsuarioPorNome(dados.nome);
+    // Valida saldo
+    if (pix.valor > saldoAtual) {
+      document.getElementById('scanFrame').classList.add('erro');
+        setHint("Saldo insuficiente", ZentryUI.formatarMoeda(pix.valor) + " · Saldo: " + ZentryUI.formatarMoeda(saldoAtual), "erro");
+      setTimeout(() => {
+        document.getElementById('scanFrame').classList.remove('erro');
+        processando = false;
+        iniciarScanner();
+      }, 2500);
+      return;
+    }
 
-    const transacaoPendente = {
-      nomeDestino: usuario ? usuario.nome : dados.nome,
-      valor: dados.valor.toLocaleString('pt-BR', { style:'currency', currency:'BRL' }),
-      valorNumerico: dados.valor,
-      chavePix: "QR Code",
-      bancoDestino: usuario ? "Zentry Bank" : "Banco Externo",
-      uidDestino: usuario ? usuario.uid : "externo"
+    const usuario = await buscarUsuario(pix.nome);
+    dadosQR = {
+      valor:      pix.valor,
+      nome:       usuario ? usuario.nome : pix.nome,
+      banco:      usuario ? "Zentry"    : "Banco Externo",
+      uidDestino: usuario ? usuario.uid : "externo",
+      chave:      pix.chave || "QR Code",
     };
-    localStorage.setItem("transacao_pendente", JSON.stringify(transacaoPendente));
-    location.href = "revisao.html";
+
+    // Preenche modal
+    document.getElementById('modalValor').textContent = ZentryUI.formatarMoeda(pix.valor);
+    document.getElementById('modalPara').textContent  = "Para: " + dadosQR.nome;
+    document.getElementById('modalNome').textContent  = dadosQR.nome;
+    document.getElementById('modalBanco').textContent = dadosQR.banco;
+    document.getElementById('modalOverlay').classList.add('aberto');
   }
 
-  async function iniciarScanner(){
+  // ── CONFIRMAR PAGAMENTO ──
+  window.confirmarPagamento = async function() {
+    if (!dadosQR) return;
+    const btn = document.querySelector('.btn-confirmar');
+    btn.disabled = true;
+    btn.textContent = "Processando...";
+    ZentryUI.loading(true);
+
+    try {
+      const txId = "PIX" + Date.now();
+      await setDoc(doc(db, "usuarios", userUid, "transacoes", txId), {
+        tipo:         "saida",
+        valor:        dadosQR.valor,
+        descricao:    "Pix QR Code - " + dadosQR.nome,
+        nomeDestino:  dadosQR.nome,
+        bancoDestino: dadosQR.banco,
+        uidDestino:   dadosQR.uidDestino,
+        chavePix:     dadosQR.chave,
+        data:         new Date().toISOString().split('T')[0],
+        timestamp:    new Date(),
+        id:           txId
+      });
+
+      await updateDoc(doc(db, "usuarios", userUid), {
+        saldo: saldoAtual - dadosQR.valor
+      });
+
+      ZentryUI.loading(false);
+
+      // Salva para o comprovante
+      localStorage.setItem("comprovante_final", JSON.stringify({
+        tipo:         "saida",
+        valor:        dadosQR.valor,
+        descricao:    "Pix QR Code",
+        nomeDestino:  dadosQR.nome,
+        bancoDestino: dadosQR.banco,
+        uidDestino:   dadosQR.uidDestino,
+        chavePix:     dadosQR.chave,
+        data:         new Date().toLocaleString('pt-BR'),
+        id:           txId
+      }));
+
+      window.location.href = "comprovante.html";
+
+    } catch(e) {
+      ZentryUI.loading(false);
+      ZentryUI.toast("Erro ao processar. Tente novamente.", "erro");
+      btn.disabled = false;
+      btn.textContent = "Confirmar Pagamento";
+    }
+  };
+
+  // ── CANCELAR MODAL ──
+  window.cancelarModal = function() {
+    document.getElementById('modalOverlay').classList.remove('aberto');
+    dadosQR = null;
+    processando = false;
+    document.getElementById('scanFrame').classList.remove('sucesso','erro');
+    setHint("Aponte para o QR Code", "Mantenha o código dentro do quadro verde");
+    iniciarScanner();
+  };
+
+  // ── SOLICITAR PERMISSÃO ──
+  window.solicitarPermissao = async function() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      stream.getTracks().forEach(t => t.stop()); // Para o stream de teste
+      document.getElementById('permScreen').classList.add('oculto');
+      mostrarCameraUI();
+      iniciarScanner();
+    } catch(err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        document.getElementById('permScreen').classList.add('oculto');
+        document.getElementById('erroScreen').classList.add('visivel');
+      } else {
+        document.getElementById('permScreen').classList.add('oculto');
+        mostrarCameraUI();
+        iniciarScanner();
+      }
+    }
+  };
+
+  window.tentarNovamente = function() {
+    document.getElementById('erroScreen').classList.remove('visivel');
+    document.getElementById('permScreen').classList.remove('oculto');
+  };
+
+  // ── INICIAR SCANNER ──
+  async function iniciarScanner() {
     if (ativo) return;
     ativo = true;
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      setHint("Câmera não disponível", "Libere a permissão de câmera nas configurações do app", true);
-      ativo = false; return;
-    }
-
     try {
-      scanner = new Html5Qrcode("reader", { verbose:false });
-      const config = { fps: 12, qrbox: { width: 270, height: 270 }, aspectRatio: window.innerHeight / window.innerWidth };
+      scanner = new Html5Qrcode("reader", { verbose: false });
+      const cfg = {
+        fps: 15,
+        qrbox: { width: 270, height: 270 },
+        aspectRatio: window.innerHeight / window.innerWidth
+      };
 
       try {
-        await scanner.start({ facingMode:{ exact:"environment" } }, config, processarCodigo, ()=>{});
+        await scanner.start({ facingMode: { exact: "environment" } }, cfg, processarQR, () => {});
       } catch(e1) {
-        await scanner.start({ facingMode:"environment" }, config, processarCodigo, ()=>{});
+        await scanner.start({ facingMode: "environment" }, cfg, processarQR, () => {});
       }
 
-      // Pega a track pra controlar o flash
-      try {
-        const stream = scanner.getRunningTrackCameraCapabilities ? null : null;
-        const videoEl = document.querySelector("#reader video");
-        if (videoEl && videoEl.srcObject) {
-          trackAtual = videoEl.srcObject.getVideoTracks()[0];
-        }
-      } catch(e){}
+      // Pega track para flash
+      setTimeout(() => {
+        const v = document.querySelector("#reader video");
+        if (v && v.srcObject) trackAtual = v.srcObject.getVideoTracks()[0];
+      }, 800);
 
-      setHint("Aponte para o QR Code", "Mantenha o código dentro do quadro");
-    } catch (err) {
-      console.error(err);
-      const msg = err && err.name === "NotAllowedError"
-        ? "Permissão de câmera negada"
-        : "Não foi possível abrir a câmera";
-      const sub = err && err.name === "NotAllowedError"
-        ? "Vá em Configurações do app e ative a câmera"
-        : (err?.message || "");
-      setHint(msg, sub, true);
+      setHint("Aponte para o QR Code", "Mantenha o código dentro do quadro verde");
+
+    } catch(err) {
       ativo = false;
+      document.getElementById('scanFrame').classList.add('erro');
+      if (err.name === 'NotAllowedError') {
+        document.getElementById('erroScreen').classList.add('visivel');
+      } else {
+        setHint("Erro na câmera", err?.message || "Tente novamente", "erro");
+      }
     }
   }
 
-  window.toggleFlash = async function(){
+  // ── FLASH/LANTERNA ──
+  window.toggleFlash = async function() {
     if (!trackAtual) {
       const v = document.querySelector("#reader video");
       if (v && v.srcObject) trackAtual = v.srcObject.getVideoTracks()[0];
     }
     if (!trackAtual) return;
     const caps = trackAtual.getCapabilities ? trackAtual.getCapabilities() : {};
-    if (!caps.torch) { setHint("Lanterna não suportada", "Seu dispositivo não permite", true); setTimeout(()=>setHint("Aponte para o QR Code","Mantenha o código dentro do quadro"),1500); return; }
+    if (!caps.torch) { ZentryUI.toast("Lanterna não disponível neste dispositivo", "info"); return; }
     try {
       flashOn = !flashOn;
       await trackAtual.applyConstraints({ advanced: [{ torch: flashOn }] });
-      flashBtn.classList.toggle("on", flashOn);
-    } catch(e){ console.warn(e); }
+      document.getElementById('flashBtn').classList.toggle('on', flashOn);
+    } catch(e) {}
   };
 
-  window.voltar = function(){
-    if (scanner && ativo) scanner.stop().catch(()=>{});
-    location.href = "pix.html";
+  // ── VOLTAR ──
+  window.voltar = function() {
+    if (scanner && ativo) scanner.stop().catch(() => {});
+    window.location.href = "pix.html";
   };
 
-  // Leitura por imagem da galeria
-  document.getElementById("file-input").addEventListener("change", async (e) => {
+  // ── GALERIA ──
+  document.getElementById('file-input').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (scanner && ativo) { try { await scanner.stop(); } catch(_){} ativo = false; }
-    const tmp = new Html5Qrcode("reader", { verbose:false });
+    document.getElementById('permScreen').classList.add('oculto');
+    document.getElementById('erroScreen').classList.remove('visivel');
+    mostrarCameraUI();
+
+    if (scanner && ativo) { try { await scanner.stop(); } catch(_) {} ativo = false; }
+    const tmp = new Html5Qrcode("reader", { verbose: false });
     try {
       const result = await tmp.scanFile(file, false);
-      processarCodigo(result);
-    } catch(err){
-      setHint("QR não encontrado na imagem","Tente outra foto", true);
-      setTimeout(()=>{ processando = false; iniciarScanner(); }, 1800);
+      processarQR(result);
+    } catch(err) {
+      setHint("QR não encontrado", "Tente outra imagem", "erro");
+      setTimeout(() => { processando = false; iniciarScanner(); }, 2000);
     }
+    e.target.value = "";
   });
 
-  window.addEventListener("load", () => setTimeout(iniciarScanner, 250));
-  window.addEventListener("beforeunload", () => { if (scanner && ativo) scanner.stop().catch(()=>{}); });
+  window.addEventListener('beforeunload', () => {
+    if (scanner && ativo) scanner.stop().catch(() => {});
+  });
 </script>
-
 </body>
 </html>
