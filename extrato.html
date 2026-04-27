@@ -260,7 +260,19 @@
         </div>
     </div>
 </div>
-
+    <div id="compartilharCard" style="
+  position:fixed;
+  left:-9999px;
+  top:0;
+  width:420px;
+  background:#fff;
+  border-radius:24px;
+  padding:24px;
+  font-family:'Sora';
+  color:#000;
+">
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script type="module">
     import { auth, db, ZentryAuth, ZentryUI } from './zentry-core.js';
     import { collection, onSnapshot, query, orderBy, where, Timestamp }
@@ -511,49 +523,83 @@
     };
 
     // ── COMPARTILHAR COMPROVANTE ──
-    window.compartilharComprovante = async function() {
-     if (!transacaoAtiva) return;
-        const t  = transacaoAtiva;
-        const me = uidAtual;
-        const ehEntrada = t.tipo === "entrada" || t.uidDestino === me;
-        const v  = Number(t.valor || 0);
+window.compartilharComprovante = async function () {
+  if (!transacaoAtiva) return;
 
-        const texto = `🧾 *Comprovante Zentry*
-━━━━━━━━━━━━━━━
-${ehEntrada ? "✅ Recebido" : "📤 Enviado"}
-💰 Valor: ${ZentryUI.formatarMoeda(v)}
-📋 Tipo: ${labelTipo(t)}
-📝 Descrição: ${t.descricao || "—"}
-📅 Data: ${formatarData(t)} às ${formatarHora(t)}
-🔑 ID: ${t.id.substring(0, 12)}
-━━━━━━━━━━━━━━━
-Transferência realizada pelo Zentry`;
+  const t  = transacaoAtiva;
+  const me = uidAtual;
+  const ehEntrada = t.tipo === "entrada" || t.uidDestino === me;
+  const v = Number(t.valor || 0);
 
-        // Tenta share nativo primeiro
-        if (navigator.share) {
-            try {
-                await navigator.share({ title: 'Comprovante Zentry', text: texto });
-                return;
-            } catch(e) { /* usuário cancelou ou não suportado */ }
-        }
+  const card = document.getElementById("compartilharCard");
 
-        // Fallback: copia para área de transferência
-        try {
-            await navigator.clipboard.writeText(texto);
-            ZentryUI.toast("Comprovante copiado! Cole onde quiser 📋", "sucesso");
-        } catch(e) {
-            // Fallback final para dispositivos antigos
-            const el = document.createElement('textarea');
-            el.value = texto;
-            el.style.position = 'fixed';
-            el.style.opacity  = '0';
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            el.remove();
-            ZentryUI.toast("Comprovante copiado! Cole onde quiser 📋", "sucesso");
-        }
-    };
+  // 🔥 monta comprovante branco estilo Nubank
+  card.innerHTML = `
+    <div style="text-align:center; margin-bottom:20px;">
+      <div style="font-size:12px;font-weight:700;color:#16a34a;">
+        ${ehEntrada ? "Pix Recebido" : "Pix Enviado"}
+      </div>
+      <div style="font-size:34px;font-weight:800;margin:10px 0;">
+        ${ZentryUI.formatarMoeda(v)}
+      </div>
+      <div style="font-size:12px;color:#64748b;">
+        ${formatarData(t)} às ${formatarHora(t)}
+      </div>
+    </div>
+
+    <div style="border-top:1px solid #eee;padding-top:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span>Tipo</span><b>${labelTipo(t)}</b>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span>Descrição</span><b>${t.descricao || "-"}</b>
+      </div>
+
+      ${t.nomeDestino ? `
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span>Destino</span><b>${t.nomeDestino}</b>
+      </div>` : ""}
+
+      ${t.nomeRemetente ? `
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span>Origem</span><b>${t.nomeRemetente}</b>
+      </div>` : ""}
+
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span>ID</span><b>${t.id}</b>
+      </div>
+
+      <div style="margin-top:16px;font-size:11px;color:#999;text-align:center;">
+        Comprovante gerado pelo Zentry
+      </div>
+    </div>
+  `;
+
+  // 🔥 gera imagem
+  const canvas = await html2canvas(card, {
+    scale: 3,
+    backgroundColor: "#ffffff"
+  });
+
+  const blob = await new Promise(r => canvas.toBlob(r));
+  const file = new File([blob], "comprovante.png", { type: "image/png" });
+
+  // 🔥 abre apps do Android (galeria de compartilhamento)
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    await navigator.share({
+      files: [file],
+      title: "Comprovante Pix",
+      text: "Comprovante Zentry"
+    });
+  } else {
+    // fallback download
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL();
+    a.download = "comprovante.png";
+    a.click();
+  }
+};
 </script>
 </body>
 </html>
