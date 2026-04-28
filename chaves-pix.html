@@ -144,9 +144,93 @@
         <button class="btn-confirm" onclick="adicionarChave()">Concluir Cadastro</button>
     </div>
 </div>
+    <script type="module">
+    import { db, ZentryAuth, ZentryUser } from './zentry-core.js';
+    import { doc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-<script>
-    function toggleModal(show) {
+    let usuarioId = "";
+
+    // 1. Inicialização e Carregamento em Tempo Real
+    async function initPix() {
+        try {
+            const user = await ZentryAuth.exigirLogin();
+            usuarioId = user.uid;
+
+            // Escuta as chaves cadastradas no Firestore
+            ZentryUser.escutar(usuarioId, (dados) => {
+                if (dados && dados.chavesPix) {
+                    renderizarLista(dados.chavesPix);
+                } else {
+                    document.getElementById('lista-chaves').innerHTML = '<p style="text-align:center; color:var(--text-sec); font-size:12px;">Nenhuma chave cadastrada.</p>';
+                }
+            });
+        } catch (error) {
+            console.error("Erro:", error);
+        }
+    }
+
+    // 2. Renderiza a lista na tela
+    function renderizarLista(chaves) {
+        const lista = document.getElementById('lista-chaves');
+        lista.innerHTML = ""; // Limpa a lista atual
+
+        chaves.forEach((item, index) => {
+            const novaChave = document.createElement('div');
+            novaChave.className = 'key-item';
+            novaChave.innerHTML = `
+                <div class="key-info">
+                    <label>${item.tipo}</label>
+                    <b>${item.valor}</b>
+                </div>
+                <button class="delete-btn" onclick="excluirChave('${item.tipo}', '${item.valor}')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                </button>
+            `;
+            lista.appendChild(novaChave);
+        });
+    }
+
+    // 3. Salva no Firebase
+    window.adicionarChave = async () => {
+        const tipo = document.getElementById('tipo-chave').value;
+        const valor = document.getElementById('valor-chave').value;
+
+        if (valor.length < 5) {
+            alert("Preencha a chave corretamente.");
+            return;
+        }
+
+        try {
+            const userRef = doc(db, "usuarios", usuarioId);
+            await updateDoc(userRef, {
+                chavesPix: arrayUnion({ tipo, valor })
+            });
+            
+            document.getElementById('valor-chave').value = "";
+            toggleModal(false);
+        } catch (e) {
+            alert("Erro ao salvar chave.");
+        }
+    };
+
+    // 4. Exclui do Firebase
+    window.excluirChave = async (tipo, valor) => {
+        if (confirm("Deseja excluir esta chave Pix?")) {
+            try {
+                const userRef = doc(db, "usuarios", usuarioId);
+                await updateDoc(userRef, {
+                    chavesPix: arrayRemove({ tipo, valor })
+                });
+            } catch (e) {
+                alert("Erro ao excluir.");
+            }
+        }
+    };
+
+    // --- Suas funções de UI mantidas abaixo ---
+    const inputChave = document.getElementById('valor-chave');
+    
+    window.toggleModal = (show) => {
         const modal = document.getElementById('modal-pix');
         if (show) {
             modal.style.display = 'flex';
@@ -155,101 +239,29 @@
             modal.classList.remove('modal-active');
             setTimeout(() => modal.style.display = 'none', 300);
         }
-    }
+    };
 
-    // Função para aplicar máscaras automaticamente
-const inputChave = document.getElementById('valor-chave');
+    inputChave.addEventListener('input', (e) => {
+        const tipo = document.getElementById('tipo-chave').value;
+        if (tipo === "E-mail") return; 
+        let value = e.target.value.replace(/\D/g, "");
+        if (tipo === "CPF") value = value.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        else if (tipo === "CNPJ") value = value.replace(/^(\d{2})(\d)/, "$1.$2").replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1/$2").replace(/(\d{4})(\d)/, "$1-$2");
+        else if (tipo === "Celular") value = value.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
+        e.target.value = value;
+    });
 
-inputChave.addEventListener('input', (e) => {
-    const tipo = document.getElementById('tipo-chave').value;
+    document.getElementById('tipo-chave').addEventListener('change', () => {
+        inputChave.value = "";
+        const tipo = document.getElementById('tipo-chave').value;
+        inputChave.type = (tipo === "E-mail") ? "text" : "tel";
+        inputChave.inputMode = (tipo === "E-mail") ? "email" : "numeric";
+        inputChave.placeholder = "Digite o " + tipo + "...";
+    });
+
+    initPix();
+                                            </script>
     
-    // SE FOR E-MAIL, não aplica máscara e permite tudo (letras e números)
-    if (tipo === "E-mail") {
-        return; 
-    }
-
-    // SE NÃO FOR E-MAIL, aplica a lógica de números e máscaras
-    let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não é número
-
-    if (tipo === "CPF") {
-        // Máscara CPF: 000.000.000-00
-        value = value.replace(/(\d{3})(\d)/, "$1.$2");
-        value = value.replace(/(\d{3})(\d)/, "$1.$2");
-        value = value.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-    } 
-    else if (tipo === "CNPJ") {
-        // Máscara CNPJ: 00.000.000/0000-00
-        value = value.replace(/^(\d{2})(\d)/, "$1.$2");
-        value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-        value = value.replace(/\.(\d{3})(\d)/, ".$1/$2");
-        value = value.replace(/(\d{4})(\d)/, "$1-$2");
-    } 
-    else if (tipo === "Celular") {
-        // Máscara Celular: (00) 00000-0000
-        value = value.replace(/^(\d{2})(\d)/g, "($1) $2");
-        value = value.replace(/(\d{5})(\d)/, "$1-$2");
-    }
-
-    e.target.value = value;
-});
-
-// Ajusta o tipo de teclado e limpa o campo ao trocar a opção
-document.getElementById('tipo-chave').addEventListener('change', () => {
-    inputChave.value = "";
-    const tipo = document.getElementById('tipo-chave').value;
-    
-    if (tipo === "E-mail") {
-        inputChave.type = "text"; // Muda para texto para aceitar letras
-        inputChave.inputMode = "email"; // Otimiza teclado para e-mail
-    } else {
-        inputChave.type = "tel"; // Abre teclado numérico para os outros
-        inputChave.inputMode = "numeric";
-    }
-    
-    inputChave.placeholder = "Digite o " + tipo + "...";
-});
-
-
-
-function toggleModal(show) {
-    const modal = document.getElementById('modal-pix');
-    if (show) {
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('modal-active'), 10);
-    } else {
-        modal.classList.remove('modal-active');
-        setTimeout(() => modal.style.display = 'none', 300);
-    }
-}
-
-function adicionarChave() {
-    const tipo = document.getElementById('tipo-chave').value;
-    const valor = document.getElementById('valor-chave').value;
-
-    if (valor.length < 5) {
-        alert("Por favor, preencha a chave corretamente.");
-        return;
-    }
-
-    const lista = document.getElementById('lista-chaves');
-    const novaChave = document.createElement('div');
-    novaChave.className = 'key-item';
-    novaChave.innerHTML = `
-        <div class="key-info">
-            <label>${tipo}</label>
-            <b>${valor}</b>
-        </div>
-        <button class="delete-btn" onclick="this.parentElement.remove()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-        </button>
-    `;
-
-    lista.appendChild(novaChave);
-    inputChave.value = "";
-    toggleModal(false);
-}
-
-</script>
 
 </body>
 </html>
