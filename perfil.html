@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zentry - Perfil</title>
+    <title>ZENTRY - Ajustes</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -14,11 +14,11 @@
             --text-sec: #94a3b8;
             --danger: #ef4444;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             margin: 0; font-family: 'Inter', sans-serif;
             background: radial-gradient(circle at 20% 0%, #0f172a, #000 60%);
-            color: #fff; min-height: 100vh;
+            color: #fff; min-height: 100vh; overflow-x: hidden;
         }
         .container { padding: 25px; max-width: 450px; margin: auto; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -31,32 +31,44 @@
         }
 
         .profile-header { text-align: center; margin-bottom: 35px; }
-        .avatar-wrapper { position: relative; width: 110px; height: 110px; margin: 0 auto 15px; }
+        .avatar-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 15px; }
         .avatar {
             width: 100%; height: 100%; border-radius: 50%;
-            background: #1e293b; border: 3px solid var(--primary);
+            background: #1e293b; border: 2px solid var(--primary);
             display: flex; align-items: center; justify-content: center;
-            overflow: hidden; box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
         }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-header h2 { font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -1px; }
+        .profile-header h2 { font-size: 22px; font-weight: 800; margin: 0; }
 
         .menu-group { display: flex; flex-direction: column; gap: 12px; }
         .menu-item {
-            background: var(--bg-card); backdrop-filter: blur(15px);
-            border-radius: 20px; border: 1px solid var(--border);
-            padding: 18px; display: flex; align-items: center; gap: 15px;
-            text-decoration: none; color: #fff; transition: 0.2s;
+            background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border);
+            padding: 16px; display: flex; align-items: center; gap: 15px;
+            cursor: pointer; transition: 0.2s;
         }
-        .menu-item:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.08); }
+        .menu-item:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.1); }
         .icon-box {
-            width: 42px; height: 42px; background: rgba(255, 255, 255, 0.03);
+            width: 40px; height: 40px; background: rgba(255, 255, 255, 0.03);
             border-radius: 12px; display: flex; align-items: center; justify-content: center;
             color: var(--text-sec);
         }
         .item-info { flex: 1; }
-        .item-info b { display: block; font-size: 15px; }
-        .item-info span { font-size: 12px; color: var(--text-sec); }
+        .item-info b { display: block; font-size: 14px; }
+        .item-info span { font-size: 11px; color: var(--text-sec); }
+
+        /* MODAL DE CONTEÚDO (Termos, Dados, etc) */
+        .z-modal {
+            position: fixed; inset: 0; background: #000; z-index: 1000;
+            display: none; flex-direction: column; animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .modal-header { padding: 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); }
+        .modal-body { padding: 25px; overflow-y: auto; flex: 1; }
+        
+        .term-section { background: var(--bg-card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .term-section h3 { font-size: 16px; margin-top: 0; color: var(--primary); }
+        .term-section p { font-size: 13px; color: var(--text-sec); margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -66,87 +78,94 @@
 
     <div class="profile-header">
         <div class="avatar-wrapper">
-            <div class="avatar" id="avatar-image"><i data-lucide="user" size="40"></i></div>
+            <div class="avatar" id="user-avatar"><i data-lucide="user" size="35"></i></div>
         </div>
-        <h2 id="nomeUser">Carregando...</h2>
+        <h2 id="nomeDisplay">Carregando...</h2>
     </div>
 
     <div class="menu-group">
-        <a href="meus-dados.html" class="menu-item">
-            <div class="icon-box"><i data-lucide="user-cog"></i></div>
-            <div class="item-info"><b>Meus Dados</b><span>CPF, e-mail e telefone</span></div>
+        <div class="menu-item" onclick="abrirModal('modalDados')">
+            <div class="icon-box"><i data-lucide="shield-check"></i></div>
+            <div class="item-info"><b>Segurança da Conta</b><span>CPF e dados de acesso</span></div>
             <i data-lucide="chevron-right" size="18" style="opacity:0.3"></i>
-        </a>
+        </div>
 
-        <a href="configuracoes.html" class="menu-item">
-            <div class="icon-box"><i data-lucide="settings"></i></div>
-            <div class="item-info"><b>Configurações</b><span>Segurança e notificações</span></div>
+        <div class="menu-item" onclick="abrirModal('modalTermos')">
+            <div class="icon-box"><i data-lucide="file-text"></i></div>
+            <div class="item-info"><b>Termos de Uso</b><span>Contratos e políticas Zentry</span></div>
             <i data-lucide="chevron-right" size="18" style="opacity:0.3"></i>
-        </a>
+        </div>
 
-        <a href="ajuda.html" class="menu-item">
-            <div class="icon-box"><i data-lucide="help-circle"></i></div>
-            <div class="item-info"><b>Ajuda</b><span>Suporte e dúvidas</span></div>
-            <i data-lucide="chevron-right" size="18" style="opacity:0.3"></i>
-        </a>
-
-        <div class="menu-item" onclick="confirmarSair()" style="margin-top: 10px; border-color: rgba(239, 68, 68, 0.2);">
+        <div class="menu-item" onclick="sair()" style="margin-top: 10px; border-color: rgba(239, 68, 68, 0.2);">
             <div class="icon-box" style="color: var(--danger);"><i data-lucide="log-out"></i></div>
             <div class="item-info"><b style="color: var(--danger);">Sair da conta</b></div>
         </div>
     </div>
 </div>
-    <script type="module">
-    // Importando o padrão Zentry para acabar com a bagunça
-    import { auth, ZentryAuth, ZentryUser } from './zentry-core.js';
 
-    // Inicializa os ícones do Lucide
+<div id="modalTermos" class="z-modal">
+    <div class="modal-header">
+        <button class="back-nav" onclick="fecharModal('modalTermos')" style="margin-bottom:0"><i data-lucide="x"></i></button>
+        <h3 style="margin-left: 15px">Termos de Uso</h3>
+    </div>
+    <div class="modal-body">
+        <div class="term-section">
+            <h3>1. Aceitação</h3>
+            <p>Ao usar o Zentry, você aceita nossas políticas de segurança digital e criptografia ponta a ponta.</p>
+        </div>
+        <div class="term-section">
+            <h3>2. Responsabilidade</h3>
+            <p>A guarda da senha de 6 dígitos é de responsabilidade exclusiva do usuário.</p>
+        </div>
+        <div class="term-section">
+            <h3>3. Movimentações</h3>
+            <p>Transferências via PIX são instantâneas e não podem ser canceladas após a confirmação.</p>
+        </div>
+    </div>
+</div>
+
+<div id="modalDados" class="z-modal">
+    <div class="modal-header">
+        <button class="back-nav" onclick="fecharModal('modalDados')" style="margin-bottom:0"><i data-lucide="x"></i></button>
+        <h3 style="margin-left: 15px">Meus Dados</h3>
+    </div>
+    <div class="modal-body" id="infoPrivada">
+        <p>Carregando dados seguros...</p>
+    </div>
+</div>
+
+<script type="module">
+    import { auth, ZentryAuth, ZentryUser } from './zentry-core.js';
     lucide.createIcons();
 
-    async function initPerfil() {
-        try {
-            // 1. Valida se o usuário está logado usando o Core
-            const user = await ZentryAuth.exigirLogin();
-
-            // 2. Escuta os dados do usuário em tempo real
-            ZentryUser.escutar(user.uid, (dados) => {
-                if (dados) {
-                    // Atualiza o nome na tela
-                    document.getElementById("nomeUser").innerText = dados.nome || "Usuário Zentry";
-                    
-                    // Se você tiver um campo 'foto' no Firestore, pode carregar aqui:
-                    if (dados.foto) {
-                        document.getElementById("avatar-image").innerHTML = `<img src="${dados.foto}" alt="Avatar">`;
-                    } else {
-                        // Caso contrário, gera uma inicial ou mantém o ícone
-                        const inicial = dados.nome ? dados.nome.charAt(0).toUpperCase() : "";
-                        document.getElementById("avatar-image").innerHTML = `<span style="font-size: 40px; font-weight: 800; color: var(--primary)">${inicial}</span>`;
-                    }
-                }
-            });
-        } catch (error) {
-            console.error("Erro ao carregar perfil:", error);
-        }
+    // Carregar dados reais
+    async function init() {
+        const user = await ZentryAuth.exigirLogin();
+        ZentryUser.escutar(user.uid, (dados) => {
+            if (dados) {
+                document.getElementById("nomeDisplay").innerText = dados.nome;
+                
+                // Preenche o modal de dados
+                document.getElementById("infoPrivada").innerHTML = `
+                    <div class="term-section"><h3>CPF</h3><p>${dados.cpf}</p></div>
+                    <div class="term-section"><h3>E-mail</h3><p>${dados.email}</p></div>
+                    <div class="term-section"><h3>Telefone</h3><p>${dados.telefone}</p></div>
+                `;
+            }
+        });
     }
 
-    // Função de Sair (Logout)
-    window.confirmarSair = async () => {
-        // Um simples confirm do navegador para evitar cliques acidentais
-        if (confirm("Deseja realmente sair da sua conta?")) {
-            try {
-                await auth.signOut();
-                localStorage.clear(); // Limpa dados temporários
-                window.location.replace("login.html");
-            } catch (error) {
-                alert("Erro ao sair. Tente novamente.");
-            }
+    window.abrirModal = (id) => document.getElementById(id).style.display = 'flex';
+    window.fecharModal = (id) => document.getElementById(id).style.display = 'none';
+
+    window.sair = async () => {
+        if(confirm("Deseja sair?")) {
+            await auth.signOut();
+            window.location.href = "login.html";
         }
     };
 
-    // Rodar a inicialização
-    initPerfil();
-    </script>
-    
-
+    init();
+</script>
 </body>
 </html>
