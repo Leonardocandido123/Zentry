@@ -6,7 +6,6 @@
 <title>ZENTRY</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
 *{
   box-sizing:border-box;
@@ -17,6 +16,8 @@
 body{
   height:100vh;
   overflow:hidden;
+  /* Fundo preto base caso a imagem demore a carregar */
+  background-color: #000; 
 }
 
 /* SPLASH */
@@ -29,61 +30,83 @@ body{
   overflow:hidden;
 }
 
-/* FUNDO COM ZOOM */
+/* FUNDO COM ZOOM (AJUSTADO: Mais brilho na imagem) */
 .splash::before{
   content:"";
   position:absolute;
   inset:0;
+  /* Use uma imagem de alta qualidade. Tente uma mais nítida. */
   background:url('splash.jpg') center/cover no-repeat;
-  animation:zoom 4s ease forwards;
+  /* Filtro para aumentar um pouco a exposição da imagem original */
+  filter: brightness(1.2) contrast(1.1); 
+  animation:zoom 5s ease-out forwards; /* Mais suave */
 }
 
-/* OVERLAY ESCURO PREMIUM */
+/* OVERLAY PREMIUM (AJUSTADO: Mais sutil) */
 .splash::after{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(
-    rgba(0,0,0,0.4),
-    rgba(0,0,0,0.8)
+  /* Gradiente mais suave para não apagar o fundo. Preto apenas nas bordas. */
+  background: radial-gradient(
+    circle at center,
+    rgba(0,0,0,0.2) 0%, /* Centro bem claro */
+    rgba(0,0,0,0.6) 70%, /* Escurecendo nas pontas */
+    rgba(0,0,0,0.9) 100% /* Preto total apenas no final */
   );
+  z-index: 1; /* Garante que está acima da imagem */
 }
 
-/* LOGO */
+/* LOGO (AJUSTADO: Muito brilho e profundidade) */
 .logo{
   position:relative;
   font-family:'Inter',sans-serif;
-  font-size:52px;
-  font-weight:700;
-  letter-spacing:4px;
+  font-size:56px; /* Um pouco maior */
+  font-weight:900; /* Mais pesado */
+  letter-spacing:5px; /* Mais espaçado */
+  z-index: 2; /* Acima do overlay */
+  text-transform: uppercase; /* Força maiúsculo profissional */
+  
+  /* EFEITO DE BRILHO NEON ZENTRY */
+  text-shadow: 
+    0 0 10px rgba(255,255,255,0.2), /* Brilho branco base */
+    0 0 25px rgba(34, 197, 94, 0.4), /* Brilho verde core */
+    0 0 50px rgba(34, 197, 94, 0.2); /* Halo verde suave */
 }
 
 .white{
-  color:#fff;
+  color: #ffffff;
+  /* Leve brilho branco específico */
+  text-shadow: 0 0 10px rgba(255,255,255,0.4);
 }
 
 .green{
-  color:#22c55e;
+  color: #22c55e; /* Verde Zentry mais vivo */
+  /* Brilho neon intenso */
+  text-shadow: 0 0 15px rgba(34, 197, 94, 0.8); 
 }
 
 /* ANIMAÇÃO FUNDO */
 @keyframes zoom{
-  from{transform:scale(1);}
-  to{transform:scale(1.08);}
+  from{transform:scale(1.02) rotate(0.1deg);} /* Leve giro para suavizar o render */
+  to{transform:scale(1.1) rotate(0.1deg);} /* Zoom mais suave */
 }
 
 /* FADE OUT */
 .fade-out{
-  animation:fadeOut 0.8s ease forwards;
+  animation:fadeOut 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes fadeOut{
   to{
     opacity:0;
-    transform:scale(1.05);
+    transform:scale(1.03); /* Leve aumento no fade */
+    filter: blur(5px); /* Efeito de desfoque ao sair */
   }
 }
 </style>
+  
+
 </head>
 
 <body>
