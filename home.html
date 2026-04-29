@@ -243,7 +243,7 @@ body {
   </nav>
 </div>
   <script type="module">
-    import { auth, db } from './zentry-core.js'; // Removi o ZentryAuth daqui
+    import { auth, db } from './zentry-core.js'; 
     import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     let saldoOculto = false;
@@ -251,35 +251,31 @@ body {
 
     async function initHome() {
         try {
-            // --- NOVA TRAVA DE SEGURANÇA MANUAL ---
-            // Em vez de usar o ZentryAuth (SMS), olhamos o nosso login manual
+            // 1. Pegamos o ID REAL que o novo login salvou (ex: user_882544)
+            const docID = localStorage.getItem("idUsuarioLogado");
             const dadosLocal = localStorage.getItem("dadosUsuario");
             
-            if (!dadosLocal) {
-                console.log("Nenhum usuário logado. Voltando...");
+            // Se não tiver o ID ou os dados, expulsa pro login
+            if (!docID || !dadosLocal) {
+                console.log("Acesso negado: ID não encontrado.");
                 window.location.href = "login.html";
                 return;
             }
 
-            const usuarioLogado = JSON.parse(dadosLocal);
-            // O ID que salvamos no cadastro novo está em 'id' ou usamos o email como chave
-            // No seu print do Firebase, o ID do documento é algo como "user_882544"
-            // Vamos tentar buscar pelo email ou pelo ID que guardamos
-            const docID = usuarioLogado.id || usuarioLogado.email.replace(/[^a-zA-Z0-9]/g, "_");
-
-            // Escuta os dados do banco em tempo real
+            // 2. Escuta os dados do banco usando o ID exato do Firestore
             onSnapshot(doc(db, "usuarios", docID), (docSnap) => {
                 if (docSnap.exists()) {
                     const d = docSnap.data();
                     
-                    // 1. Atualiza o Nome
+                    // Atualiza o Nome
                     const elNome = document.getElementById("nome-usuario");
                     if (elNome) elNome.innerText = (d.nome || "Usuário") + "!";
                     
-                    // 2. Atualiza o Saldo
+                    // Atualiza o Saldo (convertendo centavos se necessário)
+                    // Se no seu banco estiver 10000 para representar R$ 100,00, divida por 100
                     window.currentSaldo = parseFloat(d.saldo || 0);
 
-                    // 3. Aplica Preferências
+                    // Aplica Preferências
                     if (d.preferencias && d.preferencias.modoDiscreto === true) {
                         if (!sessionStorage.getItem('ja_abriu')) {
                             saldoOculto = true;
@@ -287,21 +283,25 @@ body {
                         }
                     }
 
-                    // 4. Mostra na tela
                     renderSaldo();
                     atualizarSaudacao();
                 } else {
-                    // Se o documento sumiu do banco, desloga por segurança
+                    // Se o documento não existir mais no banco
+                    console.log("Documento inexistente no Firestore.");
                     window.location.href = "login.html";
                 }
+            }, (error) => {
+                // Se der erro de permissão (Regras do Firebase)
+                console.error("Erro no Snapshot:", error);
+                // window.location.href = "login.html"; // Comentei para você conseguir ver o erro no console se der ruim
             });
+
         } catch (error) {
             console.error("Erro ao carregar Home:", error);
             window.location.href = "login.html";
         }
     }
 
-    // Função para desenhar o saldo
     window.renderSaldo = () => {
         const elSaldo = document.getElementById("saldo-home");
         if (elSaldo) {
@@ -328,6 +328,7 @@ body {
 
     initHome();
   </script>
+  
   
 </body>
 </html>
