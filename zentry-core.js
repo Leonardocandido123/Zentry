@@ -242,4 +242,23 @@ export const ZentryUI = {
     }
   }
 };
+  // --- AUTO-INSTALADOR ZENTRY (PWA) ---
+(function() {
+    // Injeta o manifest.json no <head> de qualquer página que use o core
+    if (!document.querySelector('link[rel="manifest"]')) {
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = './manifest.json';
+        document.head.appendChild(link);
+    }
+
+    // Registra o Service Worker para habilitar o modo "Instalar Aplicativo"
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('Zentry: Sistema de App Ativo'))
+                .catch(err => console.log('Zentry: Erro no App Mode', err));
+        });
+    }
+})();
   
