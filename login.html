@@ -171,7 +171,7 @@
   </div>
   <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB4U7iIO3OVrrwyWPPI057jTqZWF6V1osU",
@@ -183,11 +183,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// SEGURANÇA MÁXIMA: Desloga o usuário ao carregar a página de login
-// Isso garante que NINGUÉM pule a etapa da senha se a sessão estiver aberta.
-signOut(auth);
+const db = getFirestore(app);
 
 function showZModal(titulo, texto, icon) {
   document.getElementById('zModalGlobal').style.display = 'flex';
@@ -205,7 +201,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btnEntrar");
 
   input.addEventListener("input", () => {
-    if(input.value.length >= 6) btn.classList.add("active");
+    if(input.value.length >= 4) btn.classList.add("active"); // Ajustei para 4 dígitos se sua senha for curta
     else btn.classList.remove("active");
   });
 
@@ -220,13 +216,12 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  window.entrar = function(){
-    if(input.value.length < 6) return;
+  window.entrar = async function(){
+    const senhaDigitada = input.value;
+    const emailSalvo = localStorage.getItem("usuarioEmail");
     
-    const email = localStorage.getItem("usuarioEmail");
-    
-    if(!email){
-      showZModal("Sessão Expirada", "Identificação necessária. Por favor, faça o fluxo de e-mail novamente.", "👤");
+    if(!emailSalvo){
+      showZModal("E-mail não encontrado", "Não identificamos seu e-mail. Volte e crie uma conta.", "👤");
       return;
     }
 
@@ -234,26 +229,45 @@ window.addEventListener("DOMContentLoaded", () => {
     btn.innerHTML = `<div class="spinner"></div>`;
     btn.style.pointerEvents = "none";
     
-    signInWithEmailAndPassword(auth, email, input.value)
-      .then(() => {
-        // Sucesso: Animação e entrada
+    try {
+      // BUSCA NO FIRESTORE (BANCO DE DADOS)
+      const usuariosRef = collection(db, "usuarios");
+      const q = query(usuariosRef, where("email", "==", emailSalvo));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        throw new Error("usuario-nao-encontrado");
+      }
+
+      let dadosUsuario = null;
+      querySnapshot.forEach((doc) => {
+        dadosUsuario = doc.data();
+      });
+
+      // VALIDA A SENHA QUE ESTÁ NO BANCO
+      if (dadosUsuario.senha === senhaDigitada) {
+        // Sucesso: Salva os dados na sessão e entra
+        localStorage.setItem("dadosUsuario", JSON.stringify(dadosUsuario));
         document.body.style.opacity = "0";
         document.body.style.transition = "0.4s";
         setTimeout(() => { window.location.href = "home.html"; }, 400);
-      })
-      .catch((error) => {
-        console.error(error.code);
-        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
-        btn.style.pointerEvents = "all";
-        
-        let msg = "Senha incorreta. Tente novamente.";
-        if(error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') msg = "Senha inválida para este usuário.";
-        if(error.code === 'auth/too-many-requests') msg = "Acesso bloqueado temporariamente por excesso de tentativas.";
-        
-        showZModal("Acesso Negado", msg, "🔒");
-        input.value = ""; // Limpa o campo por segurança
-        btn.classList.remove("active");
-      });
+      } else {
+        throw new Error("senha-incorreta");
+      }
+
+    } catch (error) {
+      console.error(error);
+      btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+      btn.style.pointerEvents = "all";
+      
+      let msg = "Erro ao acessar o banco.";
+      if(error.message === 'senha-incorreta') msg = "Senha inválida para este usuário.";
+      if(error.message === 'usuario-nao-encontrado') msg = "Usuário não encontrado no sistema.";
+      
+      showZModal("Acesso Negado", msg, "🔒");
+      input.value = ""; 
+      btn.classList.remove("active");
+    }
   };
 
   input.addEventListener("keypress", (e) => {
