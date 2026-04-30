@@ -2,7 +2,7 @@
   "name": "Zentry",
   "short_name": "Zentry",
   "description": "Sua conta digital Zentry",
-  "start_url": "./home.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
