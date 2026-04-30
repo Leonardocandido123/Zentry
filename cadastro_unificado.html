@@ -4,52 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZENTRY - Cadastro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #22C55E; --bg-gradient: radial-gradient(circle at top, #0f172a 0%, #000000 100%); --card: #121826; --border: #2A3441; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        /* Fundo atualizado para combinar com o Login */
-        body { background: var(--bg-gradient); height: 100vh; color: white; overflow: hidden; position: fixed; width: 100%; }
-        
-        .top-nav { position: fixed; top: 0; width: 100%; padding: 25px 25px; z-index: 100; }
-        .progress-container { width: 100%; height: 4px; background: rgba(31, 41, 55, 0.5); border-radius: 10px; }
-        .progress-bar { width: 14%; height: 100%; background: var(--primary); border-radius: 10px; transition: 0.5s ease; box-shadow: 0 0 10px var(--primary); }
-        
-        #main-slider { display: flex; width: 700%; height: 100vh; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
-        .step-page { width: 14.28%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 25px; }
-        
-        .header-area { margin-bottom: 25px; }
-        .header-area h2 { font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; }
-        .header-area p { color: #9CA3AF; font-size: 14px; margin-top: 10px; }
-        
-        .input-wrapper { border-bottom: 1.5px solid #2A3441; margin-bottom: 15px; transition: 0.3s; }
-        .input-wrapper:focus-within { border-bottom-color: var(--primary); }
-        .input-line { width: 100%; background: transparent; border: none; padding: 15px 0; color: white; font-size: 24px; outline: none; }
-        
-        .token-group { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; }
-        .token-input { width: 45px; height: 55px; background: rgba(18, 24, 38, 0.8); border: 1px solid #2A3441; border-radius: 12px; text-align: center; font-size: 24px; color: white; outline: none; }
-        
-        .footer { position: fixed; bottom: 50px; right: 25px; display: flex; align-items: center; gap: 15px; z-index: 99; }
-        .next-btn { width: 65px; height: 65px; background: #1F2937; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; transition: 0.3s; }
-        .next-btn svg { width: 30px; height: 30px; stroke: #4B5563; stroke-width: 2.5; fill: none; }
-        .next-btn.active { background: var(--primary); box-shadow: 0 0 25px rgba(34, 197, 94, 0.4); }
-        .next-btn.active svg { stroke: #000; }
-        
-        .finish-btn { display: none; padding: 20px 40px; background: var(--primary); color: black; border: none; border-radius: 18px; font-weight: 700; font-size: 16px; box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+        :root { 
+            --accent: #22c55e; 
+            --bg: #05070A;
+            --border: #2A3441;
+        }
 
-        #zModalGlobal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(10px); }
-        .z-content { background:#121826; border:1px solid #2A3441; border-radius:30px; width:100%; max-width:340px; padding:30px; text-align:center; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; 
+            position: fixed; 
+            background: radial-gradient(circle at top, #0f172a, #000); /* FUNDO IGUAL AO LOGIN */
+        }
+
+        body { 
+            display: flex; 
+            flex-direction: column; 
+            color: #fff;
+        }
+
+        /* Barra de Progresso Sutil */
+        .top-nav { position: fixed; top: 0; width: 100%; padding: 25px; z-index: 100; }
+        .progress-container { width: 100%; height: 3px; background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .progress-bar { width: 14.28%; height: 100%; background: var(--accent); border-radius: 10px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px var(--accent); }
+
+        #main-slider {
+            display: flex;
+            width: 700%; /* 7 passos */
+            height: 100vh;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .step-page {
+            width: 14.28%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 30px;
+        }
+
+        .title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #fff, #9CA3AF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: #9CA3AF;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .input-container {
+            position: relative;
+            border-bottom: 1.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            height: 60px;
+            transition: 0.3s;
+        }
+
+        .input-container:focus-within { border-bottom-color: var(--accent); }
+
+        input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            outline: none;
+            width: 100%;
+        }
+
+        /* Estilo dos quadradinhos do Token */
+        .token-group { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+        .token-input {
+            width: 45px; height: 55px; background: rgba(255,255,255,0.03); 
+            border: 1.5px solid var(--border); border-radius: 12px; 
+            text-align: center; font-size: 22px; color: white; outline: none;
+            transition: 0.3s;
+        }
+        .token-input:focus { border-color: var(--accent); background: rgba(34, 197, 94, 0.05); }
+
+        .footer { position: fixed; bottom: 50px; right: 30px; display: flex; align-items: center; gap: 20px; z-index: 99; }
+
+        .next-btn {
+            width: 55px; height: 55px; border-radius: 16px;
+            background: rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center;
+            border: none; opacity: 0.3; pointer-events: none;
+            transition: 0.3s;
+        }
+
+        .next-btn.active { opacity: 1; background: var(--accent); pointer-events: all; box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+        .next-btn svg { stroke: #4B5563; stroke-width: 3; transition: 0.3s; }
+        .next-btn.active svg { stroke: #000; }
+
+        .finish-btn {
+            display: none; padding: 18px 35px; background: var(--accent);
+            color: #000; border: none; border-radius: 16px; font-weight: 700; font-size: 16px;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+
+        /* MODAL */
+        #zModalGlobal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(6px); }
+        .modal-content { background:#121826; border:1px solid #2A3441; border-radius:28px; width:100%; max-width:340px; padding:30px; text-align:center; }
     </style>
 </head>
 <body>
 
     <div id="zModalGlobal">
-        <div class="z-content">
+        <div class="modal-content">
             <div id="zIcon" style="font-size:45px; margin-bottom:15px;">🛡️</div>
             <h3 id="zTitle" style="margin-bottom:10px; font-size:18px;">Aviso</h3>
             <p id="zText" style="color:#9CA3AF; font-size:14px; margin-bottom:25px; line-height:1.5;"></p>
-            <button id="zBtnClose" style="width:100%; padding:16px; border-radius:14px; background:var(--primary); border:none; color:#000; font-weight:700;">Entendido</button>
+            <button id="zBtnClose" style="width:100%; padding:16px; border-radius:14px; background:var(--accent); border:none; color:#000; font-weight:700;">Entendido</button>
         </div>
     </div>
 
@@ -59,27 +138,32 @@
 
     <div id="main-slider">
         <div class="step-page">
-            <div class="header-area"><h2>Como podemos te chamar?</h2><p>Digite seu nome completo.</p></div>
-            <div class="input-wrapper"><input type="text" id="cad_nome" class="input-line" placeholder="Seu Nome"></div>
+            <div class="title">Seu nome</div>
+            <div class="subtitle">Como devemos te chamar na plataforma?</div>
+            <div class="input-container"><input type="text" id="cad_nome" placeholder="Nome completo" autocomplete="off"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Informe o seu CPF</h2><p>Segurança para sua conta.</p></div>
-            <div class="input-wrapper"><input type="tel" id="cad_cpf" class="input-line" placeholder="000.000.000-00" maxlength="14"></div>
+            <div class="title">Seu CPF</div>
+            <div class="subtitle">Precisamos dele para validar sua identidade bancária.</div>
+            <div class="input-container"><input type="tel" id="cad_cpf" placeholder="000.000.000-00" maxlength="14"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Qual o seu celular?</h2><p>Número com DDD.</p></div>
-            <div class="input-wrapper"><input type="tel" id="cad_tel" class="input-line" placeholder="(00) 00000-0000" maxlength="15"></div>
+            <div class="title">Seu celular</div>
+            <div class="subtitle">Informe seu número com DDD para contato.</div>
+            <div class="input-container"><input type="tel" id="cad_tel" placeholder="(00) 00000-0000" maxlength="15"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Seu melhor e-mail</h2><p>O código de validação chegará aqui.</p></div>
-            <div class="input-wrapper"><input type="email" id="cad_email" class="input-line" placeholder="exemplo@email.com"></div>
+            <div class="title">E-mail principal</div>
+            <div class="subtitle">O código de verificação será enviado para este e-mail.</div>
+            <div class="input-container"><input type="email" id="cad_email" placeholder="seu@email.com" autocomplete="off"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Validação</h2><p id="token-msg">Aguardando código...</p></div>
+            <div class="title">Verificação</div>
+            <div class="subtitle" id="token-msg">Aguardando código de 6 dígitos...</div>
             <div class="token-group">
                 <input type="tel" class="token-input" maxlength="1">
                 <input type="tel" class="token-input" maxlength="1">
@@ -91,24 +175,26 @@
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Senha de acesso</h2><p>Crie uma senha de 6 dígitos.</p></div>
-            <div class="input-wrapper"><input type="password" id="cad_senha" class="input-line" style="letter-spacing: 15px;" maxlength="6" placeholder="••••••"></div>
+            <div class="title">Senha de acesso</div>
+            <div class="subtitle">Crie uma senha numérica de 6 dígitos.</div>
+            <div class="input-container"><input type="password" id="cad_senha" style="letter-spacing: 8px;" maxlength="6" placeholder="••••••"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Termos ZENTRY</h2><p>Leia e aceite para continuar.</p></div>
-            <div style="background: rgba(18,24,38,0.5); padding: 15px; border-radius: 12px; font-size: 12px; color: #9CA3AF; margin-bottom: 20px;">
-                Aceito as políticas de privacidade e proteção de dados LGPD da plataforma ZENTRY.
-            </div>
-            <label style="display: flex; gap: 12px; color: #9CA3AF; align-items: center;">
-                <input type="checkbox" id="checkTermo" style="width:22px; height:22px; accent-color: var(--primary);"> Aceito os termos
+            <div class="title">Termos ZENTRY</div>
+            <div class="subtitle">Para finalizar, aceite nossas políticas de segurança.</div>
+            <label style="display: flex; gap: 15px; color: #9CA3AF; align-items: center; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 16px; border: 1px solid var(--border);">
+                <input type="checkbox" id="checkTermo" style="width:22px; height:22px; accent-color: var(--accent);">
+                <span style="font-size: 14px;">Li e concordo com os termos de uso e privacidade.</span>
             </label>
         </div>
     </div>
 
     <div class="footer">
-        <button class="next-btn" id="nextBtn"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
-        <button id="finishBtn" class="finish-btn">FINALIZAR AGORA</button>
+        <button class="next-btn" id="nextBtn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <button id="finishBtn" class="finish-btn">CRIAR MINHA CONTA</button>
     </div>
 
 <script type="module">
@@ -134,7 +220,7 @@
     const nextBtn = document.getElementById('nextBtn');
     const finishBtn = document.getElementById('finishBtn');
 
-    // Máscaras de Input (Pontos e Traços)
+    // MÁSCARAS PROFISSIONAIS
     document.getElementById('cad_cpf').oninput = (e) => {
         let v = e.target.value.replace(/\D/g, "");
         v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
@@ -156,13 +242,10 @@
         if(pronto) nextBtn.classList.add('active'); else nextBtn.classList.remove('active');
     }
 
-    async function avancar() {
-        if (!nextBtn.classList.contains('active')) return;
-
+    window.avancar = async function() {
         if (currentStep === 3) {
-            document.getElementById('token-msg').innerText = "Enviado para: " + document.getElementById('cad_email').value;
+            document.getElementById('token-msg').innerText = "Enviamos um código para " + document.getElementById('cad_email').value;
         }
-
         if (currentStep < totalSteps - 1) {
             currentStep++;
             slider.style.transform = `translateX(-${currentStep * (100 / totalSteps)}%)`;
@@ -171,42 +254,36 @@
             nextBtn.classList.remove('active');
             validarBotao();
         }
-    }
+    };
+    nextBtn.onclick = window.avancar;
 
-    nextBtn.onclick = avancar;
-
-    // Token pulo de campo
     const tokens = document.querySelectorAll('.token-input');
     tokens.forEach((t, i) => {
         t.oninput = () => { if(t.value && i < 5) tokens[i+1].focus(); validarBotao(); };
         t.onkeydown = (e) => { if(e.key === "Backspace" && !t.value && i > 0) tokens[i-1].focus(); };
     });
 
-    async function finalizar() {
+    document.getElementById('finishBtn').onclick = async () => {
         if(!document.getElementById('checkTermo').checked) return;
-        
-        const userEmail = document.getElementById('cad_email').value;
+        const email = document.getElementById('cad_email').value;
         const dados = {
             nome: document.getElementById('cad_nome').value,
             cpf: document.getElementById('cad_cpf').value,
             tel: document.getElementById('cad_tel').value,
-            email: userEmail,
+            email: email,
             senha: document.getElementById('cad_senha').value,
-            status_verificacao: "pendente",
+            status_verificacao: "pendente", // TRAVA DE SEGURANÇA
             saldo: 0,
             data: new Date().toISOString()
         };
-
         try {
-            await setDoc(doc(db, "usuarios", userEmail), dados);
-            document.getElementById('zModalGlobal').style.display = 'flex';
-            document.getElementById('zText').innerText = "Conta criada! Verifique seu e-mail para validar.";
-            setTimeout(() => { window.location.href = "login.html"; }, 3000);
+            await setDoc(doc(db, "usuarios", email), dados);
+            localStorage.setItem("usuarioEmail", email);
+            window.location.href = "login.html";
         } catch (e) { console.error(e); }
-    }
+    };
 
-    finishBtn.onclick = finalizar;
-    document.querySelectorAll('.input-line').forEach(i => i.oninput = validarBotao);
+    document.querySelectorAll('.input-container input').forEach(i => i.oninput = validarBotao);
     document.getElementById('zBtnClose').onclick = () => document.getElementById('zModalGlobal').style.display = 'none';
 </script>
 </body>
