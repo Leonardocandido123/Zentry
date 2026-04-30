@@ -104,55 +104,60 @@
 <div class="actions">
   <button class="btn btn-share" onclick="compartilhar()">📤 Compartilhar Comprovante</button>
   <button class="btn btn-back" onclick="window.history.back()">Voltar</button>
-</div>
-<script type="module">
+</div> 
+
+  <script type="module">
 import { db, ZentryUI, ZentryUser } from "./zentry-core.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 async function renderizar() {
+    const container = document.getElementById('cardComprovante');
+    
     try {
         const params = new URLSearchParams(window.location.search);
         const txId = params.get("id");
 
-        // 1. Log para debug (aparece no console F12)
-        console.log("Buscando transação:", txId);
-
-        // 2. Aguarda o ID do usuário ser resolvido
-        const userDocId = await ZentryUser.obterIdPorEmail();
-        console.log("ID do usuário encontrado:", userDocId);
-
-        if (!userDocId || !txId) {
-            document.getElementById('cardComprovante').innerHTML = `
-                <div style="padding:40px; text-align:center;">
-                    <p>Sessão expirada ou ID ausente.</p>
-                    <button class="btn btn-back" style="margin-top:20px" onclick="window.location.href='home.html'">Voltar</button>
-                </div>`;
+        if (!txId) {
+            container.innerHTML = "<div style='padding:40px; text-align:center;'>ID da transação não encontrado.</div>";
             return;
         }
 
-        // 3. Busca o documento da transação
+        // 1. TENTATIVA A: Pegar o ID que salvamos no login (mais rápido)
+        let userDocId = localStorage.getItem("idUsuarioLogado");
+
+        // 2. TENTATIVA B: Se não tiver o ID, busca pelo e-mail (teu fallback)
+        if (!userDocId) {
+            userDocId = await ZentryUser.obterIdPorEmail();
+        }
+
+        // 3. LOG DE SEGURANÇA (Verifica no console se aparece user_914718)
+        console.log("Caminho: usuarios /", userDocId, "/ transacoes /", txId);
+
+        if (!userDocId) {
+            container.innerHTML = "<div style='padding:40px; text-align:center;'>Erro: Utilizador não identificado.</div>";
+            return;
+        }
+
+        // 4. BUSCA DIRETA NO CAMINHO QUE VIMOS NA FOTO
         const docRef = doc(db, "usuarios", userDocId, "transacoes", txId);
         const snap = await getDoc(docRef);
         
         if (!snap.exists()) {
-            console.error("Documento não existe no caminho:", `usuarios/${userDocId}/transacoes/${txId}`);
-            document.getElementById('cardComprovante').innerHTML = "<p style='padding:40px; text-align:center;'>Transação não encontrada.<br><small>Verifique se o ID está correto.</small></p>";
+            container.innerHTML = `
+                <div style='padding:40px; text-align:center;'>
+                    <p>Transação não encontrada.</p>
+                    <small style="color:gray">ID: ${txId}</small><br>
+                    <small style="color:gray">Caminho: ${userDocId}</small>
+                </div>`;
             return;
         }
 
         const d = snap.data();
-        const tiposSaida = ['saida', 'recarga', 'pagamento', 'cartao'];
-        const isSaida = tiposSaida.includes(d.tipo);
-        
-        let tituloHeader = "Transação Realizada";
-        if (d.tipo === 'entrada') tituloHeader = "Pix Recebido";
-        if (d.tipo === 'saida')   tituloHeader = "Pix Enviado";
-        if (d.tipo === 'recarga') tituloHeader = "Recarga Celular";
+        const isSaida = d.tipo !== 'entrada';
 
-        const container = document.getElementById('cardComprovante');
         container.innerHTML = `
             <div class="top-info ${isSaida ? 'saida' : 'entrada'}">
-                <div class="status-label ${isSaida ? 'saida' : 'entrada'}">${tituloHeader}</div>
+                <div class="status-label ${isSaida ? 'saida' : 'entrada'}">${d.descricao || 'Transação'}</div>
                 <div class="valor-principal ${isSaida ? 'saida' : 'entrada'}">${ZentryUI.formatarMoeda(d.valor)}</div>
                 <div class="data-hora">${ZentryUI.formatarData(d.timestamp)}</div>
             </div>
@@ -163,44 +168,23 @@ async function renderizar() {
             </div>
 
             <div class="section">
-                <div class="row"><span class="label">${isSaida ? 'Destino' : 'Origem'}</span><span class="value">${d.descricao || 'Transferência'}</span></div>
-                <div class="row"><span class="label">Instituição</span><span class="value">${d.instituicao || 'ZENTRY BANK'}</span></div>
+                <div class="row"><span class="label">Tipo</span><span class="value">${d.tipo === 'recarga' ? 'Recarga de Telemóvel' : 'Transferência'}</span></div>
+                <div class="row"><span class="label">Instituição</span><span class="value">ZENTRY BANK</span></div>
             </div>
 
             <div class="footer-auth">
-                <div class="auth-text">Autenticação: ${txId.substring(0,15).toUpperCase()}</div>
+                <div class="auth-text">Autenticação: ${txId.substring(0,12).toUpperCase()}</div>
             </div>
         `;
 
     } catch (e) {
-        console.error("Erro Geral no Comprovante:", e);
-        document.getElementById('cardComprovante').innerHTML = "<p style='padding:40px; text-align:center;'>Erro de conexão.<br>Tente novamente em instantes.</p>";
+        console.error("Erro no Comprovante:", e);
+        container.innerHTML = "<div style='padding:40px; text-align:center;'>Erro de conexão com o banco.</div>";
     }
 }
 
-// Inicia a renderização
 renderizar();
-
-window.compartilhar = async function() {
-    const btn = document.querySelector('.btn-share');
-    btn.innerHTML = "Gerando...";
-    try {
-        const canvas = await html2canvas(document.getElementById("cardComprovante"), { scale: 2 });
-        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-        const file = new File([blob], "comprovante.png", { type: "image/png" });
-        if (navigator.share) {
-            await navigator.share({ files: [file], title: 'Comprovante Zentry' });
-        } else {
-            const link = document.createElement("a");
-            link.href = canvas.toDataURL();
-            link.download = "comprovante.png";
-            link.click();
-        }
-    } catch (e) { alert("Use o print para salvar!"); }
-    btn.innerHTML = "📤 Compartilhar Comprovante";
-};
-</script>
-  
+  </script>
   
 </body>
 </html>
