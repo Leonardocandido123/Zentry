@@ -102,20 +102,21 @@
     navigator.serviceWorker.register('./sw.js');
   }
 </script>
-<script>
-// Tempo aumentado para 10 segundos para "forçar" a renderização no modo nativo
+ <script>
+// Voltando para o tempo ideal de 2.5 segundos
 setTimeout(() => {
   const splash = document.getElementById("splash");
   if (splash) {
     splash.classList.add("fade-out");
   }
 
-  // Espera o efeito de sumir (fade) e vai para o login
+  // Espera o efeito de fade (600ms) e vai para o login
   setTimeout(() => {
     window.location.href = "login.html";
-  }, 800); 
-}, 10000); // 10000ms = 10 segundos
-</script>
+  }, 600); 
+}, 2500); // 2.5 segundos
+     </script>
+ 
  
 </body>
 </html>
