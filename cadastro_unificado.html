@@ -8,73 +8,30 @@
     <style>
         :root { --primary: #22C55E; --bg: #000000; --card: #121826; --border: #2A3441; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-
         body { background-color: var(--bg); height: 100vh; color: white; overflow: hidden; position: fixed; width: 100%; }
-
         .top-nav { position: fixed; top: 0; width: 100%; padding: 25px 25px; background: var(--bg); z-index: 100; }
         .progress-container { width: 100%; height: 4px; background: #1F2937; border-radius: 10px; }
         .progress-bar { width: 14%; height: 100%; background: var(--primary); border-radius: 10px; transition: 0.5s ease; box-shadow: 0 0 10px var(--primary); }
-
-        #main-slider {
-            display: flex;
-            width: 700%;
-            height: 100vh;
-            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .step-page {
-            width: 14.28%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 25px;
-        }
-
+        #main-slider { display: flex; width: 700%; height: 100vh; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+        .step-page { width: 14.28%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 25px; }
         .header-area { margin-bottom: 25px; }
         .header-area h2 { font-size: 26px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; }
         .header-area p { color: #9CA3AF; font-size: 14px; margin-top: 10px; }
-
         .input-wrapper { border-bottom: 1.5px solid #2A3441; margin-bottom: 15px; transition: 0.3s; }
         .input-wrapper:focus-within { border-bottom-color: var(--primary); }
-        .input-line {
-            width: 100%; background: transparent; border: none;
-            padding: 15px 0; color: white; font-size: 24px; outline: none;
-        }
-
+        .input-line { width: 100%; background: transparent; border: none; padding: 15px 0; color: white; font-size: 24px; outline: none; }
         .token-group { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; }
-        .token-input {
-            width: 45px; height: 55px; background: #121212; border: 1px solid #2A3441;
-            border-radius: 12px; text-align: center; font-size: 24px; color: white; outline: none;
-        }
-
-        .terms-box {
-            background: #121212; border-radius: 16px; padding: 20px;
-            overflow-y: auto; height: 150px; border: 1px solid #2A3441;
-            font-size: 13px; color: #9CA3AF; margin-bottom: 20px; line-height: 1.6;
-        }
-
+        .token-input { width: 45px; height: 55px; background: #121212; border: 1px solid #2A3441; border-radius: 12px; text-align: center; font-size: 24px; color: white; outline: none; }
+        .terms-box { background: #121212; border-radius: 16px; padding: 20px; overflow-y: auto; height: 150px; border: 1px solid #2A3441; font-size: 13px; color: #9CA3AF; margin-bottom: 20px; line-height: 1.6; }
         .footer { position: fixed; bottom: 50px; right: 25px; display: flex; align-items: center; gap: 15px; z-index: 99; }
-
-        .next-btn {
-            width: 65px; height: 65px; background: #1F2937; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; border: none; transition: 0.3s;
-        }
-
+        .next-btn { width: 65px; height: 65px; background: #1F2937; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; transition: 0.3s; }
         .next-btn svg { width: 30px; height: 30px; stroke: #4B5563; stroke-width: 2.5; fill: none; }
         .next-btn.active { background: var(--primary); box-shadow: 0 0 25px rgba(34, 197, 94, 0.4); }
         .next-btn.active svg { stroke: #000; }
-
-        .finish-btn {
-            display: none; padding: 20px 40px; background: var(--primary);
-            color: black; border: none; border-radius: 18px; font-weight: 700; font-size: 16px;
-        }
-
+        .finish-btn { display: none; padding: 20px 40px; background: var(--primary); color: black; border: none; border-radius: 18px; font-weight: 700; font-size: 16px; }
         #zModalGlobal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(8px); }
         .z-content { background:#121826; border:1px solid #2A3441; border-radius:30px; width:100%; max-width:340px; padding:30px; text-align:center; animation: pop 0.3s ease; }
         @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        #recaptcha-container { position: fixed; bottom: -100px; left: 0; }
     </style>
 </head>
 <body>
@@ -89,52 +46,50 @@
     </div>
 
     <div class="top-nav">
-        <div class="progress-container">
-            <div id="p-bar" class="progress-bar"></div>
-        </div>
+        <div class="progress-container"><div id="p-bar" class="progress-bar"></div></div>
     </div>
 
     <div id="main-slider">
         <div class="step-page">
-            <div class="header-area"><h2>Como podemos te chamar?</h2><p>Use seu nome completo para o cadastro.</p></div>
-            <div class="input-wrapper"><input type="text" id="cad_nome" class="input-line" placeholder="Seu Nome" autocomplete="off" spellcheck="false"></div>
+            <div class="header-area"><h2>Como podemos te chamar?</h2><p>Use seu nome completo.</p></div>
+            <div class="input-wrapper"><input type="text" id="cad_nome" class="input-line" placeholder="Seu Nome"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Informe o seu CPF</h2><p>Precisamos dele para validar sua conta.</p></div>
-            <div class="input-wrapper"><input type="tel" id="cad_cpf" class="input-line" placeholder="000.000.000-00" maxlength="14" autocomplete="off"></div>
+            <div class="header-area"><h2>Informe o seu CPF</h2><p>Para validar sua identidade.</p></div>
+            <div class="input-wrapper"><input type="tel" id="cad_cpf" class="input-line" placeholder="000.000.000-00" maxlength="14"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Qual o seu celular?</h2><p>Vamos enviar um código por SMS para confirmar.</p></div>
-            <div class="input-wrapper"><input type="tel" id="cad_tel" class="input-line" placeholder="(00) 00000-0000" maxlength="15" autocomplete="off"></div>
+            <div class="header-area"><h2>Qual o seu celular?</h2><p>Número com DDD.</p></div>
+            <div class="input-wrapper"><input type="tel" id="cad_tel" class="input-line" placeholder="(00) 00000-0000" maxlength="15"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Verifique seu celular</h2><p id="token-msg">Aguardando código SMS...</p></div>
+            <div class="header-area"><h2>Seu melhor e-mail</h2><p>Enviaremos um código de validação para ele.</p></div>
+            <div class="input-wrapper"><input type="email" id="cad_email" class="input-line" placeholder="email@exemplo.com"></div>
+        </div>
+
+        <div class="step-page">
+            <div class="header-area"><h2>Verifique seu e-mail</h2><p id="token-msg">Aguardando código de 6 dígitos...</p></div>
             <div class="token-group">
-                <input type="tel" class="token-input" maxlength="1" autocomplete="off">
-                <input type="tel" class="token-input" maxlength="1" autocomplete="off">
-                <input type="tel" class="token-input" maxlength="1" autocomplete="off">
-                <input type="tel" class="token-input" maxlength="1" autocomplete="off">
-                <input type="tel" class="token-input" maxlength="1" autocomplete="off">
-                <input type="tel" class="token-input" maxlength="1" autocomplete="off">
+                <input type="tel" class="token-input" maxlength="1">
+                <input type="tel" class="token-input" maxlength="1">
+                <input type="tel" class="token-input" maxlength="1">
+                <input type="tel" class="token-input" maxlength="1">
+                <input type="tel" class="token-input" maxlength="1">
+                <input type="tel" class="token-input" maxlength="1">
             </div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>E seu melhor e-mail?</h2><p>Você o usará para fazer login.</p></div>
-            <div class="input-wrapper"><input type="email" id="cad_email" class="input-line" placeholder="email@exemplo.com" autocomplete="off" spellcheck="false"></div>
-        </div>
-
-        <div class="step-page">
             <div class="header-area"><h2>Crie sua senha de acesso</h2><p>Senha numérica de 6 dígitos.</p></div>
-            <div class="input-wrapper"><input type="password" id="cad_senha" class="input-line" style="letter-spacing: 15px;" maxlength="6" placeholder="••••••" autocomplete="new-password"></div>
+            <div class="input-wrapper"><input type="password" id="cad_senha" class="input-line" style="letter-spacing: 15px;" maxlength="6" placeholder="••••••"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Quase lá!</h2><p>Confirme os termos para finalizar.</p></div>
-            <div class="terms-box">Ao clicar em finalizar, você declara estar ciente das políticas de privacidade ZENTRY, proteção LGPD e termos de uso do sistema bancário digital.</div>
+            <div class="header-area"><h2>Tudo pronto!</h2><p>Aceite os termos para ativar sua conta.</p></div>
+            <div class="terms-box">Ao finalizar, você concorda com os termos de segurança ZENTRY e proteção de dados.</div>
             <label style="display: flex; gap: 12px; color: #9CA3AF; align-items: center; font-size: 14px;">
                 <input type="checkbox" id="checkTermo" style="width:20px; height:20px; accent-color: var(--primary);"> Aceito os termos e condições
             </label>
@@ -142,22 +97,12 @@
     </div>
 
     <div class="footer">
-        <button class="next-btn" id="nextBtn">
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </button>
+        <button class="next-btn" id="nextBtn"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
         <button id="finishBtn" class="finish-btn">FINALIZAR CADASTRO</button>
     </div>
 
-    <div id="recaptcha-container"></div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-        getAuth,
-        RecaptchaVerifier,
-        signInWithPhoneNumber,
-        EmailAuthProvider,
-        linkWithCredential
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -170,10 +115,15 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // --- Modal ---
+    let currentStep = 0;
+    const totalSteps = 7;
+    const slider = document.getElementById('main-slider');
+    const pBar = document.getElementById('p-bar');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+
     function showZModal(titulo, texto, icon) {
         document.getElementById('zModalGlobal').style.display = 'flex';
         document.getElementById('zTitle').innerText = titulo;
@@ -183,128 +133,80 @@
     document.getElementById('zBtnClose').onclick = () => document.getElementById('zModalGlobal').style.display = 'none';
 
     // --- Máscaras ---
-    const inputCPF = document.getElementById('cad_cpf');
-    const inputTel = document.getElementById('cad_tel');
-
-    inputCPF.addEventListener('input', (e) => {
+    document.getElementById('cad_cpf').oninput = (e) => {
         let v = e.target.value.replace(/\D/g, "");
         v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
         e.target.value = v;
         validarBotao();
-    });
+    };
 
-    inputTel.addEventListener('input', (e) => {
+    document.getElementById('cad_tel').oninput = (e) => {
         let v = e.target.value.replace(/\D/g, "");
         v = v.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d)(\d{4})$/, "$1-$2");
         e.target.value = v;
         validarBotao();
-    });
+    };
 
-    // --- Navegação e Lógica de Pulo ---
-    let currentStep = 0;
-    const totalSteps = 7;
-    const slider = document.getElementById('main-slider');
-    const pBar = document.getElementById('p-bar');
-    const nextBtn = document.getElementById('nextBtn');
-    const finishBtn = document.getElementById('finishBtn');
-
-    // Função para validar se o botão deve ficar verde
     function validarBotao() {
         const inputsAtuais = slider.children[currentStep].querySelectorAll('input');
         let tudoPreenchido = true;
         inputsAtuais.forEach(input => {
-            if (input.value.length < 3) tudoPreenchido = false;
+            if (input.type !== 'checkbox' && input.value.length < 3) tudoPreenchido = false;
         });
-
         if (tudoPreenchido) nextBtn.classList.add('active');
         else nextBtn.classList.remove('active');
     }
 
     async function avancar() {
-        // MODO TESTE: Simulando envio de SMS
-        if (currentStep === 2) {
-            document.getElementById('token-msg').innerText = "Simulando envio para " + inputTel.value;
-            // Não chama mais o Firebase aqui para não dar erro de SMS
-        }
-
-        // MODO TESTE: Simulando validação do código
+        // Logica de disparo de e-mail no passo 3 (quando clica pra ir pro passo 4)
         if (currentStep === 3) {
-            const inputs = document.querySelectorAll('.token-input');
-            let digitado = "";
-            inputs.forEach(i => digitado += i.value);
-            if (digitado.length !== 6) {
-                showZModal("Código incompleto", "Digite 6 números para testar.", "📱");
-                return;
-            }
-            // Passa direto sem validar no Firebase
+            const email = document.getElementById('cad_email').value;
+            document.getElementById('token-msg').innerText = "Código enviado para: " + email;
+            // Aqui entra a chamada da função de disparo de e-mail futuramente
         }
 
         if (currentStep < totalSteps - 1) {
             currentStep++;
-            const deslocamento = currentStep * (100 / totalSteps);
-            slider.style.transform = `translateX(-${deslocamento}%)`;
+            slider.style.transform = `translateX(-${currentStep * (100 / totalSteps)}%)`;
             pBar.style.width = `${((currentStep + 1) / totalSteps) * 100}%`;
-
-            if (currentStep === 6) {
-                nextBtn.style.display = 'none';
-                finishBtn.style.display = 'block';
-            }
+            if (currentStep === 6) { nextBtn.style.display = 'none'; finishBtn.style.display = 'block'; }
             nextBtn.classList.remove('active');
-            validarBotao(); // Checa o próximo campo
+            validarBotao();
         }
     }
 
     nextBtn.onclick = avancar;
 
-    // --- Pulos no token ---
+    // Token inputs
     const tokenInputs = document.querySelectorAll('.token-input');
     tokenInputs.forEach((input, index) => {
-        input.addEventListener('input', (e) => {
-            if (e.target.value.length === 1 && index < tokenInputs.length - 1) tokenInputs[index + 1].focus();
-            validarBotao();
-        });
-        input.addEventListener('keydown', (e) => {
-            if (e.key === "Backspace" && input.value === "" && index > 0) tokenInputs[index - 1].focus();
-        });
+        input.oninput = (e) => { if (e.target.value.length === 1 && index < 5) tokenInputs[index + 1].focus(); validarBotao(); };
+        input.onkeydown = (e) => { if (e.key === "Backspace" && !input.value && index > 0) tokenInputs[index - 1].focus(); };
     });
 
-    // --- Finalização ---
     async function finalizar() {
-        const nome = document.getElementById('cad_nome').value;
-        const cpf = document.getElementById('cad_cpf').value;
-        const tel = document.getElementById('cad_tel').value;
-        const email = document.getElementById('cad_email').value;
-        const senha = document.getElementById('cad_senha').value;
+        if(!document.getElementById('checkTermo').checked) return showZModal("Termos", "Aceite os termos para continuar.", "⚠️");
+        
+        const dados = {
+            nome: document.getElementById('cad_nome').value,
+            cpf: document.getElementById('cad_cpf').value,
+            tel: document.getElementById('cad_tel').value,
+            email: document.getElementById('cad_email').value,
+            senha: document.getElementById('cad_senha').value,
+            status_verificacao: "pendente", // Trava oficial no banco!
+            saldo: 0,
+            dataCriacao: new Date().toISOString()
+        };
 
         try {
-            // No modo teste, vamos criar o doc direto no Firestore usando o email como ID ou um ID gerado
-            const tempID = "user_" + Math.floor(Math.random() * 1000000);
-            
-            await setDoc(doc(db, "usuarios", tempID), {
-                nome, cpf, telefone: tel, email, senha, // salvando senha direto para o seu teste
-                saldo: 0,
-                transacoes: [],
-                dataCriacao: new Date().toISOString()
-            });
-
-            localStorage.setItem("usuarioEmail", email); 
-            showZModal("Sucesso!", "Conta de teste criada (SMS pulado).", "🎉");
-            
+            await setDoc(doc(db, "usuarios", dados.email), dados);
+            showZModal("Sucesso!", "Cadastro realizado. Verifique seu e-mail.", "🎉");
             setTimeout(() => { window.location.href = "login.html"; }, 2500);
-        } catch (error) {
-            console.error(error);
-            showZModal("Erro", "Erro ao salvar dados.", "❌");
-        }
+        } catch (e) { showZModal("Erro", "Falha ao salvar.", "❌"); }
     }
 
     finishBtn.onclick = finalizar;
-
-    // Listener global para inputs ficarem verdes
-    document.querySelectorAll('.input-line').forEach(input => {
-        input.addEventListener('input', validarBotao);
-    });
-
-        </script>
-    
+    document.querySelectorAll('.input-line').forEach(i => i.oninput = validarBotao);
+</script>
 </body>
 </html>
