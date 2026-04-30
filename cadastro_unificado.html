@@ -6,32 +6,40 @@
     <title>ZENTRY - Cadastro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #22C55E; --bg: #000000; --card: #121826; --border: #2A3441; }
+        :root { --primary: #22C55E; --bg-gradient: radial-gradient(circle at top, #0f172a 0%, #000000 100%); --card: #121826; --border: #2A3441; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg); height: 100vh; color: white; overflow: hidden; position: fixed; width: 100%; }
-        .top-nav { position: fixed; top: 0; width: 100%; padding: 25px 25px; background: var(--bg); z-index: 100; }
-        .progress-container { width: 100%; height: 4px; background: #1F2937; border-radius: 10px; }
+        
+        /* Fundo atualizado para combinar com o Login */
+        body { background: var(--bg-gradient); height: 100vh; color: white; overflow: hidden; position: fixed; width: 100%; }
+        
+        .top-nav { position: fixed; top: 0; width: 100%; padding: 25px 25px; z-index: 100; }
+        .progress-container { width: 100%; height: 4px; background: rgba(31, 41, 55, 0.5); border-radius: 10px; }
         .progress-bar { width: 14%; height: 100%; background: var(--primary); border-radius: 10px; transition: 0.5s ease; box-shadow: 0 0 10px var(--primary); }
+        
         #main-slider { display: flex; width: 700%; height: 100vh; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
         .step-page { width: 14.28%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 25px; }
+        
         .header-area { margin-bottom: 25px; }
-        .header-area h2 { font-size: 26px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; }
+        .header-area h2 { font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.5px; }
         .header-area p { color: #9CA3AF; font-size: 14px; margin-top: 10px; }
+        
         .input-wrapper { border-bottom: 1.5px solid #2A3441; margin-bottom: 15px; transition: 0.3s; }
         .input-wrapper:focus-within { border-bottom-color: var(--primary); }
         .input-line { width: 100%; background: transparent; border: none; padding: 15px 0; color: white; font-size: 24px; outline: none; }
+        
         .token-group { display: flex; justify-content: space-between; gap: 8px; margin-top: 20px; }
-        .token-input { width: 45px; height: 55px; background: #121212; border: 1px solid #2A3441; border-radius: 12px; text-align: center; font-size: 24px; color: white; outline: none; }
-        .terms-box { background: #121212; border-radius: 16px; padding: 20px; overflow-y: auto; height: 150px; border: 1px solid #2A3441; font-size: 13px; color: #9CA3AF; margin-bottom: 20px; line-height: 1.6; }
+        .token-input { width: 45px; height: 55px; background: rgba(18, 24, 38, 0.8); border: 1px solid #2A3441; border-radius: 12px; text-align: center; font-size: 24px; color: white; outline: none; }
+        
         .footer { position: fixed; bottom: 50px; right: 25px; display: flex; align-items: center; gap: 15px; z-index: 99; }
         .next-btn { width: 65px; height: 65px; background: #1F2937; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; transition: 0.3s; }
         .next-btn svg { width: 30px; height: 30px; stroke: #4B5563; stroke-width: 2.5; fill: none; }
         .next-btn.active { background: var(--primary); box-shadow: 0 0 25px rgba(34, 197, 94, 0.4); }
         .next-btn.active svg { stroke: #000; }
-        .finish-btn { display: none; padding: 20px 40px; background: var(--primary); color: black; border: none; border-radius: 18px; font-weight: 700; font-size: 16px; }
-        #zModalGlobal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(8px); }
-        .z-content { background:#121826; border:1px solid #2A3441; border-radius:30px; width:100%; max-width:340px; padding:30px; text-align:center; animation: pop 0.3s ease; }
-        @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .finish-btn { display: none; padding: 20px 40px; background: var(--primary); color: black; border: none; border-radius: 18px; font-weight: 700; font-size: 16px; box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
+
+        #zModalGlobal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(10px); }
+        .z-content { background:#121826; border:1px solid #2A3441; border-radius:30px; width:100%; max-width:340px; padding:30px; text-align:center; }
     </style>
 </head>
 <body>
@@ -41,7 +49,7 @@
             <div id="zIcon" style="font-size:45px; margin-bottom:15px;">🛡️</div>
             <h3 id="zTitle" style="margin-bottom:10px; font-size:18px;">Aviso</h3>
             <p id="zText" style="color:#9CA3AF; font-size:14px; margin-bottom:25px; line-height:1.5;"></p>
-            <button id="zBtnClose" style="width:100%; padding:16px; border-radius:14px; background:var(--primary); border:none; color:#000; font-weight:700;">Ok, entendi</button>
+            <button id="zBtnClose" style="width:100%; padding:16px; border-radius:14px; background:var(--primary); border:none; color:#000; font-weight:700;">Entendido</button>
         </div>
     </div>
 
@@ -51,12 +59,12 @@
 
     <div id="main-slider">
         <div class="step-page">
-            <div class="header-area"><h2>Como podemos te chamar?</h2><p>Use seu nome completo.</p></div>
+            <div class="header-area"><h2>Como podemos te chamar?</h2><p>Digite seu nome completo.</p></div>
             <div class="input-wrapper"><input type="text" id="cad_nome" class="input-line" placeholder="Seu Nome"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Informe o seu CPF</h2><p>Para validar sua identidade.</p></div>
+            <div class="header-area"><h2>Informe o seu CPF</h2><p>Segurança para sua conta.</p></div>
             <div class="input-wrapper"><input type="tel" id="cad_cpf" class="input-line" placeholder="000.000.000-00" maxlength="14"></div>
         </div>
 
@@ -66,12 +74,12 @@
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Seu melhor e-mail</h2><p>Enviaremos um código de validação para ele.</p></div>
-            <div class="input-wrapper"><input type="email" id="cad_email" class="input-line" placeholder="email@exemplo.com"></div>
+            <div class="header-area"><h2>Seu melhor e-mail</h2><p>O código de validação chegará aqui.</p></div>
+            <div class="input-wrapper"><input type="email" id="cad_email" class="input-line" placeholder="exemplo@email.com"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Verifique seu e-mail</h2><p id="token-msg">Aguardando código de 6 dígitos...</p></div>
+            <div class="header-area"><h2>Validação</h2><p id="token-msg">Aguardando código...</p></div>
             <div class="token-group">
                 <input type="tel" class="token-input" maxlength="1">
                 <input type="tel" class="token-input" maxlength="1">
@@ -83,22 +91,24 @@
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Crie sua senha de acesso</h2><p>Senha numérica de 6 dígitos.</p></div>
+            <div class="header-area"><h2>Senha de acesso</h2><p>Crie uma senha de 6 dígitos.</p></div>
             <div class="input-wrapper"><input type="password" id="cad_senha" class="input-line" style="letter-spacing: 15px;" maxlength="6" placeholder="••••••"></div>
         </div>
 
         <div class="step-page">
-            <div class="header-area"><h2>Tudo pronto!</h2><p>Aceite os termos para ativar sua conta.</p></div>
-            <div class="terms-box">Ao finalizar, você concorda com os termos de segurança ZENTRY e proteção de dados.</div>
-            <label style="display: flex; gap: 12px; color: #9CA3AF; align-items: center; font-size: 14px;">
-                <input type="checkbox" id="checkTermo" style="width:20px; height:20px; accent-color: var(--primary);"> Aceito os termos e condições
+            <div class="header-area"><h2>Termos ZENTRY</h2><p>Leia e aceite para continuar.</p></div>
+            <div style="background: rgba(18,24,38,0.5); padding: 15px; border-radius: 12px; font-size: 12px; color: #9CA3AF; margin-bottom: 20px;">
+                Aceito as políticas de privacidade e proteção de dados LGPD da plataforma ZENTRY.
+            </div>
+            <label style="display: flex; gap: 12px; color: #9CA3AF; align-items: center;">
+                <input type="checkbox" id="checkTermo" style="width:22px; height:22px; accent-color: var(--primary);"> Aceito os termos
             </label>
         </div>
     </div>
 
     <div class="footer">
         <button class="next-btn" id="nextBtn"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
-        <button id="finishBtn" class="finish-btn">FINALIZAR CADASTRO</button>
+        <button id="finishBtn" class="finish-btn">FINALIZAR AGORA</button>
     </div>
 
 <script type="module">
@@ -124,15 +134,7 @@
     const nextBtn = document.getElementById('nextBtn');
     const finishBtn = document.getElementById('finishBtn');
 
-    function showZModal(titulo, texto, icon) {
-        document.getElementById('zModalGlobal').style.display = 'flex';
-        document.getElementById('zTitle').innerText = titulo;
-        document.getElementById('zText').innerText = texto;
-        document.getElementById('zIcon').innerText = icon;
-    }
-    document.getElementById('zBtnClose').onclick = () => document.getElementById('zModalGlobal').style.display = 'none';
-
-    // --- Máscaras ---
+    // Máscaras de Input (Pontos e Traços)
     document.getElementById('cad_cpf').oninput = (e) => {
         let v = e.target.value.replace(/\D/g, "");
         v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
@@ -149,20 +151,16 @@
 
     function validarBotao() {
         const inputsAtuais = slider.children[currentStep].querySelectorAll('input');
-        let tudoPreenchido = true;
-        inputsAtuais.forEach(input => {
-            if (input.type !== 'checkbox' && input.value.length < 3) tudoPreenchido = false;
-        });
-        if (tudoPreenchido) nextBtn.classList.add('active');
-        else nextBtn.classList.remove('active');
+        let pronto = true;
+        inputsAtuais.forEach(i => { if(i.type !== 'checkbox' && i.value.length < 3) pronto = false; });
+        if(pronto) nextBtn.classList.add('active'); else nextBtn.classList.remove('active');
     }
 
     async function avancar() {
-        // Logica de disparo de e-mail no passo 3 (quando clica pra ir pro passo 4)
+        if (!nextBtn.classList.contains('active')) return;
+
         if (currentStep === 3) {
-            const email = document.getElementById('cad_email').value;
-            document.getElementById('token-msg').innerText = "Código enviado para: " + email;
-            // Aqui entra a chamada da função de disparo de e-mail futuramente
+            document.getElementById('token-msg').innerText = "Enviado para: " + document.getElementById('cad_email').value;
         }
 
         if (currentStep < totalSteps - 1) {
@@ -177,36 +175,39 @@
 
     nextBtn.onclick = avancar;
 
-    // Token inputs
-    const tokenInputs = document.querySelectorAll('.token-input');
-    tokenInputs.forEach((input, index) => {
-        input.oninput = (e) => { if (e.target.value.length === 1 && index < 5) tokenInputs[index + 1].focus(); validarBotao(); };
-        input.onkeydown = (e) => { if (e.key === "Backspace" && !input.value && index > 0) tokenInputs[index - 1].focus(); };
+    // Token pulo de campo
+    const tokens = document.querySelectorAll('.token-input');
+    tokens.forEach((t, i) => {
+        t.oninput = () => { if(t.value && i < 5) tokens[i+1].focus(); validarBotao(); };
+        t.onkeydown = (e) => { if(e.key === "Backspace" && !t.value && i > 0) tokens[i-1].focus(); };
     });
 
     async function finalizar() {
-        if(!document.getElementById('checkTermo').checked) return showZModal("Termos", "Aceite os termos para continuar.", "⚠️");
+        if(!document.getElementById('checkTermo').checked) return;
         
+        const userEmail = document.getElementById('cad_email').value;
         const dados = {
             nome: document.getElementById('cad_nome').value,
             cpf: document.getElementById('cad_cpf').value,
             tel: document.getElementById('cad_tel').value,
-            email: document.getElementById('cad_email').value,
+            email: userEmail,
             senha: document.getElementById('cad_senha').value,
-            status_verificacao: "pendente", // Trava oficial no banco!
+            status_verificacao: "pendente",
             saldo: 0,
-            dataCriacao: new Date().toISOString()
+            data: new Date().toISOString()
         };
 
         try {
-            await setDoc(doc(db, "usuarios", dados.email), dados);
-            showZModal("Sucesso!", "Cadastro realizado. Verifique seu e-mail.", "🎉");
-            setTimeout(() => { window.location.href = "login.html"; }, 2500);
-        } catch (e) { showZModal("Erro", "Falha ao salvar.", "❌"); }
+            await setDoc(doc(db, "usuarios", userEmail), dados);
+            document.getElementById('zModalGlobal').style.display = 'flex';
+            document.getElementById('zText').innerText = "Conta criada! Verifique seu e-mail para validar.";
+            setTimeout(() => { window.location.href = "login.html"; }, 3000);
+        } catch (e) { console.error(e); }
     }
 
     finishBtn.onclick = finalizar;
     document.querySelectorAll('.input-line').forEach(i => i.oninput = validarBotao);
+    document.getElementById('zBtnClose').onclick = () => document.getElementById('zModalGlobal').style.display = 'none';
 </script>
 </body>
 </html>
