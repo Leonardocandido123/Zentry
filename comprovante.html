@@ -105,42 +105,45 @@
   <button class="btn btn-share" onclick="compartilhar()">📤 Compartilhar Comprovante</button>
   <button class="btn btn-back" onclick="window.history.back()">Voltar</button>
 </div>
-  <script type="module">
+<script type="module">
 import { db, ZentryUI, ZentryUser } from "./zentry-core.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 async function renderizar() {
-    const params = new URLSearchParams(window.location.search);
-    const txId = params.get("id");
-
-    // 1. Usamos a função do core para achar o ID do documento pelo e-mail salvo
-    const userDocId = await ZentryUser.obterIdPorEmail();
-
-    if (!userDocId || !txId) {
-        document.getElementById('cardComprovante').innerHTML = `
-            <div style="padding:40px; text-align:center;">
-                <p>Sessão expirada ou Transação inválida.</p>
-                <button class="btn btn-back" style="margin-top:20px" onclick="window.location.href='home.html'">Voltar ao Início</button>
-            </div>`;
-        return;
-    }
-
     try {
-        // 2. Busca a transação dentro da subcoleção do usuário correto
-        const snap = await getDoc(doc(db, "usuarios", userDocId, "transacoes", txId));
+        const params = new URLSearchParams(window.location.search);
+        const txId = params.get("id");
+
+        // 1. Log para debug (aparece no console F12)
+        console.log("Buscando transação:", txId);
+
+        // 2. Aguarda o ID do usuário ser resolvido
+        const userDocId = await ZentryUser.obterIdPorEmail();
+        console.log("ID do usuário encontrado:", userDocId);
+
+        if (!userDocId || !txId) {
+            document.getElementById('cardComprovante').innerHTML = `
+                <div style="padding:40px; text-align:center;">
+                    <p>Sessão expirada ou ID ausente.</p>
+                    <button class="btn btn-back" style="margin-top:20px" onclick="window.location.href='home.html'">Voltar</button>
+                </div>`;
+            return;
+        }
+
+        // 3. Busca o documento da transação
+        const docRef = doc(db, "usuarios", userDocId, "transacoes", txId);
+        const snap = await getDoc(docRef);
         
         if (!snap.exists()) {
-            document.getElementById('cardComprovante').innerHTML = "<p style='padding:40px; text-align:center;'>Transação não encontrada no banco.</p>";
+            console.error("Documento não existe no caminho:", `usuarios/${userDocId}/transacoes/${txId}`);
+            document.getElementById('cardComprovante').innerHTML = "<p style='padding:40px; text-align:center;'>Transação não encontrada.<br><small>Verifique se o ID está correto.</small></p>";
             return;
         }
 
         const d = snap.data();
-        
-        // Define cores (Vermelho para saída/recarga, Verde para entrada)
         const tiposSaida = ['saida', 'recarga', 'pagamento', 'cartao'];
         const isSaida = tiposSaida.includes(d.tipo);
         
-        // Título baseado no que foi salvo na Recarga ou Pix
         let tituloHeader = "Transação Realizada";
         if (d.tipo === 'entrada') tituloHeader = "Pix Recebido";
         if (d.tipo === 'saida')   tituloHeader = "Pix Enviado";
@@ -160,61 +163,43 @@ async function renderizar() {
             </div>
 
             <div class="section">
-                <div class="row"><span class="label">${isSaida ? 'Destino' : 'Origem'}</span><span class="value">${d.descricao || (isSaida ? 'Pagamento' : 'Recebimento')}</span></div>
+                <div class="row"><span class="label">${isSaida ? 'Destino' : 'Origem'}</span><span class="value">${d.descricao || 'Transferência'}</span></div>
                 <div class="row"><span class="label">Instituição</span><span class="value">${d.instituicao || 'ZENTRY BANK'}</span></div>
             </div>
 
-            ${d.tipo === 'recarga' ? `
-            <div class="section">
-                <div class="row"><span class="label">Operadora</span><span class="value">${d.descricao.replace('Recarga ', '')}</span></div>
-                <div class="row"><span class="label">Canal</span><span class="value">App Mobile</span></div>
-            </div>` : ''}
-
             <div class="footer-auth">
-                <div class="auth-text">Autenticação Digital: ${txId.substring(0,18).toUpperCase()}</div>
+                <div class="auth-text">Autenticação: ${txId.substring(0,15).toUpperCase()}</div>
             </div>
         `;
+
     } catch (e) {
-        console.error("Erro ao buscar comprovante:", e);
-        document.getElementById('cardComprovante').innerHTML = "<p style='padding:40px; text-align:center;'>Erro de conexão com o banco.</p>";
+        console.error("Erro Geral no Comprovante:", e);
+        document.getElementById('cardComprovante').innerHTML = "<p style='padding:40px; text-align:center;'>Erro de conexão.<br>Tente novamente em instantes.</p>";
     }
 }
 
+// Inicia a renderização
 renderizar();
 
 window.compartilhar = async function() {
     const btn = document.querySelector('.btn-share');
-    const textoOriginal = btn.innerHTML;
-    btn.innerHTML = "Gerando Imagem...";
-    
+    btn.innerHTML = "Gerando...";
     try {
-        const canvas = await html2canvas(document.getElementById("cardComprovante"), {
-            scale: 2,
-            backgroundColor: "#ffffff",
-            useCORS: true
-        });
-        
+        const canvas = await html2canvas(document.getElementById("cardComprovante"), { scale: 2 });
         const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
-        const file = new File([blob], "comprovante_zentry.png", { type: "image/png" });
-
-        if (navigator.share && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: 'Comprovante Zentry',
-                text: 'Comprovante de transação realizada via Zentry App.'
-            });
+        const file = new File([blob], "comprovante.png", { type: "image/png" });
+        if (navigator.share) {
+            await navigator.share({ files: [file], title: 'Comprovante Zentry' });
         } else {
             const link = document.createElement("a");
             link.href = canvas.toDataURL();
-            link.download = "comprovante_zentry.png";
+            link.download = "comprovante.png";
             link.click();
         }
-    } catch (e) {
-        alert("Erro ao compartilhar. Você pode tirar um print da tela!");
-    }
-    btn.innerHTML = textoOriginal;
+    } catch (e) { alert("Use o print para salvar!"); }
+    btn.innerHTML = "📤 Compartilhar Comprovante";
 };
-  </script>
+</script>
   
   
 </body>
