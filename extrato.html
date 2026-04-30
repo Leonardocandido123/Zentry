@@ -178,7 +178,15 @@
 
     // Inicializa tudo
     init();
+// ... dentro da função init() do Extrato, após pegar o uidAtual:
+uidAtual = userSnap.docs[0].id;
 
+// ADICIONE ESTA LINHA ABAIXO:
+localStorage.setItem("idUsuarioLogado", uidAtual); 
+
+console.log("ID salvo para o comprovante:", uidAtual);
+// ... resto do código
+    
     // Filtros
     document.querySelectorAll('.filter').forEach(btn => {
         btn.onclick = () => {
