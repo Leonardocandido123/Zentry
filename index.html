@@ -102,18 +102,18 @@
     navigator.serviceWorker.register('./sw.js');
   }
 </script>
- 
-<script>
-// Aguarda 2.5s e redireciona
+ <script>
+// Aguarda 5 segundos (5000ms) e redireciona
 setTimeout(() => {
   const splash = document.getElementById("splash");
-  splash.classList.add("fade-out");
+  if (splash) splash.classList.add("fade-out");
 
   setTimeout(() => {
     window.location.href = "login.html";
-  }, 600);
-}, 1000);
-</script>
+  }, 800); // Tempo extra para o efeito de fade terminar suave
+}, 5000); 
+ </script>
+ 
 
 </body>
 </html>
