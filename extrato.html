@@ -33,10 +33,9 @@
         .filter { flex-shrink: 0; padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--card); color: var(--text-muted); font-weight: 600; font-size: 13px; cursor: pointer; }
         .filter.active { background: var(--primary); color: #052e16; border-color: var(--primary); }
 
-        .data-header { padding: 8px 20px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-
         .lista { display: flex; flex-direction: column; gap: 2px; padding: 0 20px; }
-        .item { background: var(--card); padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; cursor: pointer; }
+        .item { background: var(--card); padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; cursor: pointer; transition: opacity 0.15s; }
+        .item:active { opacity: 0.7; }
         .icon-box { width: 46px; height: 46px; background: var(--card2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
         .info b { display: block; font-size: 14px; font-weight: 700; color: #fff; }
         .info span { font-size: 11px; color: var(--text-muted); }
@@ -73,8 +72,8 @@
         Carregando...
     </div>
 </div>
+
 <script type="module">
-    // Importamos as ferramentas do seu core
     import { db, ZentryUI, ZentryUser } from './zentry-core.js';
     import { collection, onSnapshot, query, orderBy, doc, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -82,7 +81,6 @@
     let transacoesCache = [];
 
     async function init() {
-        // 1. Pegamos o e-mail que o novo cadastro/login salvou
         const emailLogado = localStorage.getItem("usuarioEmail");
         
         if (!emailLogado) {
@@ -91,8 +89,6 @@
             return;
         }
 
-        // 2. BUSCA O ID (UID) NO FIREBASE USANDO O EMAIL
-        // Isso resolve o problema de você conseguir testar sem ser expulso
         try {
             const qUser = query(collection(db, "usuarios"), where("email", "==", emailLogado), limit(1));
             const userSnap = await getDocs(qUser);
@@ -102,17 +98,22 @@
                 return;
             }
 
-            // Pegamos o ID do documento (Ex: ABC123XYZ)
+            // Pega o ID do documento
             uidAtual = userSnap.docs[0].id;
 
-            // 3. AGORA SIM: Escutar Saldo em Tempo Real usando o ID encontrado
+            // ✅ CORREÇÃO: salva o ID aqui dentro do try, logo após pegar
+            localStorage.setItem("idUsuarioLogado", uidAtual);
+            localStorage.setItem("usuarioEmail", emailLogado);
+            console.log("ID salvo para comprovante:", uidAtual);
+
+            // Escuta o saldo em tempo real
             onSnapshot(doc(db, "usuarios", uidAtual), (ds) => {
                 if (ds.exists()) {
                     document.getElementById('txtSaldo').innerText = ZentryUI.formatarMoeda(ds.data().saldo || 0);
                 }
             });
 
-            // 4. Escutar Transações em Tempo Real
+            // Escuta as transações em tempo real
             const qTx = query(
                 collection(db, "usuarios", uidAtual, "transacoes"), 
                 orderBy("timestamp", "desc")
@@ -146,7 +147,6 @@
         filtradas.forEach(t => {
             const ehEntrada = t.tipo === "entrada";
             
-            // Tratamento da data para não dar erro de toDate()
             let dataFinal = "Recentemente";
             let horaFinal = "";
             
@@ -176,17 +176,9 @@
         });
     }
 
-    // Inicializa tudo
+    // Inicializa
     init();
-// ... dentro da função init() do Extrato, após pegar o uidAtual:
-uidAtual = userSnap.docs[0].id;
 
-// ADICIONE ESTA LINHA ABAIXO:
-localStorage.setItem("idUsuarioLogado", uidAtual); 
-
-console.log("ID salvo para o comprovante:", uidAtual);
-// ... resto do código
-    
     // Filtros
     document.querySelectorAll('.filter').forEach(btn => {
         btn.onclick = () => {
@@ -196,7 +188,6 @@ console.log("ID salvo para o comprovante:", uidAtual);
         };
     });
 </script>
-    
 
 </body>
 </html>
