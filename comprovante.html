@@ -111,6 +111,12 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase
 
 async function renderizar() {
     const container = document.getElementById('cardComprovante');
+  const params = new URLSearchParams(window.location.search);
+const txId = params.get("id");
+if (!txId) {
+    container.innerHTML = "<div style='padding:40px; text-align:center; color:red'>URL sem ?id= — verifique o link</div>";
+    return;
+}
     
     try {
         const params = new URLSearchParams(window.location.search);
@@ -176,10 +182,13 @@ async function renderizar() {
                 <div class="auth-text">Autenticação: ${txId.substring(0,12).toUpperCase()}</div>
             </div>
         `;
-
-    } catch (e) {
-        console.error("Erro no Comprovante:", e);
-        container.innerHTML = "<div style='padding:40px; text-align:center;'>Erro ao carregar banco de dados.</div>";
+} catch (e) {
+    container.innerHTML = `
+        <div style='padding:40px; text-align:center;'>
+            <p style="font-weight:bold; color:red">Erro:</p>
+            <p style="font-size:12px; word-break:break-all; margin-top:10px">${e.message}</p>
+            <p style="font-size:10px; color:gray; margin-top:10px">${e.stack || ''}</p>
+        </div>`;
     }
 }
 
