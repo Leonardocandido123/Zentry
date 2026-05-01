@@ -50,9 +50,8 @@ export const ZentryAuth = {
   }
 };
 
-// ── ZENTRYUSER (ORGANIZADO) ──
+// ── ZENTRYUSER ──
 export const ZentryUser = {
-  // ESSA É A FUNÇÃO QUE SALVA AS TELAS NOVAS
   async obterIdPorEmail() {
     const email = localStorage.getItem("usuarioEmail");
     if (!email) return null;
@@ -142,6 +141,20 @@ export const ZentryUI = {
       style: "currency", currency: "BRL"
     });
   },
+
+  // ✅ FUNÇÃO ADICIONADA — usada pelo comprovante.html
+  formatarData(timestamp) {
+    try {
+      // Suporta Firestore Timestamp e Date nativo
+      const date = timestamp && timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const data = date.toLocaleDateString("pt-BR");
+      const hora = date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+      return `${data} às ${hora}`;
+    } catch (e) {
+      return "Data indisponível";
+    }
+  },
+
   saudacao() {
     const h = new Date().getHours();
     if (h >= 5  && h < 12) return "Bom dia,";
