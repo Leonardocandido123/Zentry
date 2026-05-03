@@ -394,7 +394,7 @@
   <button class="btn-main" id="btnMain" onclick="avancarEtapa()" disabled>Continuar</button>
   <button class="btn-sec"  id="btnSec"  onclick="irParaComprovante()" style="display:none;">Ver comprovante completo</button>
 </div>
- <script type="module">
+  <script type="module">
   import { db, ZentryAuth, ZentryUser, ZentryUI } from './zentry-core.js';
   import { doc, setDoc, updateDoc, collection, getDocs, getDoc, onSnapshot, increment }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -404,273 +404,160 @@
   let dadosTransacao    = null;
   let buscaTimer        = null;
 
-  // ── INIT ──
   async function init() {
-    userDocId = localStorage.getItem("idUsuarioLogado");
-
-    if (!userDocId) {
-      userDocId = await ZentryUser.obterIdPorEmail();
-    }
-
-    if (!userDocId) {
-      window.location.href = "login.html";
-      return;
-    }
+    userDocId = localStorage.getItem("idUsuarioLogado") || await ZentryUser.obterIdPorEmail();
+    if (!userDocId) { window.location.href = "login.html"; return; }
 
     onSnapshot(doc(db, "usuarios", userDocId), (snap) => {
       if (snap.exists()) {
-        const data = snap.data();
-        saldoAtual = Number(data.saldo || 0);
+        saldoAtual = Number(snap.data().saldo || 0);
         document.getElementById('displaySaldo').innerText = ZentryUI.formatarMoeda(saldoAtual);
-        document.getElementById('saldoDisp').innerText    = "Saldo disponível: " + ZentryUI.formatarMoeda(saldoAtual);
-        
-        // Mantém o botão desabilitado se o valor for inválido na etapa 1
-        if(etapa === 1) {
-           const v = parseFloat(document.getElementById('valorInput').value.replace(',','.')) || 0;
-           document.getElementById('btnMain').disabled = (v <= 0 || v > saldoAtual);
-        }
+        document.getElementById('saldoDisp').innerText = "Saldo disponível: " + ZentryUI.formatarMoeda(saldoAtual);
       }
     });
-
     document.getElementById('hiddenPin').addEventListener('input', onPin);
   }
   init();
 
+  // --- FUNÇÕES DE APOIO ---
   function detectarTipo(v) {
     const s = v.replace(/\D/g,'');
     if (v.includes('@')) return { tipo:'email', label:'E-mail' };
     if (s.length === 11 && s[2]==='9') return { tipo:'celular', label:'Celular' };
     if (s.length === 11) return { tipo:'cpf', label:'CPF' };
     if (s.length === 14) return { tipo:'cnpj', label:'CNPJ' };
-    if (v.length === 36 && v.includes('-')) return { tipo:'aleat', label:'Chave Aleatória' };
-    return null;
+    return { tipo:'aleat', label:'Chave Pix' };
   }
 
   function aplicarMascara(val) {
-    let s = val.replace(/\D/g,'');
     if (val.includes('@')) return val;
-    if (s.length <= 11 && s[2]==='9') {
-      s = s.slice(0,11);
-      return s.replace(/^(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3').replace(/-$/,'');
-    }
-    if (s.length <= 11) {
-      return s.replace(/^(\d{3})(\d{0,3})(\d{0,3})(\d{0,2})/, (_, a,b,c,d) =>
-        a + (b?'.'+b:'') + (c?'.'+c:'') + (d?'-'+d:''));
-    }
+    let s = val.replace(/\D/g,'');
+    if (s.length === 11) return s.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
     return val;
   }
 
-  document.getElementById('chaveInput').addEventListener('input', function(e) {
-    const raw = e.target.value;
-    if (!raw.includes('@') && raw.length < 37) {
-      const mascarado = aplicarMascara(raw);
-      if (mascarado !== raw) e.target.value = mascarado;
-    }
-
+  document.getElementById('chaveInput').addEventListener('input', (e) => {
     const tipo = detectarTipo(e.target.value);
-    if (tipo) {
-      document.getElementById('tipoDetectado').classList.add('visivel');
-      document.getElementById('tipoBadge').textContent = tipo.label;
-    } else {
-      document.getElementById('tipoDetectado').classList.remove('visivel');
-    }
-
-    document.getElementById('destinoCard').classList.remove('visivel');
-    document.getElementById('destinoExterno').classList.remove('visivel');
-    document.getElementById('btnMain').disabled = true;
-
+    document.getElementById('tipoDetectado').classList.toggle('visivel', !!e.target.value);
+    document.getElementById('tipoBadge').textContent = tipo.label;
     clearTimeout(buscaTimer);
-    const chave = e.target.value.trim();
-    if (chave.length >= 5) {
-      document.getElementById('buscandoEl').classList.add('visivel');
-      buscaTimer = setTimeout(() => buscarDestinatario(chave), 800);
-    }
+    if (e.target.value.length >= 5) buscaTimer = setTimeout(() => buscarDestinatario(e.target.value), 800);
   });
 
   async function buscarDestinatario(chave) {
+    document.getElementById('buscandoEl').classList.add('visivel');
     try {
       const snap = await getDocs(collection(db, "usuarios"));
-      let encontrado = null;
-      const chaveLower = chave.toLowerCase().trim();
-      const chaveDigits = chave.replace(/\D/g,'');
-
+      let achou = null;
       snap.forEach(d => {
-        if (d.id === userDocId) return; 
         const data = d.data();
-        const match =
-          (data.chavepix && String(data.chavepix).toLowerCase() === chaveLower) ||
-          (data.email && data.email.toLowerCase() === chaveLower) ||
-          (data.cpf && data.cpf.replace(/\D/g,'') === chaveDigits && chaveDigits.length === 11) ||
-          (data.celular && data.celular.replace(/\D/g,'') === chaveDigits);
-
-        if (match) encontrado = { uid: d.id, ...data };
+        if (d.id !== userDocId && (data.chavepix === chave || data.email === chave || data.cpf?.replace(/\D/g,'') === chave.replace(/\D/g,''))) {
+          achou = { uid: d.id, ...data };
+        }
       });
-
       document.getElementById('buscandoEl').classList.remove('visivel');
-
-      if (encontrado) {
-        destinoEncontrado = { uid: encontrado.uid, nome: encontrado.nome || "Usuário Zentry", banco: "Zentry Bank" };
-        const iniciais = (destinoEncontrado.nome || "?").split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-        document.getElementById('destAvatar').textContent = iniciais;
-        document.getElementById('destNome').textContent = destinoEncontrado.nome;
+      if (achou) {
+        destinoEncontrado = { uid: achou.uid, nome: achou.nome, banco: "Zentry Bank" };
+        document.getElementById('destNome').textContent = achou.nome;
+        document.getElementById('destAvatar').textContent = achou.nome.charAt(0).toUpperCase();
         document.getElementById('destinoCard').classList.add('visivel');
+        document.getElementById('destinoExterno').classList.remove('visivel');
       } else {
-        destinoEncontrado = { uid:'externo', nome: chave, banco:'Banco Externo' };
+        destinoEncontrado = { uid: 'externo', nome: chave, banco: "Banco Externo" };
         document.getElementById('destinoExterno').classList.add('visivel');
+        document.getElementById('destinoCard').classList.remove('visivel');
       }
       document.getElementById('btnMain').disabled = false;
-    } catch(e) {
-      document.getElementById('buscandoEl').classList.remove('visivel');
-    }
+    } catch (e) { console.error(e); }
   }
 
-  document.getElementById('valorInput').addEventListener('input', function(e) {
+  document.getElementById('valorInput').addEventListener('input', (e) => {
     let v = e.target.value.replace(/\D/g,'');
     v = (parseInt(v||'0') / 100).toFixed(2).replace('.',',');
     e.target.value = v;
-    const num = parseFloat(v.replace(',','.')) || 0;
-    const disp = document.getElementById('saldoDisp');
-    disp.className = 'saldo-disp' + (num > saldoAtual ? ' insuf' : '');
+    const num = parseFloat(v.replace(',','.'));
     document.getElementById('btnMain').disabled = num <= 0 || num > saldoAtual;
   });
 
   function onPin() {
-    const pin = document.getElementById('hiddenPin');
-    if (pin.value.length > 4) pin.value = pin.value.slice(0,4);
-    for (let i=1; i<=4; i++) {
-      document.getElementById(`p${i}`).className = 'pin-dot' + (i <= pin.value.length ? ' ok' : '');
-    }
-    // O botão da etapa 2 (senha) só habilita com 4 dígitos
-    if(etapa === 2) document.getElementById('btnMain').disabled = pin.value.length < 4;
+    const p = document.getElementById('hiddenPin').value;
+    for (let i=1; i<=4; i++) document.getElementById(`p${i}`).className = 'pin-dot' + (i <= p.length ? ' ok' : '');
+    if(etapa === 2) document.getElementById('btnMain').disabled = p.length < 4;
   }
 
   function irPara(n) {
-    document.getElementById(`tela${etapa}`).classList.remove('ativa');
+    document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+    document.getElementById(`tela${n}`).classList.add('ativa');
     etapa = n;
-    document.getElementById(`tela${etapa}`).classList.add('ativa');
-    atualizarDots();
-    const titles = ["Transferir Pix","Valor","Confirmação","Concluído"];
+    const titles = ["Transferir", "Valor", "Confirmar", "Sucesso"];
     document.getElementById('barTitle').textContent = titles[n];
-    
-    // Reseta estado do botão conforme a tela
-    const btn = document.getElementById('btnMain');
-    if(n === 2) btn.disabled = document.getElementById('hiddenPin').value.length < 4;
-  }
-
-  function atualizarDots() {
-    for (let i=0; i<4; i++) {
-      const d = document.getElementById(`dot${i}`);
-      d.className = 'step-dot' + (i === etapa ? ' active' : (i < etapa ? ' done' : ''));
-    }
+    for (let i=0; i<4; i++) document.getElementById(`dot${i}`).className = 'step-dot' + (i==n?' active':(i<n?' done':''));
   }
 
   window.avancarEtapa = async function() {
     const btn = document.getElementById('btnMain');
-
-    if (etapa === 0) {
-      irPara(1);
-      btn.disabled = true;
-    } else if (etapa === 1) {
-      const v = parseFloat(document.getElementById('valorInput').value.replace(',','.')) || 0;
-      const chave = document.getElementById('chaveInput').value;
-      const desc  = document.getElementById('descInput').value || "—";
-      
-      document.getElementById('confirmAvatar').textContent = document.getElementById('destAvatar').textContent;
+    if (etapa === 0) irPara(1);
+    else if (etapa === 1) {
+      dadosTransacao = { 
+        valor: parseFloat(document.getElementById('valorInput').value.replace(',','.')),
+        chave: document.getElementById('chaveInput').value,
+        desc: document.getElementById('descInput').value || "Transferência Pix"
+      };
       document.getElementById('confirmNome').textContent = destinoEncontrado.nome;
-      document.getElementById('confirmBanco').textContent = destinoEncontrado.banco;
-      document.getElementById('confirmChave').textContent = chave;
-      document.getElementById('confirmDesc').textContent = desc;
-      document.getElementById('confirmData').textContent = new Date().toLocaleDateString('pt-BR');
-      document.getElementById('confirmValor').textContent = ZentryUI.formatarMoeda(v);
-
-      dadosTransacao = { valor: v, destino: destinoEncontrado, chave, desc };
+      document.getElementById('confirmValor').textContent = ZentryUI.formatarMoeda(dadosTransacao.valor);
+      document.getElementById('confirmChave').textContent = dadosTransacao.chave;
       irPara(2);
       btn.textContent = "Confirmar Pix";
     } else if (etapa === 2) {
-      const pin = document.getElementById('hiddenPin').value;
-      
-      // TRAVA DE SEGURANÇA NO BOTÃO
       btn.disabled = true;
       btn.textContent = "Validando...";
-
+      
       const userSnap = await getDoc(doc(db, "usuarios", userDocId));
-      const userData = userSnap.data();
+      const senhaBanco = String(userSnap.data()?.senha);
+      const senhaDigitada = String(document.getElementById('hiddenPin').value);
 
-      // CORREÇÃO DO TRAVAMENTO: Compara como String
-      if (String(pin) !== String(userData?.senha || '')) {
-        ZentryUI.toast("Senha incorreta!", "erro");
-        document.getElementById('hiddenPin').value = "";
-        onPin();
-        btn.textContent = "Confirmar Pix";
-        btn.disabled = false;
+      if (senhaDigitada !== senhaBanco) {
+        ZentryUI.toast("Senha incorreta", "erro");
+        btn.disabled = false; btn.textContent = "Confirmar Pix";
         return;
       }
 
       ZentryUI.loading(true);
-      btn.textContent = "Processando...";
       try {
-        const { valor, destino, chave, desc } = dadosTransacao;
-        const txId = "PIX" + Date.now();
+        const txId = "TX" + Date.now();
         const agora = new Date();
-
-        // 1. Debita e registra saída
-        await updateDoc(doc(db, "usuarios", userDocId), { saldo: increment(-valor) });
+        
+        // Operações no Firebase
+        await updateDoc(doc(db, "usuarios", userDocId), { saldo: increment(-dadosTransacao.valor) });
         await setDoc(doc(db, "usuarios", userDocId, "transacoes", txId), {
-          tipo: "saida", valor, descricao: "Pix enviado - " + destino.nome,
-          nomeDestino: destino.nome, chavePix: chave, timestamp: agora, id: txId, status: "concluido"
+          tipo: "saida", valor: dadosTransacao.valor, nomeDestino: destinoEncontrado.nome, timestamp: agora, status: "concluido"
         });
 
-        // 2. Se interno, credita e registra entrada
-        if (destino.uid !== 'externo') {
-          await updateDoc(doc(db, "usuarios", destino.uid), { saldo: increment(valor) });
-          await setDoc(doc(db, "usuarios", destino.uid, "transacoes", txId + "R"), {
-            tipo: "entrada", valor, descricao: "Pix recebido",
-            nomeRemetente: userData.nome, timestamp: agora, id: txId + "R", status: "concluido"
-          });
+        if (destinoEncontrado.uid !== 'externo') {
+          await updateDoc(doc(db, "usuarios", destinoEncontrado.uid), { saldo: increment(dadosTransacao.valor) });
         }
 
-        // === AJUSTE DE TELA ===
-        // Garante que os elementos da tela de sucesso existem antes de preencher
-        const sub = document.getElementById('sucessoSub');
-        if(sub) sub.textContent = ZentryUI.formatarMoeda(valor) + " enviado.";
+        // Sucesso
+        document.getElementById('sucessoSub').textContent = ZentryUI.formatarMoeda(dadosTransacao.valor) + " enviado.";
+        document.getElementById('compNome').textContent = destinoEncontrado.nome;
+        document.getElementById('compValor').textContent = ZentryUI.formatarMoeda(dadosTransacao.valor);
         
-        const compNome = document.getElementById('compNome');
-        if(compNome) compNome.textContent = destino.nome;
-
-        // Tenta mudar para a tela de sucesso (Etapa 3)
-        irPara(3); 
-        
+        irPara(3);
         btn.textContent = "Voltar ao Início";
         btn.disabled = false;
-        
-        const btnSec = document.getElementById('btnSec');
-        if(btnSec) btnSec.style.display = "block";
-
-      } catch(e) {
-        console.error("ERRO CRÍTICO NO PIX:", e); // Isso vai te mostrar o erro real no F12
-        ZentryUI.toast("Erro na gravação do banco.", "erro");
-        btn.textContent = "Confirmar Pix";
+        document.getElementById('btnSec').style.display = "block";
+      } catch (e) {
+        ZentryUI.toast("Erro no processamento", "erro");
         btn.disabled = false;
-      } finally {
-        ZentryUI.loading(false);
-    }
-      
+      } finally { ZentryUI.loading(false); }
     } else {
       window.location.href = "home.html";
     }
   };
 
-  window.voltarEtapa = function() {
-    if (etapa === 0) window.location.href = "pix.html";
-    else if (etapa === 3) window.location.href = "home.html";
-    else irPara(etapa - 1);
-  };
-
-  window.irParaComprovante = () => {
-    const txId = "PIX" + (Date.now()-2000); 
-    window.location.href = `comprovante.html?id=${txId}`;
-  };
-      </script>
+  window.voltarEtapa = () => etapa === 0 ? window.location.href="pix.html" : irPara(etapa-1);
+  window.irParaComprovante = () => window.location.href = "comprovante.html?id=TX"+Date.now();
+          </script>
   
 </body>
 </html>
