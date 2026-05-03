@@ -3,99 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <title>Zentap Pro</title>
 
 <style>
 :root{
---primary:#22c55e;
---bg:#060910;
---card:#0f1623;
---muted:#6b7a99;
+  --primary:#22c55e;
+  --bg:#060910;
+  --card:#0f1623;
+  --border:rgba(255,255,255,0.08);
 }
 
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:#fff;font-family:'Sora',sans-serif;}
-
-.screen{display:none;flex-direction:column;padding:20px;height:100vh;}
-.screen.ativa{display:flex;animation:fade .3s;}
-
-@keyframes fade{from{opacity:0;transform:translateY(10px)}}
-
-.valor{font-size:48px;text-align:center;margin:40px 0;}
-
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.key{
-background:var(--card);
-padding:20px;
-border-radius:15px;
-text-align:center;
-font-size:20px;
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:var(--bg);
+  color:#fff;
 }
-.key:active{transform:scale(.9)}
 
+/* TELAS */
+.screen{display:none;padding:20px;height:100vh}
+.screen.ativa{display:block}
+
+/* HEADER */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* VALOR */
+.valor{
+  font-size:52px;
+  text-align:center;
+  margin:60px 0;
+  font-weight:800;
+}
+
+/* BOTÕES */
 .btn{
-margin-top:20px;
-padding:16px;
-border:none;
-border-radius:20px;
-background:linear-gradient(135deg,#22c55e,#4ade80);
-font-weight:700;
+  width:100%;
+  padding:18px;
+  border:none;
+  border-radius:16px;
+  font-weight:700;
+  margin-top:10px;
+  font-size:16px;
 }
 
+.btn-green{
+  background:var(--primary);
+  color:#052e16;
+}
+
+.btn-outline{
+  background:transparent;
+  border:1px solid var(--primary);
+  color:var(--primary);
+}
+
+/* MÉTODOS */
 .metodo{
-background:var(--card);
-padding:16px;
-border-radius:15px;
-margin:10px 0;
-display:flex;
-align-items:center;
-gap:10px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:18px;
+  border-radius:18px;
+  background:var(--card);
+  margin-bottom:12px;
+  border:1px solid var(--border);
 }
 
-.metodo img{width:30px;}
-
-.btn-sec{
-margin-top:10px;
-padding:14px;
-background:var(--primary);
-border:none;
-border-radius:15px;
-color:#052e16;
-font-weight:700;
+/* STATUS PIX */
+.status{
+  text-align:center;
+  margin-top:20px;
 }
 
+.status .title{
+  font-size:20px;
+  font-weight:700;
+}
+
+.status .sub{
+  font-size:14px;
+  opacity:.6;
+}
+
+/* LOADER */
+.loader{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  border:4px solid var(--border);
+  border-top:4px solid var(--primary);
+  animation:spin 1s linear infinite;
+  margin:30px auto;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+/* QR */
 .qr{
-background:#fff;
-padding:10px;
-border-radius:20px;
-margin:30px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:20px;
+  width:220px;
+  margin:20px auto;
 }
 
-.proc{
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-height:100%;
-}
-
-.spinner{
-width:60px;
-height:60px;
-border:4px solid #222;
-border-top:4px solid var(--primary);
-border-radius:50%;
-animation:spin 1s linear infinite;
-}
-
-@keyframes spin{to{transform:rotate(360deg)}}
-
-.ok{
-font-size:60px;
-margin-bottom:10px;
+/* TIMER */
+.timer{
+  text-align:center;
+  margin-top:10px;
+  font-size:14px;
+  color:#fbbf24;
 }
 </style>
 </head>
@@ -103,149 +126,100 @@ margin-bottom:10px;
 <body>
 
 <!-- TELA VALOR -->
-<div id="tela1" class="screen ativa">
-<div class="valor" id="valor">R$ 0,00</div>
+<div id="t1" class="screen ativa">
+  <div class="header">
+    <b>ZENTAP</b>
+  </div>
 
-<div class="keypad">
-<div class="key" onclick="dig(1)">1</div>
-<div class="key" onclick="dig(2)">2</div>
-<div class="key" onclick="dig(3)">3</div>
-<div class="key" onclick="dig(4)">4</div>
-<div class="key" onclick="dig(5)">5</div>
-<div class="key" onclick="dig(6)">6</div>
-<div class="key" onclick="dig(7)">7</div>
-<div class="key" onclick="dig(8)">8</div>
-<div class="key" onclick="dig(9)">9</div>
-<div class="key" onclick="dig('00')">00</div>
-<div class="key" onclick="dig(0)">0</div>
-<div class="key" onclick="del()">⌫</div>
+  <div class="valor" id="valor">R$ 0,00</div>
+
+  <button class="btn btn-green" onclick="ir(2)">Continuar</button>
 </div>
 
-<button class="btn" onclick="ir(2)">Continuar</button>
-</div>
+<!-- MÉTODO -->
+<div id="t2" class="screen">
+  <h2>Forma de pagamento</h2>
 
-<!-- MÉTODOS -->
-<div id="tela2" class="screen">
-<h2>Forma de pagamento</h2>
+  <div class="metodo" onclick="abrirPix()">⚡ Pix</div>
+  <div class="metodo" onclick="simular()">💳 Débito</div>
+  <div class="metodo" onclick="simular()">💳 Crédito</div>
 
-<div class="metodo" onclick="pix()">
-<img src="https://i.imgur.com/8QfQ9Qp.png">
-Pix
-</div>
-
-<div class="metodo" onclick="nfc('Débito')">
-<img src="https://i.imgur.com/1Q9Z1Zm.png">
-Débito
-</div>
-
-<div class="metodo" onclick="nfc('Crédito')">
-<img src="https://i.imgur.com/1Q9Z1Zm.png">
-Crédito
-</div>
-
-<button class="btn-sec" onclick="ir(1)">Voltar</button>
+  <button class="btn btn-outline" onclick="ir(1)">Voltar</button>
 </div>
 
 <!-- PIX -->
-<div id="tela3" class="screen">
-<h2>Pix</h2>
+<div id="t3" class="screen">
+  <h2>Pix</h2>
 
-<div id="qrcode" class="qr"></div>
+  <div class="qr" id="qr"></div>
 
-<button class="btn-sec" onclick="ir(2)">Voltar</button>
+  <div class="timer" id="timer">Expira em 05:00</div>
+
+  <div class="status">
+    <div class="title">Aguardando pagamento</div>
+    <div class="sub">Escaneie o QR Code</div>
+  </div>
+
+  <div class="loader"></div>
+
+  <button class="btn btn-outline" onclick="ir(2)">Voltar</button>
 </div>
 
-<!-- NFC -->
-<div id="tela4" class="screen">
-<h2 id="tipo"></h2>
+<!-- SUCESSO -->
+<div id="t4" class="screen">
+  <div class="status">
+    <div class="title">Pagamento recebido ✅</div>
+    <div class="sub">Valor confirmado com sucesso</div>
+  </div>
 
-<div style="font-size:80px;text-align:center;margin:50px 0;">📲</div>
-
-<button class="btn" onclick="pagar()">Simular pagamento</button>
-<button class="btn-sec" onclick="ir(2)">Voltar</button>
+  <button class="btn btn-green" onclick="ir(1)">Nova venda</button>
 </div>
 
-<!-- PROCESSANDO -->
-<div id="tela5" class="screen">
-<div class="proc">
-<div class="spinner"></div>
-<p>Processando...</p>
-</div>
-</div>
-
-<!-- APROVADO -->
-<div id="tela6" class="screen">
-<div class="proc">
-<div class="ok">✔</div>
-<p>Pagamento aprovado</p>
-</div>
-</div>
-
-<audio id="som" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3"></audio>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-
-let valor="";
-
-function vibrar(x=50){
-if(navigator.vibrate) navigator.vibrate(x);
-}
-
-function dig(n){
-vibrar(30);
-valor+=n;
-atualiza();
-}
-
-function del(){
-valor=valor.slice(0,-1);
-atualiza();
-}
-
-function atualiza(){
-let v=valor.padStart(3,'0');
-let num=(parseInt(v)/100).toFixed(2);
-document.getElementById("valor").innerText="R$ "+num.replace('.',',');
-}
-
 function ir(n){
-document.querySelectorAll(".screen").forEach(e=>e.classList.remove("ativa"));
-document.getElementById("tela"+n).classList.add("ativa");
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('ativa'))
+  document.getElementById('t'+n).classList.add('ativa')
 }
 
-function pix(){
-ir(3);
-document.getElementById("qrcode").innerHTML="";
-new QRCode(document.getElementById("qrcode"),{
-text:"pagamento"+Date.now(),
-width:200,
-height:200
-});
+/* PIX */
+function abrirPix(){
+  ir(3)
+
+  const el = document.getElementById("qr")
+  el.innerHTML=""
+
+  new QRCode(el,{
+    text:"PIX-"+Date.now(),
+    width:200,
+    height:200
+  })
+
+  iniciarTimer()
+
+  // 🔥 SIMULA CONFIRMAÇÃO (depois você liga no webhook real)
+  setTimeout(()=>{
+    ir(4)
+  },6000)
 }
 
-function nfc(t){
-document.getElementById("tipo").innerText=t;
-ir(4);
+/* TIMER */
+let t=300
+function iniciarTimer(){
+  const el=document.getElementById("timer")
+  const i=setInterval(()=>{
+    t--
+    let m=Math.floor(t/60)
+    let s=t%60
+    el.innerText=`Expira em ${m}:${s.toString().padStart(2,'0')}`
+    if(t<=0) clearInterval(i)
+  },1000)
 }
 
-async function pagar(){
-vibrar(100);
-ir(5);
-
-await new Promise(r=>setTimeout(r,2000));
-
-document.getElementById("som").play();
-vibrar([100,50,100]);
-
-ir(6);
-
-await new Promise(r=>setTimeout(r,2000));
-
-ir(1);
-valor="";
-atualiza();
+function simular(){
+  alert("Pagamento simulado")
 }
-
 </script>
 
 </body>
