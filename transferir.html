@@ -22,32 +22,17 @@
   html, body { height: 100%; background: var(--bg); color: #fff; font-family: 'Sora', sans-serif; overflow: hidden; }
   body { display: flex; flex-direction: column; }
 
-  /* ── APP BAR ── */
-  .app-bar {
-    padding: 16px 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid var(--border); flex-shrink: 0;
-  }
-  .back-btn {
-    width: 40px; height: 40px; background: var(--card2);
-    border-radius: 12px; border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-  }
+  .app-bar { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .back-btn { width: 40px; height: 40px; background: var(--card2); border-radius: 12px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; }
   .back-btn svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
   .bar-title { font-size: 15px; font-weight: 700; }
-  .saldo-pill {
-    background: var(--primary-dim); border: 1px solid rgba(34,197,94,0.3);
-    color: var(--primary); font-weight: 700; font-size: 13px;
-    padding: 6px 12px; border-radius: 20px;
-  }
+  .saldo-pill { background: var(--primary-dim); border: 1px solid rgba(34,197,94,0.3); color: var(--primary); font-weight: 700; font-size: 13px; padding: 6px 12px; border-radius: 20px; }
 
-  /* ── STEPS ── */
   .steps { display: flex; gap: 6px; padding: 14px 20px; flex-shrink: 0; }
   .step-dot { height: 4px; border-radius: 4px; background: var(--card2); flex: 1; transition: all 0.4s; }
   .step-dot.active { background: var(--primary); }
   .step-dot.done   { background: #16a34a; }
 
-  /* ── CONTENT ── */
   .content { flex: 1; overflow-y: auto; padding: 0 20px 140px; }
   .tela { display: none; animation: fadeUp 0.3s ease; }
   .tela.ativa { display: block; }
@@ -56,135 +41,51 @@
   .tela-titulo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin: 24px 0 6px; }
   .tela-sub    { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
 
-  /* ── ETAPA 1 — CAMPO CHAVE ── */
-  .campo-chave {
-    background: var(--card); border: 1.5px solid var(--border);
-    border-radius: 20px; padding: 20px;
-    transition: border-color 0.2s;
-  }
+  .campo-chave { background: var(--card); border: 1.5px solid var(--border); border-radius: 20px; padding: 20px; transition: border-color 0.2s; }
   .campo-chave:focus-within { border-color: var(--primary); }
-
-  .campo-label {
-    font-size: 11px; font-weight: 700; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 1px;
-    display: block; margin-bottom: 10px;
-  }
-
+  .campo-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 10px; }
   .campo-row { display: flex; align-items: center; gap: 12px; }
   .campo-row svg { width: 20px; height: 20px; stroke: var(--muted); fill: none; stroke-width: 2; flex-shrink: 0; }
-
-  .campo-row input {
-    background: transparent; border: none; color: #fff;
-    font-size: 18px; font-weight: 600; font-family: 'Sora', sans-serif;
-    width: 100%; outline: none;
-  }
+  .campo-row input { background: transparent; border: none; color: #fff; font-size: 18px; font-weight: 600; font-family: 'Sora', sans-serif; width: 100%; outline: none; }
   .campo-row input::placeholder { color: var(--muted); font-weight: 400; font-size: 16px; }
 
-  /* Tipo detectado */
-  .tipo-detectado {
-    margin-top: 12px; padding-top: 12px;
-    border-top: 1px solid var(--border);
-    font-size: 12px; color: var(--muted);
-    display: none; align-items: center; gap: 6px;
-  }
+  .tipo-detectado { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display: none; align-items: center; gap: 6px; }
   .tipo-detectado.visivel { display: flex; }
-  .tipo-badge {
-    background: var(--primary-dim); border: 1px solid rgba(34,197,94,0.25);
-    color: var(--primary); font-size: 10px; font-weight: 700;
-    padding: 2px 8px; border-radius: 20px;
-  }
+  .tipo-badge { background: var(--primary-dim); border: 1px solid rgba(34,197,94,0.25); color: var(--primary); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
 
-  /* Destinatário encontrado */
-  .destino-card {
-    display: none; margin-top: 16px;
-    background: var(--card2); border: 1px solid rgba(34,197,94,0.25);
-    border-radius: 18px; padding: 16px;
-    align-items: center; gap: 14px;
-    animation: fadeUp 0.3s ease;
-  }
+  .destino-card { display: none; margin-top: 16px; background: var(--card2); border: 1px solid rgba(34,197,94,0.25); border-radius: 18px; padding: 16px; align-items: center; gap: 14px; }
   .destino-card.visivel { display: flex; }
-  .dest-avatar {
-    width: 46px; height: 46px; border-radius: 14px;
-    background: var(--primary-dim); border: 1px solid var(--primary);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 17px; font-weight: 800; color: var(--primary); flex-shrink: 0;
-  }
+  .dest-avatar { width: 46px; height: 46px; border-radius: 14px; background: var(--primary-dim); border: 1px solid var(--primary); display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; color: var(--primary); flex-shrink: 0; }
   .dest-nome  { font-size: 15px; font-weight: 700; }
   .dest-banco { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .dest-check { margin-left: auto; color: var(--primary); }
+  .dest-check { margin-left: auto; }
   .dest-check svg { width: 22px; height: 22px; stroke: var(--primary); fill: none; stroke-width: 2.5; }
 
-  /* Externo */
-  .destino-externo {
-    display: none; margin-top: 16px;
-    background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25);
-    border-radius: 16px; padding: 14px 16px;
-    font-size: 13px; color: #fbbf24; line-height: 1.6;
-  }
+  .destino-externo { display: none; margin-top: 16px; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25); border-radius: 16px; padding: 14px 16px; font-size: 13px; color: #fbbf24; line-height: 1.6; }
   .destino-externo.visivel { display: block; }
 
-  /* Buscando */
-  .buscando {
-    display: none; margin-top: 16px;
-    align-items: center; gap: 10px;
-    font-size: 13px; color: var(--muted);
-  }
+  .buscando { display: none; margin-top: 16px; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
   .buscando.visivel { display: flex; }
-  .mini-spin {
-    width: 18px; height: 18px; border-radius: 50%;
-    border: 2px solid var(--border); border-top-color: var(--primary);
-    animation: spin 0.7s linear infinite; flex-shrink: 0;
-  }
+  .mini-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); border-top-color: var(--primary); animation: spin 0.7s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── ETAPA 2 — VALOR ── */
-  .valor-hero {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 20px 0 10px;
-  }
+  .valor-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 0 10px; }
   .valor-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
   .valor-row { display: flex; align-items: baseline; gap: 6px; }
   .valor-prefix { font-size: 28px; font-weight: 700; color: var(--muted); }
-  .valor-input {
-    background: transparent; border: none; outline: none;
-    color: var(--primary); font-size: 56px; font-weight: 800;
-    font-family: 'Sora', sans-serif; width: 220px;
-    text-align: center; letter-spacing: -3px;
-  }
+  .valor-input { background: transparent; border: none; outline: none; color: var(--primary); font-size: 56px; font-weight: 800; font-family: 'Sora', sans-serif; width: 220px; text-align: center; letter-spacing: -3px; }
   .valor-input::placeholder { color: var(--card2); }
-
   .saldo-disp { font-size: 13px; color: var(--muted); margin-top: 14px; }
   .saldo-disp.insuf { color: var(--red); }
 
-  .desc-box {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px 18px; margin-top: 20px;
-    display: flex; align-items: center; gap: 12px;
-  }
+  .desc-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; margin-top: 20px; display: flex; align-items: center; gap: 12px; }
   .desc-box svg { width: 18px; height: 18px; stroke: var(--muted); fill: none; stroke-width: 2; flex-shrink: 0; }
-  .desc-box input {
-    background: transparent; border: none; color: #fff;
-    font-size: 14px; font-family: 'Sora', sans-serif; width: 100%; outline: none;
-  }
+  .desc-box input { background: transparent; border: none; color: #fff; font-size: 14px; font-family: 'Sora', sans-serif; width: 100%; outline: none; }
   .desc-box input::placeholder { color: var(--muted); }
 
-  /* ── ETAPA 3 — CONFIRMAÇÃO + PIN ── */
-  .confirm-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 24px; padding: 24px; margin-bottom: 16px;
-  }
-  .confirm-top {
-    display: flex; align-items: center; gap: 14px;
-    padding-bottom: 18px; margin-bottom: 18px;
-    border-bottom: 1px solid var(--border);
-  }
-  .confirm-avatar {
-    width: 52px; height: 52px; border-radius: 16px;
-    background: var(--primary-dim); border: 1px solid var(--primary);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; font-weight: 800; color: var(--primary);
-  }
+  .confirm-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 24px; margin-bottom: 16px; }
+  .confirm-top { display: flex; align-items: center; gap: 14px; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .confirm-avatar { width: 52px; height: 52px; border-radius: 16px; background: var(--primary-dim); border: 1px solid var(--primary); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: var(--primary); }
   .confirm-nome  { font-size: 16px; font-weight: 700; }
   .confirm-banco { font-size: 12px; color: var(--muted); margin-top: 2px; }
   .confirm-row { display: flex; justify-content: space-between; padding: 12px 0; font-size: 13px; }
@@ -193,77 +94,54 @@
   .confirm-val   { font-weight: 700; }
   .confirm-total { font-size: 20px; font-weight: 800; color: var(--primary); }
 
-  .aviso-box {
-    background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2);
-    border-radius: 14px; padding: 14px 16px;
-    font-size: 12px; color: #fbbf24; line-height: 1.6; margin-bottom: 20px;
-  }
+  .aviso-box { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); border-radius: 14px; padding: 14px 16px; font-size: 12px; color: #fbbf24; line-height: 1.6; margin-bottom: 20px; }
 
-  /* PIN */
-  .pin-section {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 20px; padding: 28px 24px; text-align: center; cursor: pointer;
-  }
+  .pin-section { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px 24px; text-align: center; cursor: pointer; }
   .pin-titulo { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
   .pin-dots { display: flex; justify-content: center; gap: 16px; }
-  .pin-dot {
-    width: 18px; height: 18px; border-radius: 50%;
-    border: 2px solid var(--border); transition: all 0.2s;
-  }
+  .pin-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.2s; }
   .pin-dot.ok  { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
   .pin-dot.err { background: var(--red); border-color: var(--red); animation: shake 0.4s ease; }
   @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
 
   #hiddenPin { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
 
-  /* ── ETAPA 4 — SUCESSO ── */
+  .toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 14px; font-size: 14px; font-weight: 600; z-index: 999; white-space: nowrap; pointer-events: none; }
+  .toast.erro { background: var(--red); color: #fff; }
+  .toast.ok   { background: var(--primary); color: #052e16; }
+
+  .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(6,9,16,0.85); z-index: 998; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  .loading-overlay.visivel { display: flex; }
+  .load-spin { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--primary); animation: spin 0.8s linear infinite; }
+  .load-txt { font-size: 14px; color: var(--muted); }
+
   .sucesso-wrap { text-align: center; padding: 30px 0; }
-  .sucesso-circle {
-    width: 90px; height: 90px; border-radius: 50%;
-    background: var(--primary-dim); border: 3px solid var(--primary);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 24px;
-    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
-  }
+  .sucesso-circle { width: 90px; height: 90px; border-radius: 50%; background: var(--primary-dim); border: 3px solid var(--primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
   .sucesso-circle svg { width: 40px; height: 40px; stroke: var(--primary); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
   @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
   .sucesso-titulo { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
   .sucesso-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
-  .sucesso-comp {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 20px; padding: 20px; margin: 24px 0;
-  }
+  .sucesso-comp { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin: 24px 0; }
   .comp-row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 13px; }
   .comp-row + .comp-row { border-top: 1px solid var(--border); }
   .comp-label { color: var(--muted); }
   .comp-val   { font-weight: 700; }
 
-  /* ── FOOTER ── */
-  .footer-action {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    padding: 16px 20px 32px;
-    background: linear-gradient(transparent, var(--bg) 35%);
-  }
-  .btn-main {
-    width: 100%; padding: 17px; border-radius: 18px; border: none;
-    background: var(--primary); color: #052e16;
-    font-weight: 800; font-size: 16px; font-family: 'Sora', sans-serif;
-    box-shadow: 0 8px 30px var(--primary-glow);
-    cursor: pointer; transition: all 0.2s;
-  }
+  .footer-action { position: fixed; bottom: 0; left: 0; right: 0; padding: 16px 20px 32px; background: linear-gradient(transparent, var(--bg) 35%); }
+  .btn-main { width: 100%; padding: 17px; border-radius: 18px; border: none; background: var(--primary); color: #052e16; font-weight: 800; font-size: 16px; font-family: 'Sora', sans-serif; box-shadow: 0 8px 30px var(--primary-glow); cursor: pointer; transition: all 0.2s; }
   .btn-main:active   { transform: scale(0.98); }
   .btn-main:disabled { background: var(--card2); color: #3a4560; box-shadow: none; cursor: not-allowed; }
-  .btn-sec {
-    width: 100%; padding: 14px; border-radius: 18px;
-    border: 1px solid var(--border); background: transparent;
-    color: #fff; font-weight: 600; font-size: 15px;
-    font-family: 'Sora', sans-serif; cursor: pointer; margin-top: 10px;
-  }
+  .btn-sec { width: 100%; padding: 14px; border-radius: 18px; border: 1px solid var(--border); background: transparent; color: #fff; font-weight: 600; font-size: 15px; font-family: 'Sora', sans-serif; cursor: pointer; margin-top: 10px; }
 </style>
 </head>
 <body>
 
 <input type="number" id="hiddenPin" inputmode="numeric" pattern="\d*" autocomplete="off">
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="load-spin"></div>
+  <div class="load-txt">Processando Pix...</div>
+</div>
 
 <div class="app-bar">
   <div class="back-btn" onclick="voltarEtapa()">
@@ -282,11 +160,10 @@
 
 <div class="content">
 
-  <!-- ══ ETAPA 1 — CHAVE PIX ══ -->
+  <!-- ETAPA 1 -->
   <div class="tela ativa" id="tela0">
     <p class="tela-titulo">Para quem?</p>
     <p class="tela-sub">Informe a chave Pix do destinatário.</p>
-
     <div class="campo-chave">
       <span class="campo-label">Chave Pix</span>
       <div class="campo-row">
@@ -294,36 +171,22 @@
         <input type="text" id="chaveInput" placeholder="Digite a chave Pix" inputmode="text" autocomplete="off">
       </div>
       <div class="tipo-detectado" id="tipoDetectado">
-        Tipo identificado: <span class="tipo-badge" id="tipoBadge">—</span>
+        Tipo: <span class="tipo-badge" id="tipoBadge">—</span>
       </div>
     </div>
-
-    <div class="buscando" id="buscandoEl">
-      <div class="mini-spin"></div>
-      Buscando destinatário...
-    </div>
-
+    <div class="buscando" id="buscandoEl"><div class="mini-spin"></div>Buscando destinatário...</div>
     <div class="destino-card" id="destinoCard">
       <div class="dest-avatar" id="destAvatar">?</div>
-      <div>
-        <div class="dest-nome" id="destNome">—</div>
-        <div class="dest-banco" id="destBanco">Zentry Bank</div>
-      </div>
-      <div class="dest-check">
-        <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-      </div>
+      <div><div class="dest-nome" id="destNome">—</div><div class="dest-banco" id="destBanco">Zentry Bank</div></div>
+      <div class="dest-check"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
     </div>
-
-    <div class="destino-externo" id="destinoExterno">
-      ⚠️ Destinatário não encontrado na Zentry. O Pix será enviado como transferência externa.
-    </div>
+    <div class="destino-externo" id="destinoExterno">⚠️ Destinatário não encontrado na Zentry. O Pix será enviado como transferência externa.</div>
   </div>
 
-  <!-- ══ ETAPA 2 — VALOR ══ -->
+  <!-- ETAPA 2 -->
   <div class="tela" id="tela1">
     <p class="tela-titulo">Qual o valor?</p>
     <p class="tela-sub">Digite quanto você quer enviar.</p>
-
     <div class="valor-hero">
       <div class="valor-label">Valor da transferência</div>
       <div class="valor-row">
@@ -332,21 +195,19 @@
       </div>
       <div class="saldo-disp" id="saldoDisp">Saldo disponível: R$ 0,00</div>
     </div>
-
     <div class="desc-box">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <input type="text" id="descInput" placeholder="Adicionar mensagem (opcional)" maxlength="50">
+      <input type="text" id="descInput" placeholder="Mensagem (opcional)" maxlength="50">
     </div>
   </div>
 
-  <!-- ══ ETAPA 3 — CONFIRMAÇÃO + PIN ══ -->
+  <!-- ETAPA 3 -->
   <div class="tela" id="tela2">
     <p class="tela-titulo">Confirme o Pix</p>
     <p class="tela-sub">Verifique e autorize com sua senha.</p>
-
     <div class="confirm-card">
       <div class="confirm-top">
-        <div class="confirm-avatar" id="confirmAvatar"></div>
+        <div class="confirm-avatar" id="confirmAvatar">?</div>
         <div>
           <div class="confirm-nome" id="confirmNome"></div>
           <div class="confirm-banco" id="confirmBanco"></div>
@@ -357,9 +218,7 @@
       <div class="confirm-row"><span class="confirm-label">Data</span><span class="confirm-val" id="confirmData"></span></div>
       <div class="confirm-row"><span class="confirm-label">Valor</span><span class="confirm-val confirm-total" id="confirmValor"></span></div>
     </div>
-
     <div class="aviso-box">⚡ Pix é instantâneo e irreversível. Confira os dados antes de confirmar.</div>
-
     <div class="pin-section" onclick="document.getElementById('hiddenPin').focus()">
       <p class="pin-titulo">Digite sua senha de 4 dígitos</p>
       <div class="pin-dots">
@@ -371,12 +230,10 @@
     </div>
   </div>
 
-  <!-- ══ ETAPA 4 — SUCESSO ══ -->
+  <!-- ETAPA 4 -->
   <div class="tela" id="tela3">
     <div class="sucesso-wrap">
-      <div class="sucesso-circle">
-        <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-      </div>
+      <div class="sucesso-circle"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
       <p class="sucesso-titulo">Pix enviado!</p>
       <p class="sucesso-sub" id="sucessoSub"></p>
       <div class="sucesso-comp">
@@ -392,10 +249,11 @@
 
 <div class="footer-action">
   <button class="btn-main" id="btnMain" onclick="avancarEtapa()" disabled>Continuar</button>
-  <button class="btn-sec"  id="btnSec"  onclick="irParaComprovante()" style="display:none;">Ver comprovante completo</button>
+  <button class="btn-sec" id="btnSec" onclick="irParaComprovante()" style="display:none;">Ver comprovante completo</button>
 </div>
-  <script type="module">
-  import { db, ZentryAuth, ZentryUser, ZentryUI } from './zentry-core.js';
+
+<script type="module">
+  import { db, ZentryUser, ZentryUI } from './zentry-core.js';
   import { doc, setDoc, updateDoc, collection, getDocs, getDoc, onSnapshot, increment }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -403,9 +261,24 @@
   let destinoEncontrado = null;
   let dadosTransacao    = null;
   let buscaTimer        = null;
+  let ultimoTxId        = null;
+
+  // ✅ Toast e loading locais — sem depender do zentry-core
+  function toast(msg, tipo = 'erro') {
+    const el = document.createElement('div');
+    el.className = `toast ${tipo}`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+  }
+
+  function loading(show) {
+    document.getElementById('loadingOverlay').classList.toggle('visivel', show);
+  }
 
   async function init() {
-    userDocId = localStorage.getItem("idUsuarioLogado") || await ZentryUser.obterIdPorEmail();
+    userDocId = localStorage.getItem("idUsuarioLogado");
+    if (!userDocId) userDocId = await ZentryUser.obterIdPorEmail();
     if (!userDocId) { window.location.href = "login.html"; return; }
 
     onSnapshot(doc(db, "usuarios", userDocId), (snap) => {
@@ -415,176 +288,212 @@
         document.getElementById('saldoDisp').innerText = "Saldo disponível: " + ZentryUI.formatarMoeda(saldoAtual);
       }
     });
+
     document.getElementById('hiddenPin').addEventListener('input', onPin);
   }
   init();
 
-  // --- FUNÇÕES DE APOIO ---
   function detectarTipo(v) {
     const s = v.replace(/\D/g,'');
-    if (v.includes('@')) return { tipo:'email', label:'E-mail' };
-    if (s.length === 11 && s[2]==='9') return { tipo:'celular', label:'Celular' };
-    if (s.length === 11) return { tipo:'cpf', label:'CPF' };
-    if (s.length === 14) return { tipo:'cnpj', label:'CNPJ' };
-    return { tipo:'aleat', label:'Chave Pix' };
-  }
-
-  function aplicarMascara(val) {
-    if (val.includes('@')) return val;
-    let s = val.replace(/\D/g,'');
-    if (s.length === 11) return s.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    return val;
+    if (v.includes('@')) return 'E-mail';
+    if (s.length === 11 && s[2]==='9') return 'Celular';
+    if (s.length === 11) return 'CPF';
+    if (s.length === 14) return 'CNPJ';
+    return 'Chave Pix';
   }
 
   document.getElementById('chaveInput').addEventListener('input', (e) => {
-    const tipo = detectarTipo(e.target.value);
-    document.getElementById('tipoDetectado').classList.toggle('visivel', !!e.target.value);
-    document.getElementById('tipoBadge').textContent = tipo.label;
+    const val = e.target.value;
+    document.getElementById('tipoDetectado').classList.toggle('visivel', val.length > 0);
+    document.getElementById('tipoBadge').textContent = detectarTipo(val);
+    document.getElementById('destinoCard').classList.remove('visivel');
+    document.getElementById('destinoExterno').classList.remove('visivel');
+    document.getElementById('btnMain').disabled = true;
     clearTimeout(buscaTimer);
-    if (e.target.value.length >= 5) buscaTimer = setTimeout(() => buscarDestinatario(e.target.value), 800);
+    if (val.length >= 5) {
+      document.getElementById('buscandoEl').classList.add('visivel');
+      buscaTimer = setTimeout(() => buscarDestinatario(val.trim()), 800);
+    }
   });
 
   async function buscarDestinatario(chave) {
-    document.getElementById('buscandoEl').classList.add('visivel');
-    try {
+try {
       const snap = await getDocs(collection(db, "usuarios"));
       let achou = null;
+      const digits = chave.replace(/\D/g,'');
+      const lower  = chave.toLowerCase();
+
       snap.forEach(d => {
+        if (d.id === userDocId) return;
         const data = d.data();
-        if (d.id !== userDocId && (data.chavepix === chave || data.email === chave || data.cpf?.replace(/\D/g,'') === chave.replace(/\D/g,''))) {
-          achou = { uid: d.id, ...data };
-        }
+        if (
+          (data.chavepix && data.chavepix.toLowerCase() === lower) ||
+          (data.email    && data.email.toLowerCase()    === lower) ||
+          (data.cpf      && data.cpf.replace(/\D/g,'')  === digits && digits.length === 11) ||
+          (data.celular  && data.celular.replace(/\D/g,'') === digits)
+        ) achou = { uid: d.id, ...data };
       });
+
       document.getElementById('buscandoEl').classList.remove('visivel');
+
       if (achou) {
-        destinoEncontrado = { uid: achou.uid, nome: achou.nome, banco: "Zentry Bank" };
-        document.getElementById('destNome').textContent = achou.nome;
-        document.getElementById('destAvatar').textContent = achou.nome.charAt(0).toUpperCase();
+        destinoEncontrado = { uid: achou.uid, nome: achou.nome || "Usuário Zentry", banco: "Zentry Bank" };
+        const ini = destinoEncontrado.nome.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+        document.getElementById('destAvatar').textContent = ini;
+        document.getElementById('destNome').textContent   = destinoEncontrado.nome;
         document.getElementById('destinoCard').classList.add('visivel');
-        document.getElementById('destinoExterno').classList.remove('visivel');
       } else {
         destinoEncontrado = { uid: 'externo', nome: chave, banco: "Banco Externo" };
         document.getElementById('destinoExterno').classList.add('visivel');
-        document.getElementById('destinoCard').classList.remove('visivel');
       }
       document.getElementById('btnMain').disabled = false;
-    } catch (e) { console.error(e); }
+    } catch(e) {
+      console.error(e);
+      document.getElementById('buscandoEl').classList.remove('visivel');
+    }
   }
 
   document.getElementById('valorInput').addEventListener('input', (e) => {
     let v = e.target.value.replace(/\D/g,'');
     v = (parseInt(v||'0') / 100).toFixed(2).replace('.',',');
     e.target.value = v;
-    const num = parseFloat(v.replace(',','.'));
+    const num = parseFloat(v.replace(',','.')) || 0;
+    document.getElementById('saldoDisp').className = 'saldo-disp' + (num > saldoAtual ? ' insuf' : '');
     document.getElementById('btnMain').disabled = num <= 0 || num > saldoAtual;
   });
 
   function onPin() {
-    const p = document.getElementById('hiddenPin').value;
-    for (let i=1; i<=4; i++) document.getElementById(`p${i}`).className = 'pin-dot' + (i <= p.length ? ' ok' : '');
-    if(etapa === 2) document.getElementById('btnMain').disabled = p.length < 4;
+    const pin = document.getElementById('hiddenPin');
+    if (pin.value.length > 4) pin.value = pin.value.slice(0,4);
+    for (let i=1; i<=4; i++) {
+      document.getElementById(`p${i}`).className = 'pin-dot' + (i <= pin.value.length ? ' ok' : '');
+    }
+    // ✅ Habilita botão com 4 dígitos
+    document.getElementById('btnMain').disabled = pin.value.length < 4;
   }
 
   function irPara(n) {
     document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
     document.getElementById(`tela${n}`).classList.add('ativa');
     etapa = n;
-    const titles = ["Transferir", "Valor", "Confirmar", "Sucesso"];
+    const titles = ["Transferir Pix","Valor","Confirmação","Concluído"];
     document.getElementById('barTitle').textContent = titles[n];
-    for (let i=0; i<4; i++) document.getElementById(`dot${i}`).className = 'step-dot' + (i==n?' active':(i<n?' done':''));
+    for (let i=0; i<4; i++) {
+      document.getElementById(`dot${i}`).className = 'step-dot' + (i===n?' active':(i<n?' done':''));
+    }
   }
+
   window.avancarEtapa = async function() {
     const btn = document.getElementById('btnMain');
 
     if (etapa === 0) {
       irPara(1);
+      btn.disabled = true;
+
     } else if (etapa === 1) {
-      // ... (sua lógica de pegar valores continua igual)
-      dadosTransacao = { 
-        valor: parseFloat(document.getElementById('valorInput').value.replace(',','.')),
-        chave: document.getElementById('chaveInput').value,
-        desc: document.getElementById('descInput').value || "Transferência Pix"
-      };
+      const valor = parseFloat(document.getElementById('valorInput').value.replace(',','.')) || 0;
+      const chave = document.getElementById('chaveInput').value;
+      const desc  = document.getElementById('descInput').value || "—";
+
+      // ✅ Preenche confirmação
+      const ini = destinoEncontrado.nome.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('confirmAvatar').textContent = ini;
+      document.getElementById('confirmNome').textContent   = destinoEncontrado.nome;
+      document.getElementById('confirmBanco').textContent  = destinoEncontrado.banco;
+      document.getElementById('confirmChave').textContent  = chave;
+      document.getElementById('confirmDesc').textContent   = desc;
+      document.getElementById('confirmData').textContent   = new Date().toLocaleDateString('pt-BR');
+      document.getElementById('confirmValor').textContent  = ZentryUI.formatarMoeda(valor);
+
+      dadosTransacao = { valor, chave, desc };
       irPara(2);
       btn.textContent = "Confirmar Pix";
+      btn.disabled = true;
+      setTimeout(() => document.getElementById('hiddenPin').focus(), 400);
+
     } else if (etapa === 2) {
-      // Bloqueia o botão para não clicar duas vezes
+      const pinDigitado = document.getElementById('hiddenPin').value;
       btn.disabled = true;
       btn.textContent = "Validando...";
 
       try {
         const userSnap = await getDoc(doc(db, "usuarios", userDocId));
         const userData = userSnap.data();
-        const pinDigitado = document.getElementById('hiddenPin').value;
+        // ✅ Suporta campo 'senha' ou 'pin'
+        const senhaCorreta = String(userData?.senha || userData?.pin || '');
 
-        // Validação de senha
-        if (String(pinDigitado) !== String(userData?.senha)) {
-          ZentryUI.toast("Senha incorreta!", "erro");
+        if (pinDigitado !== senhaCorreta) {
+          for (let i=1; i<=4; i++) document.getElementById(`p${i}`).className = 'pin-dot err';
+          setTimeout(() => { document.getElementById('hiddenPin').value = ''; onPin(); }, 600);
+          toast("Senha incorreta!", "erro");
           btn.disabled = false;
           btn.textContent = "Confirmar Pix";
           return;
         }
 
-        ZentryUI.loading(true);
+        // ✅ Processa
+        loading(true);
         btn.textContent = "Processando...";
 
-        const txId = "PIX" + Date.now();
+        ultimoTxId = "PIX" + Date.now();
         const agora = new Date();
+        const { valor, chave, desc } = dadosTransacao;
 
-        // --- A MÁGICA ESTÁ AQUI: Gravação Direta ---
-        // 1. Atualiza o saldo do remetente
-        await updateDoc(doc(db, "usuarios", userDocId), { 
-          saldo: increment(-dadosTransacao.valor) 
+        await updateDoc(doc(db, "usuarios", userDocId), { saldo: increment(-valor) });
+        await setDoc(doc(db, "usuarios", userDocId, "transacoes", ultimoTxId), {
+          tipo: "saida", valor,
+          descricao: "Pix enviado - " + destinoEncontrado.nome,
+          nomeDestino: destinoEncontrado.nome,
+          chavePix: chave, mensagem: desc,
+          timestamp: agora, status: "concluido", id: ultimoTxId
         });
 
-        // 2. Cria o registro da transação (usando uma estrutura mais simples)
-        const transacaoRef = doc(db, "usuarios", userDocId, "transacoes", txId);
-        await setDoc(transacaoRef, {
-          tipo: "saida",
-          valor: dadosTransacao.valor,
-          destino: destinoEncontrado.nome,
-          chave: dadosTransacao.chave,
-          data: agora,
-          status: "concluido"
-        });
-
-        // 3. Se for usuário interno, atualiza o outro lado
         if (destinoEncontrado.uid !== 'externo') {
-          await updateDoc(doc(db, "usuarios", destinoEncontrado.uid), { 
-            saldo: increment(dadosTransacao.valor) 
+          await updateDoc(doc(db, "usuarios", destinoEncontrado.uid), { saldo: increment(valor) });
+          await setDoc(doc(db, "usuarios", destinoEncontrado.uid, "transacoes", ultimoTxId + "R"), {
+            tipo: "entrada", valor,
+            descricao: "Pix recebido",
+            nomeRemetente: userData.nome,
+            timestamp: agora, status: "concluido", id: ultimoTxId + "R"
           });
         }
 
-        // --- FINALIZAÇÃO ---
-        // Preenche a tela de sucesso antes de mudar
-        document.getElementById('sucessoSub').textContent = ZentryUI.formatarMoeda(dadosTransacao.valor) + " enviado.";
-        document.getElementById('compNome').textContent = destinoEncontrado.nome;
-        document.getElementById('compValor').textContent = ZentryUI.formatarMoeda(dadosTransacao.valor);
-        document.getElementById('compData').textContent = agora.toLocaleString('pt-BR');
+        document.getElementById('sucessoSub').textContent = ZentryUI.formatarMoeda(valor) + " enviado com sucesso.";
+        document.getElementById('compNome').textContent   = destinoEncontrado.nome;
+        document.getElementById('compChave').textContent  = chave;
+        document.getElementById('compValor').textContent  = ZentryUI.formatarMoeda(valor);
+        document.getElementById('compData').textContent   = agora.toLocaleString('pt-BR');
 
-        // Pula para a tela de sucesso
         irPara(3);
         btn.textContent = "Voltar ao Início";
         btn.disabled = false;
         document.getElementById('btnSec').style.display = "block";
 
-      } catch (error) {
-        console.error("Erro no Pix:", error);
-        ZentryUI.toast("Erro ao processar. Tente novamente.", "erro");
+      } catch(e) {
+        console.error("Erro no Pix:", e);
+        toast("Erro ao processar. Tente novamente.", "erro");
         btn.disabled = false;
         btn.textContent = "Confirmar Pix";
       } finally {
-        ZentryUI.loading(false);
+        loading(false);
       }
+
     } else {
       window.location.href = "home.html";
     }
   };
-    
 
-  window.voltarEtapa = () => etapa === 0 ? window.location.href="pix.html" : irPara(etapa-1);
-  window.irParaComprovante = () => window.location.href = "comprovante.html?id=TX"+Date.now();
-          </script>
-  
+  window.voltarEtapa = () => {
+    if (etapa === 0) window.location.href = "pix.html";
+    else if (etapa === 3) window.location.href = "home.html";
+    else irPara(etapa - 1);
+  };
+
+  window.irParaComprovante = () => {
+    if (ultimoTxId) window.location.href = `comprovante.html?id=${ultimoTxId}`;
+    else toast("Comprovante indisponível.", "erro");
+  };
+</script>
+
 </body>
 </html>
