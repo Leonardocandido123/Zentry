@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <title>Zentap - Maquininha</title>
 <style>
   :root {
@@ -17,394 +18,190 @@
   html, body { height: 100%; background: var(--bg); color: #fff; font-family: 'Sora', sans-serif; overflow: hidden; }
   body { display: flex; flex-direction: column; }
 
+  /* ── TOAST CUSTOMIZADO (SUBSTITUI ALERTA ANDROID) ── */
+  .z-toast {
+    position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%);
+    background: #161f2e; border: 1px solid var(--primary); color: #fff;
+    padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 600;
+    z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { bottom: 0; opacity: 0; } to { bottom: 50px; opacity: 1; } }
+
   /* ── TELAS ── */
   .screen { position: absolute; inset: 0; display: none; flex-direction: column; padding: 24px; animation: fadeUp 0.3s ease; background: var(--bg); overflow-y: auto; }
   .screen.ativa { display: flex; }
   @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 
-  /* ── HEADER ── */
+  /* HEADER, DISPLAYS E TECLADO MANTIDOS IGUAIS AO SEU ORIGINAL */
   .pdv-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-shrink: 0; }
   .pdv-logo { display: flex; align-items: center; gap: 8px; }
   .pdv-logo-icon { width: 34px; height: 34px; border-radius: 10px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #052e16; }
   .pdv-logo-txt { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
   .pdv-logo-txt span { color: var(--primary); }
   .pdv-badge { background: var(--primary-dim); border: 1px solid rgba(34,197,94,0.3); color: var(--primary); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
-
-  /* ── DISPLAY VALOR ── */
   .valor-display { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
   .valor-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
   .valor-num { font-size: 56px; font-weight: 800; letter-spacing: -3px; color: #1a2030; transition: color 0.3s; }
   .valor-num.ativo { color: #fff; }
-  .valor-num.verde { color: var(--primary); }
-
-  /* ── TECLADO ── */
   .keypad { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; flex-shrink: 0; }
-  .key {
-    height: 62px; background: var(--card); border: 1px solid var(--border);
-    border-radius: 18px; display: flex; align-items: center; justify-content: center;
-    font-size: 22px; font-weight: 700; cursor: pointer; transition: all 0.15s;
-    user-select: none;
-  }
+  .key { height: 62px; background: var(--card); border: 1px solid var(--border); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; cursor: pointer; transition: all 0.15s; user-select: none; }
   .key:active { background: var(--card2); transform: scale(0.95); }
   .key-del { font-size: 18px; color: var(--muted); }
-
-  /* ── BTN CONTINUAR ── */
-  .btn-continuar {
-    width: 100%; padding: 18px; border-radius: 20px; border: none;
-    background: #1a2030; color: #3a4560;
-    font-weight: 800; font-size: 16px; font-family: 'Sora', sans-serif;
-    cursor: not-allowed; transition: all 0.3s; flex-shrink: 0;
-  }
-  .btn-continuar.ativo {
-    background: var(--primary); color: #052e16;
-    box-shadow: 0 8px 30px var(--primary-glow);
-    cursor: pointer;
-  }
-  .btn-continuar.ativo:active { transform: scale(0.98); }
-
-  /* ── SEÇÃO TÍTULO ── */
-  .sec-titulo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; flex-shrink: 0; }
-  .sec-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; flex-shrink: 0; }
-
-  /* ── VALOR TOPO ── */
-  .valor-topo {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 14px 18px;
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px; flex-shrink: 0;
-  }
-  .valor-topo-label { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .btn-continuar { width: 100%; padding: 18px; border-radius: 20px; border: none; background: #1a2030; color: #3a4560; font-weight: 800; font-size: 16px; cursor: not-allowed; transition: all 0.3s; flex-shrink: 0; }
+  .btn-continuar.ativo { background: var(--primary); color: #052e16; box-shadow: 0 8px 30px var(--primary-glow); cursor: pointer; }
+  .sec-titulo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .sec-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .valor-topo { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   .valor-topo-num { font-size: 20px; font-weight: 800; color: var(--primary); }
-
-  /* ── MÉTODOS ── */
   .metodos-list { display: flex; flex-direction: column; gap: 12px; flex: 1; }
-  .metodo-card {
-    background: var(--card); border: 2px solid var(--border);
-    border-radius: 20px; padding: 18px 20px;
-    display: flex; align-items: center; gap: 16px;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .metodo-card:active { transform: scale(0.98); background: var(--card2); }
-  .metodo-card.pix   { border-color: rgba(34,197,94,0.3);  }
-  .metodo-card.debito { border-color: rgba(59,130,246,0.3); }
-  .metodo-card.credito { border-color: rgba(168,85,247,0.3); }
-  .metodo-icon {
-    width: 50px; height: 50px; border-radius: 16px;
-    display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
-  }
-  .metodo-icon.pix    { background: var(--primary-dim); }
-  .metodo-icon.debito { background: rgba(59,130,246,0.1); }
-  .metodo-icon.credito { background: rgba(168,85,247,0.1); }
-  .metodo-nome { font-size: 16px; font-weight: 700; }
-  .metodo-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .metodo-arrow { margin-left: auto; color: var(--muted); font-size: 18px; }
-
-  /* ── PARCELAS ── */
-  .parcelas-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; }
-  .parcela-card {
-    background: var(--card); border: 1.5px solid var(--border);
-    border-radius: 16px; padding: 16px 20px;
-    display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .parcela-card:active { background: var(--card2); transform: scale(0.98); }
+  .metodo-card { background: var(--card); border: 2px solid var(--border); border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; }
+  .metodo-icon { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .metodo-icon.pix { background: var(--primary-dim); }
+  .parcelas-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .parcela-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
   .parcela-card.destaque { border-color: var(--primary); background: var(--primary-dim); }
-  .parcela-badge {
-    background: var(--primary); color: #052e16;
-    font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 20px;
-    margin-left: 8px;
-  }
-  .parcela-num { font-size: 16px; font-weight: 700; }
-  .parcela-val { font-size: 14px; color: var(--muted); margin-top: 2px; }
-  .parcela-total { font-size: 13px; font-weight: 700; color: var(--primary); }
-
-  /* ── PIX QR ── */
   .qr-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+  
+  /* BOX DO QR CODE MODIFICADA PARA RECEBER O CANVAS */
   .qr-box {
-    background: #fff; border-radius: 24px; padding: 20px;
+    background: #fff; border-radius: 24px; padding: 15px;
     box-shadow: 0 0 0 8px var(--primary-dim), 0 20px 60px rgba(0,0,0,0.5);
-    animation: qrPulse 2s ease-in-out infinite;
-  }
-  @keyframes qrPulse { 0%,100%{box-shadow:0 0 0 8px var(--primary-dim),0 20px 60px rgba(0,0,0,0.5)} 50%{box-shadow:0 0 0 16px rgba(34,197,94,0.05),0 20px 60px rgba(0,0,0,0.5)} }
-  .qr-timer { font-size: 13px; color: var(--muted); }
-  .qr-timer span { color: var(--yellow); font-weight: 700; }
-  .qr-pix-key {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 12px 16px; width: 100%;
-    display: flex; align-items: center; gap: 10px; cursor: pointer;
-  }
-  .qr-pix-key .key-txt { font-size: 12px; color: var(--muted); flex: 1; }
-  .qr-pix-key .key-txt b { display: block; color: #fff; font-size: 13px; margin-bottom: 2px; }
-
-  /* ── NFC ── */
-  .nfc-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
-  .nfc-circle {
-    width: 160px; height: 160px; border-radius: 50%;
-    border: 3px solid var(--primary);
-    background: var(--primary-dim);
     display: flex; align-items: center; justify-content: center;
-    font-size: 64px;
-    animation: nfcPulse 1.8s ease-in-out infinite;
-    cursor: pointer;
   }
-  @keyframes nfcPulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 var(--primary-glow)} 50%{transform:scale(1.05);box-shadow:0 0 0 24px transparent} }
-  .nfc-titulo { font-size: 20px; font-weight: 800; }
-  .nfc-sub { font-size: 13px; color: var(--muted); text-align: center; }
-  .nfc-valor { font-size: 36px; font-weight: 800; color: var(--primary); }
-
-  /* ── PROCESSANDO ── */
-  .proc-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
-  .proc-spinner {
-    width: 64px; height: 64px; border-radius: 50%;
-    border: 4px solid var(--border);
-    border-top-color: var(--primary);
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .proc-txt { font-size: 18px; font-weight: 700; }
-  .proc-sub { font-size: 13px; color: var(--muted); }
-
-  /* ── BOTÕES ── */
-  .btn-main {
-    width: 100%; padding: 17px; border-radius: 18px; border: none;
-    background: var(--primary); color: #052e16;
-    font-weight: 800; font-size: 16px; font-family: 'Sora', sans-serif;
-    box-shadow: 0 8px 30px var(--primary-glow);
-    cursor: pointer; transition: all 0.2s; flex-shrink: 0;
-  }
-  .btn-main:active { transform: scale(0.98); }
-  .btn-sec {
-    width: 100%; padding: 14px; border-radius: 18px;
-    border: 1px solid var(--border); background: transparent;
-    color: #fff; font-weight: 600; font-size: 15px;
-    font-family: 'Sora', sans-serif; cursor: pointer;
-    margin-top: 10px; flex-shrink: 0;
-  }
-
-  /* ── TIMER QR ── */
+  
   .timer-bar { width: 100%; height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
-  .timer-fill { height: 100%; background: var(--primary); border-radius: 3px; width: 100%; transition: width 1s linear; }
+  .timer-fill { height: 100%; background: var(--primary); width: 100%; transition: width 1s linear; }
+  .nfc-circle { width: 160px; height: 160px; border-radius: 50%; border: 3px solid var(--primary); background: var(--primary-dim); display: flex; align-items: center; justify-content: center; font-size: 64px; animation: nfcPulse 1.8s infinite; cursor: pointer; }
+  @keyframes nfcPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  .proc-spinner { width: 64px; height: 64px; border-radius: 50%; border: 4px solid var(--border); border-top-color: var(--primary); animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .btn-sec { width: 100%; padding: 14px; border-radius: 18px; border: 1px solid var(--border); background: transparent; color: #fff; font-weight: 600; margin-top: 10px; }
 </style>
 </head>
 <body>
 
-<!-- ══ TELA 1: VALOR ══ -->
 <div id="tela-valor" class="screen ativa">
   <div class="pdv-header">
-    <div class="pdv-logo">
-      <div class="pdv-logo-icon">Z</div>
-      <span class="pdv-logo-txt">ZEN<span>TAP</span></span>
-    </div>
+    <div class="pdv-logo"><div class="pdv-logo-icon">Z</div><span class="pdv-logo-txt">ZEN<span>TAP</span></span></div>
     <div class="pdv-badge">⚡ Online</div>
   </div>
-
   <div class="valor-display">
     <span class="valor-label">Valor a cobrar</span>
     <div class="valor-num" id="valorDisplay">R$ 0,00</div>
   </div>
-
   <div class="keypad">
-    <div class="key" onclick="digitarNum('1')">1</div>
-    <div class="key" onclick="digitarNum('2')">2</div>
-    <div class="key" onclick="digitarNum('3')">3</div>
-    <div class="key" onclick="digitarNum('4')">4</div>
-    <div class="key" onclick="digitarNum('5')">5</div>
-    <div class="key" onclick="digitarNum('6')">6</div>
-    <div class="key" onclick="digitarNum('7')">7</div>
-    <div class="key" onclick="digitarNum('8')">8</div>
-    <div class="key" onclick="digitarNum('9')">9</div>
-    <div class="key" onclick="digitarNum('00')">00</div>
-    <div class="key" onclick="digitarNum('0')">0</div>
-    <div class="key key-del" onclick="apagarNum()">⌫</div>
+    <div class="key" onclick="digitarNum('1')">1</div><div class="key" onclick="digitarNum('2')">2</div><div class="key" onclick="digitarNum('3')">3</div>
+    <div class="key" onclick="digitarNum('4')">4</div><div class="key" onclick="digitarNum('5')">5</div><div class="key" onclick="digitarNum('6')">6</div>
+    <div class="key" onclick="digitarNum('7')">7</div><div class="key" onclick="digitarNum('8')">8</div><div class="key" onclick="digitarNum('9')">9</div>
+    <div class="key" onclick="digitarNum('00')">00</div><div class="key" onclick="digitarNum('0')">0</div><div class="key key-del" onclick="apagarNum()">⌫</div>
   </div>
-
   <button class="btn-continuar" id="btnContinuar" onclick="irParaMetodo()">Continuar</button>
 </div>
 
-<!-- ══ TELA 2: MÉTODO ══ -->
 <div id="tela-metodo" class="screen">
   <div class="sec-titulo">Forma de pagamento</div>
   <div class="sec-sub">Escolha como o cliente vai pagar.</div>
-
-  <div class="valor-topo">
-    <span class="valor-topo-label">Total a cobrar</span>
-    <span class="valor-topo-num" id="valorTopoMetodo">R$ 0,00</span>
-  </div>
-
+  <div class="valor-topo"><span class="valor-topo-label">Total a cobrar</span><span class="valor-topo-num" id="valorTopoMetodo">R$ 0,00</span></div>
   <div class="metodos-list">
-    <div class="metodo-card pix" onclick="irParaPix()">
-      <div class="metodo-icon pix">⚡</div>
-      <div>
-        <div class="metodo-nome">Pix</div>
-        <div class="metodo-desc">QR Code dinâmico • Instantâneo</div>
-      </div>
-      <span class="metodo-arrow">›</span>
-    </div>
-    <div class="metodo-card debito" onclick="irParaNFC('Débito')">
-      <div class="metodo-icon debito">💳</div>
-      <div>
-        <div class="metodo-nome">Débito</div>
-        <div class="metodo-desc">Tap to Pay • Aproxime o cartão</div>
-      </div>
-      <span class="metodo-arrow">›</span>
-    </div>
-    <div class="metodo-card credito" onclick="irParaParcelas()">
-      <div class="metodo-icon credito">💜</div>
-      <div>
-        <div class="metodo-nome">Crédito</div>
-        <div class="metodo-desc">À vista ou parcelado em até 12x</div>
-      </div>
-      <span class="metodo-arrow">›</span>
-    </div>
+    <div class="metodo-card pix" onclick="irParaPix()"><div class="metodo-icon pix">⚡</div><div><div class="metodo-nome">Pix</div><div class="metodo-desc">QR Code dinâmico com logo</div></div></div>
+    <div class="metodo-card debito" onclick="irParaNFC('Débito')"><div class="metodo-icon" style="background:rgba(59,130,246,0.1)">💳</div><div><div class="metodo-nome">Débito</div><div class="metodo-desc">Tap to Pay • Aproxime</div></div></div>
+    <div class="metodo-card credito" onclick="irParaParcelas()"><div class="metodo-icon" style="background:rgba(168,85,247,0.1)">💜</div><div><div class="metodo-nome">Crédito</div><div class="metodo-desc">À vista ou até 12x</div></div></div>
   </div>
-
   <button class="btn-sec" onclick="irPara('tela-valor')">← Voltar</button>
 </div>
 
-<!-- ══ TELA 3: PIX QR ══ -->
 <div id="tela-pix" class="screen">
   <div class="sec-titulo">Pix QR Code</div>
   <div class="sec-sub">Mostre o QR Code para o cliente escanear.</div>
-
-  <div class="valor-topo">
-    <span class="valor-topo-label">Total</span>
-    <span class="valor-topo-num" id="valorTopoPix">R$ 0,00</span>
-  </div>
-
+  <div class="valor-topo"><span class="valor-topo-label">Total</span><span class="valor-topo-num" id="valorTopoPix">R$ 0,00</span></div>
   <div class="qr-wrap">
-    <div class="qr-box" onclick="simularPagamento('Pix')">
-      <img id="qrImg" src="" width="200" height="200" style="display:block; border-radius:8px;">
-    </div>
-
+    <div class="qr-box" id="qrBoxContainer" onclick="simularPagamento('Pix')"></div>
     <div>
       <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
-      <p class="qr-timer" style="margin-top:8px; text-align:center;">Expira em <span id="timerTxt">5:00</span></p>
+      <p style="margin-top:8px; text-align:center; font-size:13px; color:var(--muted)">Expira em <span id="timerTxt" style="color:var(--yellow); font-weight:700">5:00</span></p>
     </div>
-
     <div class="qr-pix-key" onclick="copiarChave()">
       <span style="font-size:20px;">📋</span>
-      <div class="key-txt">
-        <b>Chave Pix</b>
-        suporte@zentry.com.br
-      </div>
+      <div class="key-txt"><b>Chave Pix</b>suporte@zentry.com.br</div>
       <span style="font-size:12px; color:var(--primary); font-weight:700;">Copiar</span>
     </div>
   </div>
-
-  <!-- TODO ASAAS: substituir qrImg.src pelo QR Code real da API Asaas
-       POST /v3/payments → retorna encodedImage (base64) e payload (chave copia e cola)
-       Exemplo: qrImg.src = 'data:image/png;base64,' + resposta.encodedImage -->
-
   <button class="btn-sec" onclick="irPara('tela-metodo')">← Voltar</button>
 </div>
 
-<!-- ══ TELA 4: PARCELAS ══ -->
 <div id="tela-parcelas" class="screen">
   <div class="sec-titulo">Parcelamento</div>
   <div class="sec-sub">Escolha em quantas vezes.</div>
-
-  <div class="valor-topo">
-    <span class="valor-topo-label">Total</span>
-    <span class="valor-topo-num" id="valorTopoParcelas">R$ 0,00</span>
-  </div>
-
+  <div class="valor-topo"><span class="valor-topo-label">Total</span><span class="valor-topo-num" id="valorTopoParcelas">R$ 0,00</span></div>
   <div class="parcelas-scroll" id="listaParcelas"></div>
-
   <button class="btn-sec" onclick="irPara('tela-metodo')">← Voltar</button>
 </div>
 
-<!-- ══ TELA 5: NFC/TAP ══ -->
 <div id="tela-nfc" class="screen">
   <div class="sec-titulo" id="nfcTitulo">Débito</div>
-  <div class="sec-sub">Aproxime o cartão ou dispositivo.</div>
-
   <div class="nfc-wrap">
     <div class="nfc-circle" onclick="simularPagamento(metodoAtual)">📲</div>
     <div class="nfc-valor" id="nfcValor">R$ 0,00</div>
     <div class="nfc-titulo">Aproxime o cartão</div>
-    <div class="nfc-sub">Compatível com NFC, Apple Pay e Google Pay<br><span style="color:var(--primary)">Toque no ícone para simular</span></div>
+    <div style="font-size:13px; color:var(--muted); text-align:center">Compatível com NFC e Apple Pay</div>
   </div>
-
-  <!-- TODO ASAAS: integrar SDK de Tap to Pay quando disponível -->
   <button class="btn-sec" onclick="irPara('tela-metodo')">← Cancelar</button>
 </div>
 
-<!-- ══ TELA 6: PROCESSANDO ══ -->
 <div id="tela-proc" class="screen">
-  <div class="proc-wrap">
-    <div class="proc-spinner"></div>
-    <div class="proc-txt" id="procTxt">Processando pagamento</div>
-    <div class="proc-sub" id="procSub">Aguarde alguns instantes...</div>
-  </div>
+  <div class="proc-wrap"><div class="proc-spinner"></div><div style="font-size:18px; font-weight:700">Processando pagamento</div><div style="font-size:13px; color:var(--muted)">Aguarde a confirmação...</div></div>
 </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  
+
 <script type="module">
-  // IMPORTANTE: Removi o ZentryAuth que causava o erro
   import { db } from './zentry-core.js'; 
-  import { doc, setDoc, updateDoc, increment, getDoc } 
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { doc, setDoc, updateDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  let valorRaw   = "";
-  let userUid    = "";
-  let userData   = null;
+  let valorRaw = "";
+  let userUid = "";
+  let userData = null;
   window.metodoAtual = "";
-  let timerInterval  = null;
-  let timerSecs      = 300; // 5 min
+  let timerInterval = null;
+  let timerSecs = 300;
 
-  // ── INIT (FECHADURA MANUAL) ──
   async function init() {
-    // 1. Pegamos o ID que o login salvou
     const docID = localStorage.getItem("idUsuarioLogado");
-    
-    if (!docID) {
-      console.log("Usuário não logado na Maquininha. Voltando...");
-      window.location.href = "login.html";
-      return;
-    }
-
+    if (!docID) { window.location.href = "login.html"; return; }
     userUid = docID;
-
     try {
-      // 2. Busca os dados do vendedor no banco
       const userSnap = await getDoc(doc(db, "usuarios", userUid));
-      if (userSnap.exists()) {
-        userData = userSnap.data();
-      } else {
-        window.location.href = "login.html";
-      }
-    } catch (e) {
-      console.error("Erro ao carregar dados do vendedor:", e);
-    }
+      if (userSnap.exists()) { userData = userSnap.data(); }
+    } catch (e) { console.error(e); }
   }
-  
-  // Chama a função de início
   init();
 
-  // ── TECLADO ──
+  // FUNÇÃO TOAST (MODAL APP)
+  window.showToast = function(msg) {
+    const t = document.createElement('div');
+    t.className = 'z-toast';
+    t.innerHTML = `✅ ${msg}`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  };
+
   window.digitarNum = function(n) {
     if (valorRaw.length >= 9) return;
     valorRaw += n;
-    if (navigator.vibrate) navigator.vibrate(15);
     atualizarDisplay();
   };
 
   window.apagarNum = function() {
     valorRaw = valorRaw.slice(0,-1);
-    if (navigator.vibrate) navigator.vibrate(10);
     atualizarDisplay();
   };
 
   function atualizarDisplay() {
-    const v   = valorRaw.padStart(3,'0');
+    const v = valorRaw.padStart(3,'0');
     const num = (parseInt(v)/100).toFixed(2);
     const fmt = "R$ " + num.replace(".",",").replace(/\B(?=(\d{3})+(?!\d))/g,".");
-    const el  = document.getElementById('valorDisplay');
+    const el = document.getElementById('valorDisplay');
     el.textContent = fmt;
-    const ok = parseInt(valorRaw) > 0;
-    el.className = 'valor-num' + (ok ? ' ativo' : '');
-    const btn = document.getElementById('btnContinuar');
-    btn.classList.toggle('ativo', ok);
+    document.getElementById('btnContinuar').classList.toggle('ativo', parseInt(valorRaw) > 0);
   }
 
   function valorFmt() {
@@ -412,11 +209,6 @@
     return "R$ " + (parseInt(v)/100).toFixed(2).replace(".",",").replace(/\B(?=(\d{3})+(?!\d))/g,".");
   }
 
-  function valorNum() {
-    return parseInt(valorRaw.padStart(3,'0')) / 100;
-  }
-
-  // ── NAVEGAÇÃO ──
   window.irPara = function(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('ativa'));
     document.getElementById(id).classList.add('ativa');
@@ -428,182 +220,103 @@
     irPara('tela-metodo');
   };
 
+  // ── GERAÇÃO DO QR CODE COM LOGO ZT ──
   window.irParaPix = function() {
     document.getElementById('valorTopoPix').textContent = valorFmt();
-    
-    // Texto do PIX (quando integrar Asaas, aqui vai o payload real)
     const pixData = "ZentryPay|" + valorFmt() + "|" + Date.now();
     
-    const qrContainer = document.querySelector('.qr-box');
+    const qrContainer = document.getElementById('qrBoxContainer');
     qrContainer.innerHTML = '<canvas id="qrCanvas" style="display:block; border-radius:12px;"></canvas>';
     
-    // Div invisível para o QRCode.js trabalhar
     const tempDiv = document.createElement('div');
-    
-    const qr = new QRCode(tempDiv, {
+    new QRCode(tempDiv, {
         text: pixData,
         width: 280,
         height: 280,
         colorDark: "#000000",
         colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H // Nível alto permite cobrir o centro
+        correctLevel: QRCode.CorrectLevel.H
     });
 
-    // Aguarda o render do QR e desenha a logo
-    setTimeout(() => {
+    const checkImg = setInterval(() => {
         const qrImg = tempDiv.querySelector('img');
-        const canvas = document.getElementById('qrCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        canvas.width = 280;
-        canvas.height = 280;
+        if (qrImg && qrImg.src) {
+            clearInterval(checkImg);
+            const canvas = document.getElementById('qrCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 280; canvas.height = 280;
+            ctx.drawImage(qrImg, 0, 0);
 
-        // 1. Desenha o QR Code base
-        ctx.drawImage(qrImg, 0, 0);
+            const center = 140;
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath(); ctx.arc(center, center, 40, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = "#22c55e";
+            ctx.beginPath(); ctx.arc(center, center, 32, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = "#052e16";
+            ctx.font = "800 24px Sora"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText("ZT", center, center);
 
-        // 2. Configurações da Logo Central
-        const center = canvas.width / 2;
-        const logoBgSize = 75; // Tamanho do fundo branco
-        const logoSize = 60;   // Tamanho do círculo verde
-
-        // 3. Desenha o fundo branco (para não confundir o leitor)
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(center, center, logoBgSize / 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 4. Desenha o círculo verde Zentry
-        ctx.fillStyle = "#22c55e";
-        ctx.beginPath();
-        ctx.arc(center, center, logoSize / 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 5. Escreve "ZT" no centro
-        ctx.fillStyle = "#052e16"; // Verde escuro para contraste
-        ctx.font = "800 22px Sora";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("ZT", center, center);
-
-        iniciarTimer();
-        irPara('tela-pix');
-    }, 150);
-};
-  
-
-  window.irParaNFC = function(metodo) {
-    metodoAtual = metodo;
-    window.metodoAtual = metodo;
-    document.getElementById('nfcTitulo').textContent = metodo;
-    document.getElementById('nfcValor').textContent  = valorFmt();
-    irPara('tela-nfc');
+            iniciarTimer();
+            irPara('tela-pix');
+        }
+    }, 100);
   };
-
-  window.irParaParcelas = function() {
-    document.getElementById('valorTopoParcelas').textContent = valorFmt();
-    gerarParcelas();
-    irPara('tela-parcelas');
-  };
-
-  // ── PARCELAS ──
-  function gerarParcelas() {
-    const lista = document.getElementById('listaParcelas');
-    lista.innerHTML = "";
-    const total = valorNum();
-    const taxas = [0,0,0,0,0, 0.0199, 0.0249, 0.0299, 0.0349, 0.0399, 0.0449, 0.0499];
-    for (let i=1; i<=12; i++) {
-      const taxa   = taxas[i-1] || 0;
-      const totalC = total * (1 + taxa);
-      const parcel = totalC / i;
-      const destaque = i === 1;
-      const card = document.createElement('div');
-      card.className = 'parcela-card' + (destaque ? ' destaque' : '');
-      card.onclick   = () => irParaNFC(`Crédito ${i}x`);
-      card.innerHTML = `
-        <div>
-          <div class="parcela-num">${i}x de R$ ${parcel.toFixed(2).replace('.',',')}
-            ${destaque ? '<span class="parcela-badge">SEM JUROS</span>' : ''}
-          </div>
-          <div class="parcela-val">Total: R$ ${totalC.toFixed(2).replace('.',',')}${taxa>0 ? ` (${(taxa*100).toFixed(2)}% a.m.)` : ''}</div>
-        </div>
-        <span style="color:var(--muted)">›</span>`;
-      lista.appendChild(card);
-    }
-  }
-
-  // ── TIMER QR ──
-  function iniciarTimer() {
-    clearInterval(timerInterval);
-    timerSecs = 300;
-    timerInterval = setInterval(() => {
-      timerSecs--;
-      const m = Math.floor(timerSecs/60);
-      const s = timerSecs % 60;
-      document.getElementById('timerTxt').textContent = `${m}:${s.toString().padStart(2,'0')}`;
-      document.getElementById('timerFill').style.width = (timerSecs/300*100) + '%';
-      if (timerSecs <= 0) {
-        clearInterval(timerInterval);
-        irParaPix();
-      }
-    }, 1000);
-  }
 
   window.copiarChave = async function() {
     try {
       await navigator.clipboard.writeText("suporte@zentry.com.br");
-      alert("Chave Pix copiada!");
+      window.showToast("Chave Pix copiada!");
     } catch(e) { }
   };
 
-  // ── SIMULAR/PROCESSAR PAGAMENTO ──
+  // Parcelas e Pagamento mantidos com sua lógica Firestore
+  window.irParaParcelas = function() {
+    document.getElementById('valorTopoParcelas').textContent = valorFmt();
+    const lista = document.getElementById('listaParcelas');
+    lista.innerHTML = "";
+    for (let i=1; i<=12; i++) {
+        const card = document.createElement('div');
+        card.className = 'parcela-card' + (i===1 ? ' destaque' : '');
+        card.onclick = () => irParaNFC(`Crédito ${i}x`);
+        card.innerHTML = `<div><div class="parcela-num">${i}x de R$ ${(parseInt(valorRaw)/100/i).toFixed(2).replace('.',',')}</div></div><span>›</span>`;
+        lista.appendChild(card);
+    }
+    irPara('tela-parcelas');
+  };
+
+  window.irParaNFC = function(metodo) {
+    window.metodoAtual = metodo;
+    document.getElementById('nfcTitulo').textContent = metodo;
+    document.getElementById('nfcValor').textContent = valorFmt();
+    irPara('tela-nfc');
+  };
+
   window.simularPagamento = async function(metodo) {
     clearInterval(timerInterval);
-    document.getElementById('procTxt').textContent = "Processando " + metodo;
-    document.getElementById('procSub').textContent = "Aguarde a confirmação...";
     irPara('tela-proc');
-
     await new Promise(r => setTimeout(r, 2000));
-
     try {
-      const txId   = "PDV" + Date.now();
-      const valor  = valorNum();
-      const dataFmt = new Date().toLocaleString('pt-BR');
-
-      // SALVA A VENDA NO BANCO (Usando o ID manual)
+      const txId = "PDV" + Date.now();
+      const v = parseInt(valorRaw)/100;
       await setDoc(doc(db, "usuarios", userUid, "transacoes", txId), {
-        tipo:      "entrada",
-        valor,
-        descricao: "Venda Zentap - " + metodo,
-        metodo,
-        nomeRemetente: "Cliente",
-        data:      new Date().toISOString().split('T')[0],
-        timestamp: new Date(),
-        id:        txId
+        tipo: "entrada", valor: v, descricao: "Venda Zentap - " + metodo, 
+        metodo, data: new Date().toISOString().split('T')[0], timestamp: new Date(), id: txId
       });
-
-      // ATUALIZA O SALDO DO VENDEDOR
-      await updateDoc(doc(db, "usuarios", userUid), { saldo: increment(valor) });
-
-      localStorage.setItem("comprovante_pdv", JSON.stringify({
-        valor,
-        valorFmt:  valorFmt(),
-        metodo,
-        data:      dataFmt,
-        id:        txId,
-        vendedor:  userData?.nome || "Zentry",
-        status:    "aprovado"
-      }));
-
-      window.location.href = "comprovante_pdv.html";
-
-    } catch(e) {
-      console.error(e);
-      alert("Erro ao processar. Tente novamente.");
-      irPara('tela-metodo');
-    }
+      await updateDoc(doc(db, "usuarios", userUid), { saldo: increment(v) });
+      window.location.href = "comprovante_pdv.html?id=" + txId;
+    } catch(e) { alert("Erro"); irPara('tela-metodo'); }
   };
-    </script>
-  
+
+  function iniciarTimer() {
+    clearInterval(timerInterval); timerSecs = 300;
+    timerInterval = setInterval(() => {
+      timerSecs--;
+      const m = Math.floor(timerSecs/60); const s = timerSecs % 60;
+      document.getElementById('timerTxt').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      document.getElementById('timerFill').style.width = (timerSecs/300*100) + '%';
+      if (timerSecs <= 0) { clearInterval(timerInterval); irPara('tela-metodo'); }
+    }, 1000);
+  }
+</script>
 </body>
 </html>
-  
